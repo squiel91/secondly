@@ -1,0 +1,178 @@
+<%- include('../partials/store-head.ejs') %>
+<h2>Shiping details</h2>
+<div class="row">
+  <div class="col-md-4">
+    <div class="secondlyInput">
+      <label for="firstName">First name:</label>
+      <input type="text" value="<%= prefill?.firstName?.value %>" name="firstName" id="firstName">
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="secondlyInput">
+      <label for="lastName">Last name:</label>
+      <input type="text" value="<%= prefill?.lastName?.value %>" name="lastName" id="lastName">
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="secondlyInput">
+      <label for="email">Email:</label>
+      <input type="email" value="<%= prefill?.email?.value %>" id="email">
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="secondlyInput">
+      <label for="address">Full address:</label>
+      <input type="text" value="<%= prefill? prefill.address : '' %>" name="address" id="address">
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="secondlyInput">
+      <label for="state">State:</label>
+      <input list="states" id="state" name="state">
+        <datalist id="states">
+
+          <option <%= !prefill || !prefill.state? 'selected' : '' %>></option>
+          <option value="AL" <%= prefill && prefill.state == 'AL'? 'selected' : '' %>>Alabama</option>
+          <option value="AK" <%= prefill && prefill.state == 'AK'? 'selected' : '' %>>Alaska</option>
+          <option value="AZ" <%= prefill && prefill.state == 'AZ'? 'selected' : '' %>>Arizona</option>
+          <option value="AR" <%= prefill && prefill.state == 'AR'? 'selected' : '' %>>Arkansas</option>
+          <option value="CA" <%= prefill && prefill.state == 'CA'? 'selected' : '' %>>California</option>
+          <option value="CO" <%= prefill && prefill.state == 'CO'? 'selected' : '' %>>Colorado</option>
+          <option value="CT" <%= prefill && prefill.state == 'CT'? 'selected' : '' %>>Connecticut</option>
+          <option value="DE" <%= prefill && prefill.state == 'DE'? 'selected' : '' %>>Delaware</option>
+          <option value="DC" <%= prefill && prefill.state == 'DC'? 'selected' : '' %>>District Of Columbia</option>
+          <option value="FL" <%= prefill && prefill.state == 'FL'? 'selected' : '' %>>Florida</option>
+          <option value="GA" <%= prefill && prefill.state == 'GA'? 'selected' : '' %>>Georgia</option>
+          <option value="HI" <%= prefill && prefill.state == 'HI'? 'selected' : '' %>>Hawaii</option>
+          <option value="ID" <%= prefill && prefill.state == 'ID'? 'selected' : '' %>>Idaho</option>
+          <option value="IL" <%= prefill && prefill.state == 'IL'? 'selected' : '' %>>Illinois</option>
+          <option value="IN" <%= prefill && prefill.state == 'IN'? 'selected' : '' %>>Indiana</option>
+          <option value="IA" <%= prefill && prefill.state == 'IA'? 'selected' : '' %>>Iowa</option>
+          <option value="KS" <%= prefill && prefill.state == 'KS'? 'selected' : '' %>>Kansas</option>
+          <option value="KY" <%= prefill && prefill.state == 'KY'? 'selected' : '' %>>Kentucky</option>
+          <option value="LA" <%= prefill && prefill.state == 'LA'? 'selected' : '' %>>Louisiana</option>
+          <option value="ME" <%= prefill && prefill.state == 'ME'? 'selected' : '' %>>Maine</option>
+          <option value="MD" <%= prefill && prefill.state == 'MD'? 'selected' : '' %>>Maryland</option>
+          <option value="MA" <%= prefill && prefill.state == 'MA'? 'selected' : '' %>>Massachusetts</option>
+          <option value="MI" <%= prefill && prefill.state == 'MI'? 'selected' : '' %>>Michigan</option>
+          <option value="MN" <%= prefill && prefill.state == 'MN'? 'selected' : '' %>>Minnesota</option>
+          <option value="MS" <%= prefill && prefill.state == 'MS'? 'selected' : '' %>>Mississippi</option>
+          <option value="MO" <%= prefill && prefill.state == 'MO'? 'selected' : '' %>>Missouri</option>
+          <option value="MT" <%= prefill && prefill.state == 'MT'? 'selected' : '' %>>Montana</option>
+          <option value="NE" <%= prefill && prefill.state == 'NE'? 'selected' : '' %>>Nebraska</option>
+          <option value="NV" <%= prefill && prefill.state == 'NV'? 'selected' : '' %>>Nevada</option>
+          <option value="NH" <%= prefill && prefill.state == 'NH'? 'selected' : '' %>>New Hampshire</option>
+          <option value="NJ" <%= prefill && prefill.state == 'NJ'? 'selected' : '' %>>New Jersey</option>
+          <option value="NM" <%= prefill && prefill.state == 'NM'? 'selected' : '' %>>New Mexico</option>
+          <option value="NY" <%= prefill && prefill.state == 'NY'? 'selected' : '' %>>New York</option>
+          <option value="NC" <%= prefill && prefill.state == 'NC'? 'selected' : '' %>>North Carolina</option>
+          <option value="ND" <%= prefill && prefill.state == 'ND'? 'selected' : '' %>>North Dakota</option>
+          <option value="OH" <%= prefill && prefill.state == 'OH'? 'selected' : '' %>>Ohio</option>
+          <option value="OK" <%= prefill && prefill.state == 'OK'? 'selected' : '' %>>Oklahoma</option>
+          <option value="OR" <%= prefill && prefill.state == 'OR'? 'selected' : '' %>>Oregon</option>
+          <option value="PA" <%= prefill && prefill.state == 'PA'? 'selected' : '' %>>Pennsylvania</option>
+          <option value="RI" <%= prefill && prefill.state == 'RI'? 'selected' : '' %>>Rhode Island</option>
+          <option value="SC" <%= prefill && prefill.state == 'SC'? 'selected' : '' %>>South Carolina</option>
+          <option value="SD" <%= prefill && prefill.state == 'SD'? 'selected' : '' %>>South Dakota</option>
+          <option value="TN" <%= prefill && prefill.state == 'TN'? 'selected' : '' %>>Tennessee</option>
+          <option value="TX" <%= prefill && prefill.state == 'TX'? 'selected' : '' %>>Texas</option>
+          <option value="UT" <%= prefill && prefill.state == 'UT'? 'selected' : '' %>>Utah</option>
+          <option value="VT" <%= prefill && prefill.state == 'VT'? 'selected' : '' %>>Vermont</option>
+          <option value="VA" <%= prefill && prefill.state == 'VA'? 'selected' : '' %>>Virginia</option>
+          <option value="WA" <%= prefill && prefill.state == 'WA'? 'selected' : '' %>>Washington</option>
+          <option value="WV" <%= prefill && prefill.state == 'WV'? 'selected' : '' %>>West Virginia</option>
+          <option value="WI" <%= prefill && prefill.state == 'WI'? 'selected' : '' %>>Wisconsin</option>
+          <option value="WY" <%= prefill && prefill.state == 'WY'? 'selected' : '' %>>Wyoming</option>
+        </datalist>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="secondlyInput">
+      <label for="zip">City:</label>
+      <input value="<%= prefill? prefill.city : '' %>" type="text" name="city" id="city">
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="secondlyInput">
+      <label for="zip">Zip code:</label>
+      <input value="<%= prefill? prefill.zip : '' %>" type="text" name="zip" id="zip">
+    </div>
+  </div>
+</div>
+
+<p>
+  <input type="checkbox" id="remember" checked><label for="remember">Remember my shipping address in this device</label>
+</p>
+<button id="checkout-button" class="primary">Proceed to Payment</button>
+
+<img class="stripe" src="/assets/stripe.svg" alt="Powered by Stripe">
+
+<script src="https://js.stripe.com/v3/"></script>
+<%- include('../partials/store-tail.ejs') %>
+
+<script type="text/javascript">
+  // Create an instance of the Stripe object with your publishable API key
+  var stripe = Stripe('pk_test_51HsvHmF1g3qjNQo3PgYrH1aeV11EBkeOYk7O4SMsGHQoTq0jeYvcAA1Hi1J9uDe2BjYm9m6ysOmyMumkVkjVUydb00eHDltip5');
+  var checkoutButton = document.getElementById('checkout-button');
+
+  checkoutButton.addEventListener('click', function(event) {
+    const shipping = {
+      firstName: $('#firstName').val(),
+      lastName: $('#lastName').val(),
+      email: $('#email').val(),
+      address: $('#address').val(),
+      state: $('#state').val(),
+      city: $('#city').val(),
+      zip: $('#zip').val(),
+      _csrf: '<%= csrfToken %>',
+      remember: $('#remember').is(":checked")
+    }
+    
+    $(event.target).text('Redirecting to Stripe...').prop('disabled', true)
+    // Create a new Checkout Session using the server-side endpoint you
+    // created in step 3.
+    fetch('checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(shipping)
+    })
+      .then(function(response, ok) {
+        return response.json();
+      })
+      .then(function(session) {
+        if (session.error) {
+          throw session.error;
+        }
+        return stripe.redirectToCheckout({ sessionId: session.id });
+      })
+      .then(function(result) {
+        // If `redirectToCheckout` fails due to a browser or network
+        // error, you should display the localized error message to your
+        // customer using `error.message`.
+        if (result.error) {
+          alert(result.error.message);
+        }
+      })
+      .catch(function(error) {
+        alert(error)
+        $(event.target).text('Proceed to Payment').prop('disabled', false)
+        console.error('Error:', error);
+      });
+  });
+</script>
+
+<style>
+
+  .stripe {
+    width: 140px;
+    margin-left: 30px;
+    /* float: right; */
+  }
+  input[type="checkbox"] {
+    margin-right: 10px;
+  }
+
+</style>
+

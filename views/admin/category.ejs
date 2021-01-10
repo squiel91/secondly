@@ -1,0 +1,60 @@
+<%- include('../partials/admin-head.ejs') %>
+
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/richtext.min.css">
+
+<h2>Category Editor</h2>
+
+<form action="/admin/categories<%= category ? `/${category.handle}` : '' %>" method="post">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="row topPanel">
+    <div class="col-md-8">
+      <div class="secondlyInput">
+        <label for="title">Title</label>
+        <input id="title" type="text" name="title" value="<%= category ? category.title : '' %>">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="secondlyInput">
+        <label for="handle">Handle</label>
+        <input id="handle" type="text" name="handle" value="<%= category ? category.handle : '' %>">
+      </div>
+    </div>
+  </div>
+<div>
+<textarea name="description" id="description" cols="30" rows="10"><%= category ? category.description : '' %></textarea>
+  
+    
+  <label>Products</label>
+  <% if (products && products.length > 0) { %>
+    <ul>
+      <% products.forEach(product => { %>
+        <li>
+          <input 
+            type="checkbox" 
+            name="products[]" 
+            value="<%= product._id %>" id="<%= product._id %>" 
+            <%= category && category.products.indexOf(product._id) >= 0 ? 'checked' : '' %>
+          >
+          <label for="<%= product._id %>"><%= product.title %></label>
+        </li>
+      <% }); %>  
+    </ul>
+  <% } else { %>
+    <p>You dont have any product yet!</p>
+  <% } %>
+  <button type="submit" class="primary"><%= category ? 'Update' : 'Create' %></button>
+</form>
+
+<script src="/jquery.richtext.min.js"></script>
+<script>
+  $('textarea#description').richText();
+</script>
+
+<style>
+  .topPanel {
+    margin-bottom: 40px;
+  }
+</style>
+
+<%- include('../partials/admin-tail.ejs') %>

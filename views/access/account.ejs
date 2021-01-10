@@ -1,0 +1,68 @@
+<%- include('../partials/store-head.ejs') %>
+<% if (locals.errorMessages && locals.errorMessages.length > 0) { %>
+  <div class="errorMessage"><%= errorMessages[0] %></div>
+<% } %>
+<div class="row">
+  <div class="col-md-6">
+    <h2>Login</h2>
+    <form action="/login" method="post">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="secondlyValidatableInput <%= fields?.loginEmail?.error ? 'error' : '' %>">
+        <div class="secondlyInputInner">
+          <label for="loginEmail">Email:</label>
+          <input type="text" name="loginEmail" id="loginEmail" value="<%= fields?.loginEmail?.value %>">
+        </div>
+        <div class="secondlyErrorMessage">
+          <%= fields?.loginEmail?.error %>
+        </div>
+      </div>
+      <div class="secondlyValidatableInput <%= fields?.loginPass?.error ? 'error' : '' %>">
+        <div class="secondlyInputInner">
+          <label for="loginPass">Password:</label>
+          <input type="password" name="loginPass" id="loginPass" value="<%= fields?.loginPass?.value %>">
+        </div>
+        <div class="secondlyErrorMessage"><%= fields?.loginPass?.error %></div>
+      </div>
+      <p>Did you forget your password? <a href="/account/request-password-reset">Reset it.</a></p>
+      <button class="primary" type="submit">Login</button>
+    </form>
+  </div>
+  <div class="col-md-6">
+    <h2>Register</h2>
+    <form action="/register" method="post">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="secondlyValidatableInput <%= fields?.registerEmail?.error ? 'error' : '' %>">
+        <div class="secondlyInputInner">
+          <label for="registerEmail">Email:</label>
+          <input type="text" name="registerEmail" id="registerEmail" value="<%= fields?.registerEmail?.value %>">
+        </div>
+        <div class="secondlyErrorMessage"><%= fields?.registerEmail?.error %></div>
+      </div>
+      <div class="secondlyValidatableInput <%= fields?.registerFirstName?.error ? 'error' : '' %>">
+        <div class="secondlyInputInner">
+          <label for="registerFirstName">First name:</label>
+          <input type="text" name="registerFirstName" id="registerFirstName" value="<%= fields?.registerFirstName?.value %>">
+        </div>
+        <div class="secondlyErrorMessage"><%= fields?.registerFirstName?.error %></div>
+      </div>
+      <div class="secondlyValidatableInput <%= fields?.registerLastName?.error ? 'error' : '' %>">
+        <div class="secondlyInputInner">
+          <label for="registerLastName">Last name:</label>
+          <input type="text" name="registerLastName" id="registerLastName" value="<%= fields?.registerLastName?.value %>">
+        </div>
+        <div class="secondlyErrorMessage"><%= fields?.registerLastName?.error %></div>
+      </div>
+      <div class="secondlyValidatableInput <%= fields?.registerPass?.error ? 'error' : '' %>">
+        <div class="secondlyInputInner">
+          <label for="registerPass">Password:</label>
+          <input type="password" name="registerPass" id="registerPass" value="<%= fields?.registerPass?.value %>">
+        </div>
+        <div class="secondlyErrorMessage"><%= fields?.registerPass?.error %></div>
+      </div>
+      <button class="primary" type="submit">Register</button>
+    </form>
+  </div>
+</div>
+<%- include('../partials/store-tail.ejs') %>
+

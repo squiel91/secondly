@@ -1,0 +1,120 @@
+    </div>
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-3 col-xs-6">
+            <% if (PREFERENCES.footerMenu && PREFERENCES.footerMenu.length > 0) { %>
+              <div class="topMenu" style="flex-direction: column; align-items: flex-start;">
+                <% PREFERENCES.footerMenu.forEach(menuItem => { %>
+                  <div style="margin-left: 0px; margin-right: 12px;" class="menuItem <%= menuItem.classes %>">
+                    <a href="<%= menuItem.link %>"><%= menuItem.text %></a>
+                  </div>
+                <% }) %>
+                </div>
+            <% } %>
+          </div>
+          <div class="col-md-3 col-xs-6">
+            <div class="topMenu" style="flex-direction: column; align-items: flex-start;">
+              <div style="margin-left: 0px; margin-right: 12px;" class="menuItem">
+                <a href="#">Terms of use</a>
+              </div>
+              <div style="margin-left: 0px; margin-right: 12px;" class="menuItem">
+                <a href="#">Advertise</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 newsletter-column" style="margin-top: 15px;">
+            <div id="" class="secondlyValidatableInput newsletter">
+              <div class="secondlyInputInner">
+                <label for="newsletter">Email:</label>
+                <input id="newsletter" type="text">
+                <button class="subscribe-newsletter">Subscribe</button>
+              </div>
+              <div class="secondlyErrorMessage"></div>
+            </div>
+            <p> Get a weekly newsletter and don't miss any deal!</p>
+          </div>
+        </div>
+        <div style="align-items: center;" class="row footer-message">
+          <div class="col-md-6">
+            <%= PREFERENCES.footerMessage %>
+          </div>
+          <div class="col-md-6">
+            <img src="/assets/payment_methods.svg" alt="Payment methods">
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      function subscribe() {
+        const email = $('input#newsletter').val()
+        if (email) { // valid email
+          $('.newsletter button').text('Subscribing...').prop('disabled', true)
+          fetch('/subscribe', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, _csrf: '<%= csrfToken %>' })
+          })
+            .then((response) => {
+              console.log(response)
+              return response.json()
+            })
+            .then(body => {
+              console.log(body)
+              if (body.error) {
+                throw  new Error(body.error);
+              } else {
+                $('.newsletter-column').html('<p style="font-weight: bold; color: green;">You just subscribed!</p><p>Now you will receive the best deals into your inbox.</p>')
+              }
+              $('.newsletter button').text('Subscribe').prop('disabled', false)
+            })
+            .catch(function(error) {
+              $('.newsletter .secondlyErrorMessage').text(error.message)
+              $('.newsletter').addClass('error')
+              $('.newsletter button').text('Subscribe').prop('disabled', false)
+            })
+        }
+      }
+
+      $('.newsletter button').click((event => subscribe()))
+      $('.newsletter input').on('keypress', event => {
+        if(event.which == 13) subscribe()
+      })
+    </script>
+    <style>
+
+      .newsletter button {
+        border: none;
+        background-color: transparent;
+        color: deepskyblue;
+      }
+
+      footer {
+        margin-top: 40px;
+        padding: 30px 0 30px 0;
+        border-top: 1px solid #dcdacb;
+      }
+      
+      footer ul {
+        list-style-type: none;
+        padding: 0;
+        padding-right: 0;
+      }
+
+      footer li {
+        padding: 8px 0 8px 0;
+      }
+      
+      .footer-message {
+        font-size: x-small;
+        color: gray;
+        flex-grow: 1;
+        margin-top: 40px;
+      }
+    </style>
+  </body>
+</html>

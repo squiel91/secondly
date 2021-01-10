@@ -1,0 +1,20 @@
+<%- include('../partials/store-head.ejs') %>
+<h1 class="categoryTitle lead underline"><%= category.title %></h1>
+<div class="store__category__description"><%- category.description %></div>
+<%- include('./snippets/list-products.ejs', { products: category.products, empty: "There are no products in this category yet!" }) %>
+
+<%- include('../partials/store-tail.ejs') %>
+
+<style>
+  .categoryTitle {
+    text-transform: capitalize;
+    display: inline-block;
+    margin-bottom: 50px;
+    margin-top: 10px !important;
+    margin-left: 0px auto;
+  }
+  .store__category__description {
+    font-size: large;
+    margin-bottom: 30px;
+  }
+</style>

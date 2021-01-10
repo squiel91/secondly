@@ -1,0 +1,63 @@
+<%- include('../partials/store-head.ejs') %>
+<style>
+
+  p.subtitle {
+    line-height: 1.6;
+    font-size: 2.3em;
+    margin-bottom: 3em;
+    display: flex;
+    align-items: center;
+    font-family: 'Alata', sans-serif;
+  }
+
+  p.subtitle img {
+    width: 50px;
+    margin-right: 20px;
+  }
+
+  .browseCategory {
+    margin-top: 0;
+    font-size: large;
+    margin-bottom: 1.2em;
+  }
+  
+  .browseCategory a {
+    font-weight: normal;
+  }
+
+  .browseCategory .categoryArrow {
+    position: relative;
+    left: 10px;
+    top:2px;
+    transition: left 0.5s;
+  }
+  
+  .browseCategory:hover .categoryArrow {
+    left: 20px;
+  }
+
+  @media screen and (max-width: 992px) {
+    p.subtitle {
+      font-size: 1.3em;
+    }
+
+    p.subtitle img {
+      width: 30px;
+      margin-right: 10px;
+    }
+  }
+
+</style>
+  <div class="row">
+    <div class="col-lg-8">
+      <h1 class="lead">The Amazon of the <span class="underline">second hand deals</span>.</h1>
+      <p class="subtitle"><img src="/assets/american-flag.jpg">Free shipping & returns within the US.</p>
+    </div>
+  </div>
+  <% for (let category of categories) { %>
+    <div class="store__category">
+      <h2 class="browseCategory"><a href="/categories/<%= category.handle %>">Browse <%= category.title %> <span class="categoryArrow">→</span></a></h2>
+      <%- include('./snippets/list-products.ejs', { products: category.products, empty: "There are no products in this category yet!" }) %>
+    </div>
+  <% } %>
+<%- include('../partials/store-tail.ejs') %>

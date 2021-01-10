@@ -1,0 +1,55 @@
+<%- include('../partials/store-head.ejs') %>
+<h2>My Account</h2>
+<div class="row">
+  <div class="col-md-6">
+    <h3>Personal Info</h3>
+    <table>
+      <tr>
+        <th>First Name</th>
+        <td><%= user.firstName %></td>
+      </tr>
+      <tr>
+        <th>Last Name</th>
+        <td><%= user.lastName %></td>
+      </tr>
+      <tr>
+        <th>Email</th>
+        <td><%= user.email %></td>
+      </tr>
+      <tr>
+        <th>Password</th>
+        <td><a href="/account/request-password-reset"> Change password</a></td>
+      </tr>
+    </table>
+
+    <h3>Saved address</h3>
+    <form action="/logout" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button class="primary" type="submit">Logout</button>
+    </form>
+  </div>
+  <div class="col-md-6">
+    <h3>Orders</h3>
+
+    <% if (orders && orders.length > 0) { %>
+      <table>
+        <tr>
+          <th>Billed</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+        <% orders.reverse().forEach(order => { %>
+          <tr>
+            <td>$ <%= order.totalPrice() %></td>
+            <td><%= order.created.toLocaleDateString("en-US", { month: 'short' , day: "numeric", year: "numeric"}) %></td>
+            <td><%= order.status %></td>
+          </tr>
+        <% }) %>
+      </table>
+    <% } else { %>
+      <p>You still don't have any order!</p>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/store-tail.ejs') %>

@@ -1,0 +1,20 @@
+<%- include('../partials/store-head.ejs') %>
+<h2>Product Listing</h2>
+
+<ul>
+  <% for (let product of products) { %>
+    <li>
+      <h3><%= product.title %></h3>
+      <p>$ <%= product.price %></p>
+      <% if (product.shippingCost > 0) { %>
+        <p>+ $ <%= product.shippingCost %> Shipping</p>
+      <% } else { %>
+        <p>Free Shipping</p>
+      <% } %>
+      <p><%= product.description %></p>
+      <a href="/products/<%= product._id %>">Open</a>
+      <%- include('../partials/addToCart.ejs', { product: product }) %>
+    </li>
+  <% } %>
+</ul>
+<%- include('../partials/store-tail.ejs') %>

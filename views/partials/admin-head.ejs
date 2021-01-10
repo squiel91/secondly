@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="/bootstrap.css">
+    <link href="/assets/styles.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Alata&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title><%= PREFERENCES.title %></title>
+    <style>
+      .logo-title-container {
+        display: flex;
+        align-items: center;
+      }
+    
+      .logo {
+        width: 60px;
+        margin-right: 12px;
+      }
+    
+      h1 {
+        margin: 0em;
+        font-family: 'Alata', sans-serif;
+        font-size: 3em;
+      }
+      
+      nav ul {
+        display: flex;
+        list-style-type: none;
+        padding: 0;
+      }
+    
+      nav {
+        padding-bottom: 20px;
+      }
+    
+      nav li {
+        margin-right: 20px;
+      }
+    
+      a {
+        color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav>
+        <ul>
+          <li><a href="/admin">Dashboard</a></li>
+          <li><a href="/admin/customize">Customize</a></li>
+          <li><a href="/admin/categories">Categories</a></li>
+          <li><a href="/admin/products">Products</a></li>
+          <li><a href="/admin/orders">Orders</a></li>
+          <li><a href="/admin/users">Users</a></li>
+          <li><a href="/admin/pages">Pages</a></li>
+          <li><a href="/" target="_blank">Live store</a></li>
+        </ul>
+        <div class="logo-title-container">
+          <img class="logo" src="/assets/hands-high-five-ol-if-512.png">
+          <h1><%= PREFERENCES.title %></h1>
+        </div>
+      </nav>

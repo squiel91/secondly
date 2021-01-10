@@ -1,0 +1,149 @@
+<!-- pass a product argument if edition -->
+<%- include('../partials/admin-head.ejs') %>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/richtext.min.css">
+
+<h2>Product Editor</h2>
+
+<form action="/admin/products<%= product ? `/${product._id}/edit` : '' %>?_csrf=<%= csrfToken %>" method="post" enctype="multipart/form-data">
+  <div class="row topPanel">
+    <div class="col-sm-12">
+      <div class="secondlyValidatableInput  <%= prefill?.title?.error ? 'error' : '' %>"">
+        <div class="secondlyInputInner">
+          <label for="title">Title:</label>
+          <input id="title" type="text" name="title" value="<%= prefill.valueOfOr('title', product?.title) %>">
+        </div>
+        <div class="secondlyErrorMessage">
+          <%= prefill?.title?.error %>  
+        </div>
+      </div>
+    </div>
+  
+    <div class="col-md-3 col-sm-6">
+      <div class="secondlyValidatableInput  <%= prefill?.price?.error ? 'error' : '' %>"">
+        <div class="secondlyInputInner">
+          <label for="price">Price:</label>
+          <input id="price" type="text" step="0.01" name="price" value="<%= prefill.valueOfOr('price', product?.price) %>">
+        </div>
+        <div class="secondlyErrorMessage">
+          <%= prefill?.price?.error %>  
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+      <div class="secondlyValidatableInput  <%= prefill?.compareAt?.error ? 'error' : '' %>"">
+        <div class="secondlyInputInner">
+          <label for="compareAt">Compare at:</label>
+          <input id="compareAt" type="text" step="0.01" name="compareAt" value="<%= prefill.valueOfOr('compareAt', product?.compareAt) %>">
+        </div>
+        <div class="secondlyErrorMessage">
+          <%= prefill?.compareAt?.error %>  
+        </div>
+      </div>
+    </div>
+  
+    <div class="col-md-3 col-sm-6">
+      <div class="secondlyValidatableInput  <%= prefill?.shippingCost?.error ? 'error' : '' %>"">
+        <div class="secondlyInputInner">
+          <label for="shippingCost">Shipping $</label>
+          <input id="shippingCost" type="text" step="0.01" name="shippingCost" value="<%= prefill.valueOfOr('shippingCost', product?.shippingCost) %>">
+        </div>
+        <div class="secondlyErrorMessage">
+          <%= prefill?.shippingCost?.error %>  
+        </div>
+      </div>
+    </div>
+  
+    <div class="col-md-3 col-sm-6">
+      <div class="secondlyValidatableInput  <%= prefill?.stock?.error ? 'error' : '' %>"">
+        <div class="secondlyInputInner">
+          <label for="stock">Stock</label>
+          <input id="stock" type="text" step="0.01" name="stock" value="<%= prefill.valueOfOr('stock', product?.stock) %>">
+        </div>
+        <div class="secondlyErrorMessage">
+          <%= prefill?.stock?.error %>  
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <textarea name="description" id="description" cols="30" rows="10"><%= product ? product.description : '' %></textarea>
+  </div>
+  
+  <div>
+    <label for="images">Images</label>
+    <ul>
+      <li><input type="file" name="image1"></li>
+      <li><input type="file" name="image2"></li>
+      <li><input type="file" name="image3"></li>
+      <li><input type="file" name="image4"></li>
+      <li><input type="file" name="image5"></li>
+    </ul>
+  </div>
+
+  <div class="previews"></div>
+
+  <div>
+    <label>Categories</label>
+    
+    <% if (allCategories && (allCategories.length > 0)) { %>
+      <a href="/admin/categories/new">New Category</a>
+      <ul>
+        <% for (let category of allCategories) { %>
+          <li>
+            <input 
+              type="checkbox"
+              name="categories[]"
+              value="<%= category._id %>"
+              id="<%= category._id %>"
+              <%= product && category.products.indexOf(product._id) >= 0 ? 'checked' : '' %>
+            >
+            <label for="<%= category._id %>"><%= category.title %></label>
+          </li>
+        <% } %>
+      </ul>
+    <% } else { %>
+      <p>You dont have any category yet! <a href="/admin/categories/new">Go create one!</a></p>
+    <% } %>
+  </div>
+  <div>
+    <input type="checkbox" name="publish" id="publish" <%= product && product.publish ? 'checked' : '' %>> <label for="publish">Publish (in not is a draft)</label>
+  </div>
+  <button class="primary" type="submit"><%= product ? 'Update' : 'Create' %></button>
+</form>
+
+<style>
+  .topPanel {
+    margin-bottom: 40px;
+  }
+</style>
+
+<script src="/jquery.richtext.min.js"></script>
+<script>
+  $('textarea#description').richText();
+
+  function remove() {
+    alert('Clicked!')
+  }
+  function readURL(input) {
+    $('.previews').empty()
+    if (input.files) {
+      for (var fileIter of input.files)
+        (function(file) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+          var img = $('<img />', {
+          src: e.target.result, 
+          width: 180
+          }).click(remove)
+        .appendTo($('.previews'));
+          };
+
+          reader.readAsDataURL(fileIter);
+        })(fileIter)
+      }
+    }
+</script>
+<%- include('../partials/admin-tail.ejs') %>

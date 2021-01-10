@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= PREFERENCES.title %></title>
+    <link rel="stylesheet" href="/bootstrap.css">
+    <link href="/assets/styles.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Alata&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+    <style>
+
+      body {
+        --mobile: 700px;
+      }
+
+      a.logo-title-link {
+        color: inherit; /* blue colors for links too */
+        text-decoration: inherit;
+        color: black;
+        display: flex;
+        align-items: center;
+      }
+      
+      .logo {
+        width: 60px;
+        margin-right: 12px;
+        margin-bottom: 10px;
+      }
+    
+      .topMenu {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      .topMenu .menuItem {
+        padding: 8px 0px 8px 0px;
+        margin-left: 12px;
+      }
+
+      .topMenu .menuItem a {
+        color: black;
+        transition: color 0.3s;
+      }
+
+      .topMenu .menuItem:hover a {
+        color: deepskyblue;
+      }
+
+      .desktop-menu {
+        display: flex; 
+        flex-grow: 1;
+        align-items: flex-start;
+      }
+
+      nav {
+        padding-bottom: 40px;
+        position: relative;
+      }
+
+      a[href="/cart"] {
+        display: flex;
+        align-items: center
+      }
+
+      .miniCart, .menuIcon {
+        width: 26px;
+        margin-right: 6px;
+      }
+
+      .responsiveSearchBar {
+        flex-grow: 1;
+        margin: 0 20px 0 32px;
+      }
+
+      .separator {
+        flex-grow: 1;
+        height: 10px;
+        display: none;
+      }
+
+      .collapsableMenu {
+        display: flex;
+        flex-shrink: 0;
+      }
+      
+      @media screen and (min-width: 1201px) {
+        .collapsableMenu {
+          opacity: 1 !important;
+        }
+      }
+
+      @media screen and (max-width: 1200px) {
+        .collapsableMenu {
+          display: none;
+        }
+
+        .collapsableMenu.open {
+          background-color: white;
+          display: block !important;
+          position: absolute;
+          right: 0;
+          top: 80px;
+          padding: 15px 0;
+          border-radius: 8px;
+          box-shadow: 0 0.9px 2.2px rgba(0,0,0,.02), 0 2.2px 5.3px rgba(0,0,0,.028), 0 4.1px 10px rgba(0,0,0,.035), 0 7.4px 17.9px rgba(0,0,0,.042), 0 13.8px 33.4px rgba(0,0,0,.05), 0 33px 80px rgba(0,0,0,.07);
+          opacity: 0;
+          transition: all 0.2s;
+          z-index: 1;
+        }
+
+        .collapsableMenu .menuItem {
+          margin-left: 0;
+          padding: 10px 30px;
+        }
+      }
+
+      @media screen and (max-width: 992px) {
+        .topMenu {
+          flex-wrap: wrap;
+        }
+        
+        .responsiveSearchBar {
+          margin: 8px 0 0 0;
+          order: 1;
+          flex-basis: 100%;
+        }
+
+        .separator {
+          display: block;
+        }
+
+        .logo {
+          width: 50px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <% if (user && user.admin) { %>
+      <div class="adminBar" onclick="window.location.href = '/admin'">
+        <svg style="margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
+          <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+        </svg>
+        Manage the store    
+      </div>
+    <% } %>
+    <div class="container">
+      <nav>
+        <div class="topMenu">
+          <a class="logo-title-link" href="/">
+            <img class="logo" src="/assets/hands-high-five-ol-if-512.png">
+            <h1><%= PREFERENCES.title %></h1>
+          </a>
+          <div class="separator"></div>
+          <div class="secondlyInput responsiveSearchBar">
+            <label for="searchBar">Search:</label>
+            <input type="text" id="searchBar" value="<%= locals.query? query : '' %>">
+          </div>
+          <div class="collapsableMenu"> 
+            <% if (PREFERENCES.headerMenu && PREFERENCES.headerMenu.length > 0) {
+              PREFERENCES.headerMenu.forEach(menuItem => { %>
+                <div class="menuItem <%= menuItem.classes %>">
+                  <a href="<%= menuItem.link %>"><%= menuItem.text %></a>
+                </div>
+              <% })
+            } %>
+            <% if (user) { %>
+              <div class="menuItem">
+                <a href="/account"><%= user.firstName %>'s Account</a>
+              </div>
+            <% } else { %>
+              <div class="menuItem"><a href="/account">Account</a></div>
+            <% } %>
+          </div>
+          <div class="menuItem cart">
+            <a href="/cart">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="currentColor" class="miniCart" viewBox="0 0 100 100">
+                <style>                  
+                  .cart-line{
+                    fill:none;
+                    stroke-width:8;
+                    stroke-linecap:round;
+                    stroke-linejoin:round;
+                  }
+                </style>
+                <polyline class="cart-line" points="5.7,10.7 22.7,10.7 34.5,60.2 84.2,60.2 95.2,21.7 43.2,21.7 "/>
+                <circle cx="36.2" cy="83.6" r="9"/>
+                <circle cx="88.3" cy="83.6" r="9"/>
+              </svg>
+              <%= cartItemQty > 0? ' (' + cartItemQty + ')' : '' %>
+            </a>
+          </div>
+          <div class="menuItem d-md-block d-xl-none">
+            <a id="openMenu" href="#">
+              <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="menuIcon" viewBox="0 0 100 100">
+                <style type="text/css">
+                  .menuLines{
+                    fill:none;
+                    stroke-width:8;
+                    stroke-linecap:round;
+                    stroke-linejoin:round;
+                  }
+                </style>
+                <line class="menuLines" x1="90.1" y1="21.3" x2="33.8" y2="21.3"/>
+                <line class="menuLines" x1="90.1" y1="48.6" x2="15.3" y2="48.6"/>
+                <line class="menuLines" x1="90.1" y1="75.9" x2="44.8" y2="75.9"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <script>
+          $('#searchBar').on('keypress', event => {
+            const query = $(event.target).val() 
+            if(event.which == 13 && query) {
+              window.location.replace(`/search?q=${query}`) 
+            }
+          })
+
+          $('#openMenu').click((event) => {
+            const collapsable = $('.collapsableMenu')
+            console.log('help')
+            if (!collapsable.hasClass('open')) {
+              collapsable.addClass('open')
+              let timer = setInterval(function() {
+                collapsable.css("opacity", '1');
+                collapsable.css("top", '60px');
+                clearInterval(timer)
+              }, 0)
+            } else {
+              collapsable.css("opacity", '0');
+              collapsable.css("top", '80px');
+              let timer = setInterval(function() {
+                collapsable.removeClass('open')
+                clearInterval(timer)
+              }, 200)
+
+            }
+          })
+        </script>
+      </nav>

@@ -1,0 +1,62 @@
+<%- include('../partials/admin-head.ejs') %>
+<h2>Customize</h2>
+<form action="customize" method="post">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="input-container">
+    <label for="storeName">Store's name</label>
+    <input type="text" name="storeName" id="storeName" value="<%= PREFERENCES.title %>">
+  </div>
+  
+  <div class="row">
+    <div class="col-md-6">
+      <h3>Header Menu</h3>
+      <div id="headerMenuItemContainer">
+        <% if (PREFERENCES.headerMenu && PREFERENCES.headerMenu.length > 0) { 
+          PREFERENCES.headerMenu.forEach(menuItem => { %>
+            <%- include('./snippets/headerMenuItem.ejs', { menuItem: menuItem }) %>
+          <% })
+        } %>
+      </div>
+      <div id="newHeaderMenu">Add new link</div>
+    
+    </div>
+    <div class="col-md-6">
+      <h3>Footer Menu</h3>
+      <div id="footerMenuItemContainer">
+        <% if (PREFERENCES.footerMenu && PREFERENCES.footerMenu.length > 0) { 
+          PREFERENCES.footerMenu.forEach(menuItem => { %>
+            <%- include('./snippets/footerMenuItem.ejs', { menuItem: menuItem }) %>
+          <% })
+        } %>
+      </div>
+      <div id="newFooterMenu">Add new link</div>
+      <div class="input-container">
+        <label for="storeName">Footer message</label>
+        <input type="text" name="footerMessage" id="footerMessage" value="<%= PREFERENCES.footerMessage %>">
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" class="primary">Save</button>
+</form>  
+
+
+<div class="templates" style="display: none;">
+  <%- include('./snippets/headerMenuItem.ejs', { menuItem: null }) %>
+  <%- include('./snippets/footerMenuItem.ejs', { menuItem: null }) %>
+</div>
+<%- include('../partials/admin-tail.ejs') %>
+
+<script>
+  $('#newFooterMenu').click(() => {
+    $('.templates .footerMenuItem').clone().appendTo('#footerMenuItemContainer');
+  })
+
+  $('#newHeaderMenu').click(() => {
+    $('.templates .headerMenuLink').clone().appendTo('#headerMenuItemContainer');
+  })
+
+  $('.removeMenuItem').click((event) => {
+    $(event.target).parent().remove();
+  })
+</script>

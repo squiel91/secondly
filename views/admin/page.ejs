@@ -1,0 +1,50 @@
+<%- include('../partials/admin-head.ejs') %>
+
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/richtext.min.css">
+
+<h2>Page Editor</h2>
+
+<form action="/admin/pages<%= page ? `/${page.handle}` : '' %>" method="post">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="row topPanel">
+    <div class="col-md-8">
+      <div class="secondlyInput">
+        <label for="title">Title</label>
+        <input id="title" type="text" name="title" value="<%= page ? page.title : '' %>">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="secondlyInput">
+        <label for="handle">Handle</label>
+        <input id="handle" type="text" name="handle" value="<%= page ? page.handle : '' %>">
+      </div>
+    </div>
+  </div>
+  <textarea name="content" id="content" cols="30" rows="10"><%= page ? page.content : '' %></textarea>
+  
+  <button class="primary" type="submit"><%= page ? 'Update' : 'Create' %></button>
+</form>
+
+<script src="/jquery.richtext.min.js"></script>
+<script>
+  $('textarea#content').richText();
+
+  $('#title').blur(event => {
+    const title = $(event.target).val()
+    if (title) {
+      const handle = $('#handle')
+      if (!handle.val()) {
+        handle.val(title.toLowerCase().replace(' ', '-'))
+      }
+    } 
+  })
+</script>
+
+<style>
+  .topPanel {
+    margin-bottom: 40px;
+  }
+</style>
+
+<%- include('../partials/admin-tail.ejs') %>

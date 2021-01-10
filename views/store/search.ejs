@@ -1,0 +1,192 @@
+<%- include('../partials/store-head.ejs') %>
+
+<div class="row">
+  <div class="shearch__listing col-md-8">
+    <% if (products && products.length > 0) { %>
+      <p>There <%= products.length == 1? 'is' :'are' %> <%= products.length %> search result<%= products.length == 1? '' :'s' %></p>
+      <% products.forEach(product => { %>
+        <div class="search__product">
+          <div class="search__product__image" style="background-image: url('<%= product.imagePaths[0] %>');">
+            
+          </div>
+          <div>
+            <a href="/products/<%= product.id %>"><h3 class="search__product__title"><%= product.title %></h3></a>
+            <p>
+              $ <%= product.price %>
+              <% if (product.shippingCost > 0) { %>
+                + $ <%= product.shippingCost %> Shipping
+              <% } else { %>
+                Free shipping
+              <% } %>
+            </p>
+          </div>
+
+          <style>
+            .search__product {
+              display: flex;
+              margin-bottom: 20px;
+              box-shadow: 0 0.9px 2.2px rgba(0,0,0,.02), 0 2.2px 5.3px rgba(0,0,0,.028), 0 4.1px 10px rgba(0,0,0,.035), 0 7.4px 17.9px rgba(0,0,0,.042), 0 13.8px 33.4px rgba(0,0,0,.05), 0 33px 80px rgba(0,0,0,.07);
+              align-items: center;
+              border-radius: 16px;
+              padding-right: 30px;
+              margin-right: 30px;
+            }
+
+            .search__product__image {
+              background-color: lightgray;
+              min-width: 190px;
+              height: 190px;
+              background-size: cover;
+              background-position: center;
+              margin-right: 30px;
+              border-top-left-radius: 16px;
+              border-bottom-left-radius: 16px;
+
+            }
+            
+            .search__product__title {
+              font-size: 1.5em;
+              margin-top: 0;
+            }
+          </style>
+        </div>
+      <% }) %> 
+    <% } else { %> 
+      <div class="emptyContainer">
+        <img class="empty" src="/assets/no-found.svg" alt="">
+        <p>No results for your <strong>Search</strong>.<br>Try with another search.</p>
+      </div>
+    <% } %> 
+  </div>
+  <div class="shearch__filters col-md-4">
+    <form action="/search" method="get">
+      <input type="hidden" name="q" value="<%= query %>">
+      <div class="search__order__section">
+        <div class="secondlyInput">
+          <label for="order">Order</label>
+          <select name="order" id="order">
+            <option value="relevance" <%= selectedOrder == 'relevance'? 'selected' : '' %>>Relevance</option>
+            <option value="priceUp" <%= selectedOrder == 'priceUp'? 'selected' : '' %>>Lower price first</option>
+            <option value="priceDown" <%= selectedOrder == 'priceDown'? 'selected' : '' %>>Higher price first</option>
+          </select>
+        </div>
+      </div>
+      <% if (categoryFilters && categoryFilters.length > 0) { %>
+        <div class="search__filter__section">
+          <h3>Categories</h3>
+          <% categoryFilters.forEach(categoryFilter => { %>
+            <div>
+              <input 
+                type="checkbox"
+                name="category" 
+                value="<%= categoryFilter.id %>"
+                id="<%= categoryFilter.id %>"
+                <%= selectedCategories.includes(categoryFilter.id)? 'checked' : '' %>
+              >
+              <label for="<%= categoryFilter.id %>"> <%= categoryFilter.title %> (<%= categoryFilter.quantity %>)</label>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+      <div class="search__filter__section">
+        <h3>Price</h3>
+        <div class="price-range-slider">
+          <div id="slider-range" class="range-bar"></div>
+          <div class="range-value">
+            <input type="text" id="minAmountVisible" readonly>
+            <input type="hidden" name="minAmount" id="minAmount">
+            <input type="text" id="maxAmountVisible" readonly>
+            <input type="hidden" name="maxAmount" id="maxAmount">
+          </div>
+        </div>
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <style>
+          .price-range-slider {
+            width: 100%;
+          }
+  
+          .price-range-slider .range-value {
+            display: flex;
+          }
+  
+          .price-range-slider .range-value input {
+            background: none;
+            box-shadow: none;
+            border: none;
+            max-width: 50%;
+            margin-top: 16px;
+          }
+  
+          .price-range-slider #maxAmountVisible {
+            text-align: right;
+          }
+  
+          .price-range-slider .range-bar {
+            border: none;
+            background: #f5f5f5;
+            height: 3px;
+            width: 96%;
+            margin-left: 8px;
+          }
+  
+          .price-range-slider .range-bar .ui-slider-range {
+            background: deepskyblue;
+          }
+  
+          .price-range-slider .range-bar .ui-slider-handle {
+            border: none;
+            border-radius: 25px;
+            background: deepskyblue;
+            border: 2px solid deepskyblue;
+            height: 17px;
+            width: 17px;
+            top: -0.52em;
+            cursor: pointer;
+          }
+  
+          .price-range-slider .range-bar .ui-slider-handle + span {
+            background: deepskyblue;
+          }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
+        <script>
+          $(function() {
+            $( '#slider-range' ).slider({
+              range: true,
+              min: <%= minPrice %>,
+              max: <%= maxPrice %>,
+              values: [ <%= selectedMinPrice || minPrice %>, <%= selectedMaxPrice || maxPrice %> ],
+              slide: function( event, ui ) {
+              $( '#minAmountVisible' ).val( '$' + ui.values[ 0 ]);
+              $( '#minAmount' ).val( ui.values[ 0 ]);
+              $( '#maxAmountVisible' ).val( '$' + ui.values[ 1 ]);
+              $( '#maxAmount' ).val( ui.values[ 1 ]);
+              }
+            });
+            $( '#minAmountVisible' ).val('$' + $('#slider-range').slider( 'values', 0 ));
+            $( '#minAmount' ).val($('#slider-range').slider( 'values', 0 ));
+            $( '#maxAmountVisible' ).val('$' + $('#slider-range').slider( 'values', 1 ));
+            $( '#maxAmount' ).val($('#slider-range').slider( 'values', 1 ));
+          });
+        </script>
+      </div>
+      <div class="search__filter__section">
+        <h3>Shipping</h3>
+        <div>
+          <input type="checkbox" name="freeShipping" id="freeShipping" <%= freeShipping? 'checked' : '' %>>
+          <label for="freeShipping"> Free shipping only</label>
+        </div>
+      </div>
+      <button class="primary"  style="margin: 0;" type="submit">Update</button>
+    </form>
+  </div>
+</div>
+
+<style>
+  .search__filter__section, .search__order__section {
+    margin-bottom: 40px;
+  }
+</style>
+
+
+<%- include('../partials/store-tail.ejs') %>
