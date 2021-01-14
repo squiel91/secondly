@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= PREFERENCES.title %></title>
+    <meta name="description" content="The straight-forward e-commerce platform for selling your products"></head>
     <link rel="stylesheet" href="/bootstrap.css">
     <link href="/assets/styles.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -57,7 +58,7 @@
 
       .topMenu .menuItem {
         padding: 8px 0px 8px 0px;
-        margin-left: 12px;
+        margin-left: 20px;
       }
 
       .topMenu .menuItem a {
@@ -189,10 +190,11 @@
             } %>
             <% if (user) { %>
               <div class="menuItem">
-                <a href="/account"><%= user.firstName %>'s Account</a>
+                <a href="/account"><%= user.firstName %>'s account</a>
               </div>
             <% } else { %>
-              <div class="menuItem"><a href="/account">Account</a></div>
+              <div class="menuItem"><a href="/account">Login</a></div>
+              <div class="menuItem"><a href="/account">Register</a></div>
             <% } %>
           </div>
           <div class="menuItem cart">
