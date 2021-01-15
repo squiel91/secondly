@@ -9,15 +9,30 @@ var validator = require('email-validator');
 
 const mailer = require('../utils/mailer');
 
-// General
 function filterOutUnpublishedProducts(category) {
   category.products = category.products.filter(product => product.publish)
 }
 
+// Setup
+exports.setHeaderParams = (req, res, next) => {
+  Category.find({ listed: true })
+    .then(listedCategories => {
+      res.locals.listedCategories = listedCategories
+      next()
+    })
+}
+
+// General
 exports.getHomepage = (req, res, next) => {
+  // all these can be done more efficiently using only mongo groups
   Category.find().populate('products').exec((err, categories) => {
     categories.forEach(category => filterOutUnpublishedProducts(category))
-    res.render('store/homepage.ejs', { categories })
+    listedCategories = []
+    featuredCategories = []
+    categories.forEach(category => {
+      if (category.featured) featuredCategories.push(category)
+    })
+    res.render('store/homepage.ejs', { categories, featuredCategories })
   })
 }
 

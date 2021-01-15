@@ -18,7 +18,17 @@ const userSchema = new Schema({
       ref: 'Product',
       required: true
     }
-  ]
+  ],
+  // It will be listed in the menu
+  listed: {
+    type: Boolean,
+    default: true
+  },
+  // It will be listed in the homepeage as a button, right below the subtitle
+  featured: {
+    type: Boolean,
+    default: false
+  }
 })
 
 module.exports = mongoose.model('Category', userSchema)

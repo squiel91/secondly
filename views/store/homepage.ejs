@@ -4,15 +4,15 @@
   p.subtitle {
     line-height: 1.6;
     font-size: 2.3em;
-    margin-bottom: 3em;
+    margin-bottom: 0.4em;
     display: flex;
     align-items: center;
     font-family: 'Alata', sans-serif;
   }
 
   .browseCategory {
-    margin-top: 0;
-    font-size: xx-large;
+    margin-top: 1em;
+    font-size: x-large;
     margin-bottom: 0.8em;
   }
   
@@ -35,18 +35,28 @@
     p.subtitle {
       font-size: 1.3em;
     }
+  }
 
-    p.subtitle img {
-      width: 30px;
-      margin-right: 10px;
-    }
+  .featuredCategories {
+    margin-top: 1em;
+    margin-bottom: 3.5em;
+  }
+
+  .featuredCategory {
+    margin-right: 12px;
   }
 
 </style>
   <div class="row">
     <div class="col-lg-9">
-      <h1 class="lead">The Amazon of the second hand deals.</h1>
-      <p class="subtitle">Free shipping & returns within the US.</p>
+      <h1 class="lead"><%= PREFERENCES.homepage?.title %></h1>
+      <% if (featuredCategories.length > 0) { %>
+        <div class="featuredCategories">
+          <% featuredCategories.forEach(featuredCategory => { %>
+            <a href="/categories/<%= featuredCategory.handle %>"><button class="primary smaller featuredCategory"><%= featuredCategory.title %></button></a>
+            <% }) %>
+        </div>
+      <% } %>
     </div>
   </div>
   <% for (let category of categories) { %>

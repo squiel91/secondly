@@ -83,13 +83,17 @@ p {
 }
 
 button.primary, button.secondary {
-  padding: 12px 20px;
+  padding: 15px 40px;
   font-family: 'Alata', sans-serif;
   margin-top: 20px;
   border-radius: 100px;
   text-transform: capitalize;
   font-size: large;
   transition: all 0.5s;
+}
+
+button.primary.smaller {
+  padding: 14px 25px;
 }
 
 button.primary:hover:enabled, button.secondary:hover:enabled {
@@ -100,7 +104,6 @@ button.primary:hover:enabled, button.secondary:hover:enabled {
 
 button.primary {
   border: 0;
-  padding: 15px 40px;
   background-color: deepskyblue;
   color: white;
 }

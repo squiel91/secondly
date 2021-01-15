@@ -22,7 +22,6 @@ exports.getDashboard = (req, res, next) => {
 // Customize
 
 exports.getCustomize = (req, res, next) => {
-  console.log("preferences", PREFERENCES)
   res.render('admin/customize.ejs')
 }
 
@@ -30,7 +29,7 @@ exports.postCustomize = (req, res, next) => {
   // global variable
 
   PREFERENCES = {
-    title: req.body.storeName,
+    storeName: req.body.storeName,
     headerMenu: req.body.headerMenuText?.map((text, index) => {
       return {
         text: text,
@@ -38,6 +37,9 @@ exports.postCustomize = (req, res, next) => {
         classes: req.body.headerMenuClasses[index]
       }
     }),
+    homepage: {
+      title: req.body.homepageTitle
+    },
     footerMenu: req.body.footerMenuText?.map((text, index) => {
       return {
         text: text,
@@ -47,6 +49,19 @@ exports.postCustomize = (req, res, next) => {
     }),
     footerMessage: req.body.footerMessage
   }
+
+
+// if (req.body.featureCategories) {
+//   PREFERENCES.homepage = []
+
+//   req.body.featureCategories.forEach((featureCategoryId, index) => {
+//     PREFERENCES.homepage.push({
+//       id: featureCategoryId,
+//       altTitle: req.body.featureCategories
+//     })
+//   })
+
+// }
 
   fs.writeFileSync(rootPath('data', 'preferences.json'), JSON.stringify(PREFERENCES))
   res.redirect('/admin/customize')
@@ -94,7 +109,9 @@ exports.postNewCategory = (req, res, next) => {
     title: req.body.title,
     handle: req.body.handle,
     description: req.body.description,
-    products: req.body.products
+    products: req.body.products,
+    listed: req.body.listed == 'on',
+    featured: req.body.featured == 'on'
   })
 
   category.save()
@@ -112,6 +129,8 @@ exports.postEditCategory = (req, res, next) => {
       category.handle = req.body.handle
       category.description = req.body.description
       category.products = req.body.products
+      category.listed = req.body.listed == 'on'
+      category.featured = req.body.featured == 'on'
       return category.save()
     })
     .then(result => {

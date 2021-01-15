@@ -1,11 +1,14 @@
 <%- include('../partials/admin-head.ejs') %>
 <h2>Customize</h2>
+<h3>General</h3>
 <form action="customize" method="post">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <div class="input-container">
     <label for="storeName">Store's name</label>
-    <input type="text" name="storeName" id="storeName" value="<%= PREFERENCES.title %>">
+    <input type="text" name="storeName" id="storeName" value="<%= PREFERENCES.storeName %>">
   </div>
+  <h3>Homepage</h3>
+  <label for="homepageTitle">Main Title</label><input type="text" id="homepageTitle" name="homepageTitle" value="<%= PREFERENCES.homepage?.title %>">
   
   <div class="row">
     <div class="col-md-6">

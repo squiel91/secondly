@@ -53,7 +53,7 @@
         display: flex;
         flex-wrap: nowrap;
         align-items: center;
-        margin-top: 20px;
+        margin-top: 10px;
       }
 
       .topMenu .menuItem {
@@ -156,6 +156,11 @@
         .logo {
           width: 50px;
         }
+
+        /* Category list */
+        .categoryList {
+          position: relative;
+        }
       }
     </style>
   </head>
@@ -173,7 +178,7 @@
         <div class="topMenu">
           <a class="logo-title-link" href="/">
             <img class="logo" src="/assets/hands-high-five-ol-if-512.png">
-            <h1><%= PREFERENCES.title %></h1>
+            <h1><%= PREFERENCES.storeName %></h1>
           </a>
           <div class="separator"></div>
           <div class="secondlyInput responsiveSearchBar">
@@ -188,6 +193,22 @@
                 </div>
               <% })
             } %>
+            <div class="menuItem categoryList">
+              <div id="toggleCategoryListMenu">
+                Categories  
+              </div>
+              <div class="categoryListMenu">
+                <% if (listedCategories.length > 0) { 
+                  listedCategories.forEach(listedCategory => { %>
+                    <div>
+                      <a class="categoryListItem" href="/categories/<%= listedCategory.handle %>"><%= listedCategory.title %></a>
+                    </div>
+                  <% }) 
+                } else { %>
+                  No category yet!
+                <% } %>
+              </div>
+            </div>
             <% if (user) { %>
               <div class="menuItem">
                 <a href="/account"><%= user.firstName %>'s account</a>
@@ -239,6 +260,10 @@
             if(event.which == 13 && query) {
               window.location.replace(`/search?q=${query}`) 
             }
+          })
+
+          $('#toggleCategoryListMenu').click(event => {
+            alert('clicked')
           })
 
           $('#openMenu').click((event) => {

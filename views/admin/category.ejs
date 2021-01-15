@@ -43,6 +43,12 @@
   <% } else { %>
     <p>You dont have any product yet!</p>
   <% } %>
+  <div>
+    <input type="checkbox" name="listed" id="listed" <%= !category || category.listed?  'checked' : '' %>> <label for="listed">Listed (shows in the categoty menu)</label>
+  </div>
+  <div>
+    <input type="checkbox" name="featured" id="featured" <%= category && category.featured ?  'checked' : '' %>> <label for="featured">Featured (shows in the homepage just under the sutitle)</label>
+  </div>
   <button type="submit" class="primary"><%= category ? 'Update' : 'Create' %></button>
 </form>
 
