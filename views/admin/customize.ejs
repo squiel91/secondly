@@ -7,6 +7,13 @@
     <input type="text" name="storeName" id="storeName" value="<%= PREFERENCES.title %>">
   </div>
   
+  <div>
+    <h3>Featured Categories</h3>
+    <div id="featuredCategoryList" class="row">
+    </div>
+    <button id="added" type="button" onclick="add()">Add new</button>
+  </div>
+ <div>
   <div class="row">
     <div class="col-md-6">
       <h3>Header Menu</h3>
@@ -39,7 +46,19 @@
 
   <button type="submit" class="primary">Save</button>
 </form>  
-
+<div style="display: none;">
+  <div id="templateInput">
+    <div class="input-container col-md-4">
+      <label for="">Select a category</label>
+      <select name="categoriesTitle" id=""></select>
+    </div>
+    <div class="input-container col-md-4">
+      <label for="">Alt Title</label>
+      <input type="text" name="altTitle">
+    </div>
+    <div class="col-md-4" id="removeCat">Remove</div>
+  </div>
+</div>
 
 <div class="templates" style="display: none;">
   <%- include('./snippets/headerMenuItem.ejs', { menuItem: null }) %>
@@ -48,6 +67,16 @@
 <%- include('../partials/admin-tail.ejs') %>
 
 <script>
+ function add() {
+        var templateInput = document.querySelector('#templateInput');
+        var newCategoryLine = document.importNode(templateInput, true);
+        var featuredCategoryList = document.querySelector('#featuredCategoryList');
+        var removeCategory = newCategoryLine.querySelector('#removeCat');
+        removeCategory.addEventListener("click", function(event){
+          newCategoryLine.remove()
+        })
+        featuredCategoryList.appendChild(newCategoryLine);
+    }
   $('#newFooterMenu').click(() => {
     $('.templates .footerMenuItem').clone().appendTo('#footerMenuItemContainer');
   })
@@ -59,4 +88,5 @@
   $('.removeMenuItem').click((event) => {
     $(event.target).parent().remove();
   })
+  
 </script>
