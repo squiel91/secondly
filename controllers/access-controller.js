@@ -7,30 +7,23 @@ const prefills = require('../utils/prefills')
 
 const mailer = require('../utils/mailer');
 const Order = require('../models/Order')
+const Category = require('../models/Category')
 
-exports.setupAuth = (req, res, next) => {
+exports.setupAuth = async (req, res, next) => {
   
   res.locals.csrfToken = req.csrfToken()
+  res.locals.listedCategories = await Category.find({ listed: true })
 
   if (req.session.userId) {
-    User.findById(req.session.userId)
-      .then(user => {
-        req.user = user 
-      })
-      .catch(err => {
-        console.log(err)
-      })
-      .finally(() => {
-        res.locals.user = req.user
-        res.locals.cartItemQty = req.user.getCartQty()
-        next()
-      })
+    req.user = await User.findById(req.session.userId)
+    res.locals.user = req.user
+    res.locals.cartItemQty = req.user.getCartQty()
   } else {
     req.sessionCart = SessionCart.load(req.session)
     res.locals.user = null
     res.locals.cartItemQty = req.sessionCart.getCartQty()
-    next()
   }
+  next()
 }
 
 exports.getAccount = (req, res, next) => {

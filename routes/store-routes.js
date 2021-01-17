@@ -4,8 +4,6 @@ const router = express.Router();
 
 const storeController = require("../controllers/store-controller");
 
-router.use(storeController.setHeaderParams) // loads the user if logged
-
 router.get("/", storeController.getHomepage);
 router.get("/products", storeController.getProducts);
 router.get("/products/:productId", storeController.getProductDetails);

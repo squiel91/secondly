@@ -21,13 +21,16 @@ exports.getDashboard = (req, res, next) => {
 
 // Customize
 
-exports.getCustomize = (req, res, next) => {
-  res.render('admin/customize.ejs')
+exports.getCustomize = async (req, res, next) => {
+  const categories = await Category.find()
+  res.render('admin/customize.ejs', { categories })
 }
 
 exports.postCustomize = (req, res, next) => {
   // global variable
 
+  console.log(req.body.homepageCategory)
+  console.log(req.body.homepageCategoryAltTitle)
   PREFERENCES = {
     storeName: req.body.storeName,
     headerMenu: req.body.headerMenuText?.map((text, index) => {
@@ -50,18 +53,18 @@ exports.postCustomize = (req, res, next) => {
     footerMessage: req.body.footerMessage
   }
 
-
-// if (req.body.featureCategories) {
-//   PREFERENCES.homepage = []
-
-//   req.body.featureCategories.forEach((featureCategoryId, index) => {
-//     PREFERENCES.homepage.push({
-//       id: featureCategoryId,
-//       altTitle: req.body.featureCategories
-//     })
-//   })
-
-// }
+  const homepageCategoryIds = req.body.homepageCategory
+  const homepageCategoryAltTitle = req.body.homepageCategoryAltTitle
+  
+  if (homepageCategoryIds) {
+    PREFERENCES.homepage.categories = []
+    homepageCategoryIds.forEach((categoryId, index) => { 
+      PREFERENCES.homepage.categories.push({
+        id: categoryId,
+        altTitle: homepageCategoryAltTitle[index] || undefined 
+      })
+    })
+  }
 
   fs.writeFileSync(rootPath('data', 'preferences.json'), JSON.stringify(PREFERENCES))
   res.redirect('/admin/customize')

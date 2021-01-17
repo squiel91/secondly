@@ -1,4 +1,5 @@
-const stripe = require('stripe')('sk_test_51HsvHmF1g3qjNQo3UKVTBTvzNgJEnECDCwjrj33NVknPH9JkhQil7XdATmhRIciU53LCfie21wig5DqgCJ5qF8m500nA4ViP5a');
+const stripe = require('stripe')('sk_test_51HsvHmF1g3qjNQo3UKVTBTvzNgJEnECDCwjrj33NVknPH9JkhQil7XdATmhRIciU53LCfie21wig5DqgCJ5qF8m500nA4ViP5a')
+var mongoose = require('mongoose')
 
 const Product = require('../models/Product')
 const Page = require('../models/Page')
@@ -13,27 +14,28 @@ function filterOutUnpublishedProducts(category) {
   category.products = category.products.filter(product => product.publish)
 }
 
-// Setup
-exports.setHeaderParams = (req, res, next) => {
-  Category.find({ listed: true })
-    .then(listedCategories => {
-      res.locals.listedCategories = listedCategories
-      next()
-    })
-}
-
 // General
-exports.getHomepage = (req, res, next) => {
+exports.getHomepage = async (req, res, next) => {
   // all these can be done more efficiently using only mongo groups
-  Category.find().populate('products').exec((err, categories) => {
-    categories.forEach(category => filterOutUnpublishedProducts(category))
-    listedCategories = []
-    featuredCategories = []
-    categories.forEach(category => {
-      if (category.featured) featuredCategories.push(category)
-    })
-    res.render('store/homepage.ejs', { categories, featuredCategories })
+  featuredCategories = await Category.find({ featured: true })
+  
+  homepageCategoryRawList = PREFERENCES.homepage?.categories || []
+  homepageCategoryIds = homepageCategoryRawList.map(homepageCategoryItem => mongoose.Types.ObjectId(homepageCategoryItem.id))
+
+  homepageCategoryList = await Category.find({'_id': { '$in': homepageCategoryIds}}).populate('products')
+  homepageCategoryList.forEach(category => filterOutUnpublishedProducts(category))
+
+  homepageCategories = []
+  homepageCategoryRawList.forEach(rawItem => {
+    const homepageCategory = homepageCategoryList.find(category => category.id == rawItem.id)
+    if (homepageCategory)
+      homepageCategories.push({
+        category: homepageCategory,
+        altTitle: rawItem.altTitle
+      })
   })
+
+  res.render('store/homepage.ejs', { homepageCategories, featuredCategories })
 }
 
 

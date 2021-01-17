@@ -86,9 +86,9 @@ server.use((req, res, next) => {
   res.render("404.ejs")
 })
 
-server.use((error, req, res, next) => {
-  res.render("500.ejs")
-})
+// server.use((error, req, res, next) => {
+//   res.render("500.ejs")
+// })
 
 const port = process.env.PORT || 3000
 

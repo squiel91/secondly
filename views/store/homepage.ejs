@@ -59,10 +59,10 @@
       <% } %>
     </div>
   </div>
-  <% for (let category of categories) { %>
+  <% for (let homepageCategoryItem of homepageCategories) { %>
     <div class="store__category">
-      <h2 class="browseCategory"><a href="/categories/<%= category.handle %>">Browse <%= category.title %> <span class="categoryArrow">→</span></a></h2>
-      <%- include('./snippets/list-products.ejs', { products: category.products, empty: "There are no products in this category yet!" }) %>
+      <h2 class="browseCategory"><a href="/categories/<%= homepageCategoryItem.category.handle %>"><%= homepageCategoryItem.altTitle || homepageCategoryItem.category.title %> <span class="categoryArrow">→</span></a></h2>
+      <%- include('./snippets/list-products.ejs', { products: homepageCategoryItem.category.products, empty: "There are no products in this category yet!" }) %>
     </div>
   <% } %>
 <%- include('../partials/store-tail.ejs') %>
