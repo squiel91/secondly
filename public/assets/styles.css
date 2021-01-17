@@ -265,3 +265,16 @@ input[type="checkbox"] {
 .template {
   display: none;
 }
+
+.pseudo-a {
+  font-weight: bold;
+  cursor: pointer;
+  color: black;
+  transition: color 0.5s;
+}
+
+.pseudo-a:hover {
+  font-weight: bold;
+  cursor: pointer;
+  color: deepskyblue;
+}
