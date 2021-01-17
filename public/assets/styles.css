@@ -11,6 +11,7 @@ a {
 }
 
 .adminBar {
+  display: block;
   background-color: black;
   color: white;
   text-align: center;
@@ -21,6 +22,10 @@ a {
 
 .adminBar:hover {
   background-color: deepskyblue;
+}
+
+a.adminBar:hover {
+  color: white;
 }
 
 a:hover, a:active {
@@ -75,6 +80,10 @@ Extra extra large 	xxl	            ≥1400px
   h1.lead { font-size: 40px; }
   h2 { font-size: 20px; }
   h3 { font-size: 18px; }
+
+  .row {
+    --bs-gutter-x: 0.8rem;
+  }
 
 }
 

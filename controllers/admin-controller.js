@@ -155,7 +155,7 @@ exports.postDeleteCategory = (req, res, next) => {
 
 // Products
 
-const ITEMS_PER_PAGE = 2
+const ITEMS_PER_PAGE = 10
 
 // TODO: make it scalable with a mongoose plugin or just use mongoose paginate
 // paginate = model => {

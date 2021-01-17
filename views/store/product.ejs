@@ -1,70 +1,4 @@
 <%- include('../partials/store-head.ejs') %>
-<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/js/splide.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/css/splide.min.css">
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
-<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
-
-<div class="wideScreen">
-  <div class="row">
-    <div class="col-md-6 imagesColumn">
-      <% if (product.imagePaths) { %>
-        <% product.imagePaths.forEach((imagePath, index) => { %>
-          <a data-fancybox="gallery" href="<%= imagePath %>">
-            <img class="desktopPicture" src="<%= imagePath %>">
-          </a>
-        <% }) %>
-      <% } %>
-    </div>
-    <div class="col-md-6 detailsColumn">
-      <div class="stickyElement">
-        <h2 class="productTitle"><%= product.title %></h2>
-
-        <p class="price">
-          $ <%= product.price %>
-          <% if (product.compareAt) { %>
-          <span class="compareAt">$<%= product.compareAt %></span>
-          <% } %>
-        </p>
-
-        <p><%= product.shippingCost == 0? 'Free Shipping' : `+ $${product.shippingCost} shipping` %></p>
-        <p><%- product.description %></p>
-
-        <p>Stock: <%= product.stock == 0? 'Sold out' : product.stock %></p>
-        <% if (product.stock > 0) { %>
-          <%- include('../partials/addToCart.ejs') %>
-        <% } else { %>
-          <button class="primary" disabled>Sold out</button>
-        <% } %>
-        
-        <p>Any question? Call us at <a href="tel:(773) 096 4084">(773) 096 4084</a> or write us an email at <a href="mailto:sales@secondly.store">sales@secondly.store</a>.</p>
-        <div class="share">
-          <p>You know who will like it?</p>
-          <ul class="shareList">
-            <li><a href="#"class="shareLink"><img src="/assets/whatsapp.svg" alt=""></a></li>
-            <li><a href="#" class="shareLink"><img src="/assets/facebook.svg" alt=""></a></li>
-            <li><a href="#" class="shareLink"><img src="/assets/email.svg" alt=""></a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="recommendations">
-  <h2>You Might Also Like</h2>
-  <%- include('./snippets/list-products.ejs', { products: recommendedProducts, empty: "No products to recommend." }) %>
-</div>
-
-<script>
-  new Splide( '.splide', {
-    perPage: 3,
-    arrows: false,
-    pagination: false,
-    autoWidth: true,
-    perMove: 1,
-  }).mount();
-</script>
 
 <style>
 
@@ -126,44 +60,111 @@
   .recommendations {
     margin-top: 80px;
   }
-  .splide__slide {
-    height: 300px;
+
+
+  .picture {
+    height: 400px;
   }
 
-  .queuePicture2 {
-    height: 100%;
-    margin-right: 16px;
+  .pictureLink {
+    margin-right: 20px;
   }
-
-  .splide {
-    margin-bottom: 40px;
+  
+  .pictureLink:last-child {
+    margin-right: 0;
   }
-
-  .desktopPicture {
-    width: 100%;
-    margin-bottom: 32px;
-  }
-
-  .imagesColumn {
-    padding-right: 12px;
-  }
-
-  .detailsColumn {
-    position: relative;
-    padding-left: 12px;
-  }
-
-  .stickyElement {
-    position: sticky;
-    top: 60px;
-  } 
 
   @media screen and (max-width: 776px) {
     .narrowScreen {
       display: block;
     }
   }
+
+  .currentImage {
+    width: 100%;
+    padding-bottom: 100%;
+    background-size: cover;
+    background-position: center;
+    background-color: blueviolet;
+    border-radius: 4px;
+
+  }
+
+  .thumbnailImageContainer {
+    margin-top: 8px;
+  }
+
+  .thumbnailImage {
+    border-radius: 4px;
+    display: inline-block;
+    width: 66px;
+    height: 66px;
+    margin-right: 8px;
+    background-size: cover;
+    background-position: center;
+  }
+
 </style>
+
+<div class="row">
+  <div class="col-md-6 imageColumn">
+    <div class="currentImage" style="background-image: url('<%= product.imagePaths[0] %>');"></div>
+    <% if (product.imagePaths?.length > 1) { %>
+      <div class="thumbnailImageContainer">
+        <% product.imagePaths.forEach((imagePath, index) => { %>
+          <div class="thumbnailImage" data-image="<%= imagePath%>" style="background-image: url('<%= imagePath%>');"></div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+  <div class="col-md-6 detailsColumn">
+    <div class="stickyElement">
+      <h2 class="productTitle"><%= product.title %></h2>
+
+      <p class="price">
+        $ <%= product.price %>
+        <% if (product.compareAt) { %>
+        <span class="compareAt">$<%= product.compareAt %></span>
+        <% } %>
+      </p>
+
+      <p><%= product.shippingCost == 0? 'Free Shipping' : `+ $${product.shippingCost} shipping` %></p>
+      <p><%- product.description %></p>
+
+      <p>Stock: <%= product.stock == 0? 'Sold out' : product.stock %></p>
+      <% if (product.stock > 0) { %>
+        <%- include('../partials/addToCart.ejs') %>
+      <% } else { %>
+        <button class="primary" disabled>Sold out</button>
+      <% } %>
+      
+      <p>Any question? Call us at <a href="tel:(773) 096 4084">(773) 096 4084</a> or write us an email at <a href="mailto:sales@secondly.store">sales@secondly.store</a>.</p>
+      <div class="share">
+        <p>You know who will like it?</p>
+        <ul class="shareList">
+          <li><a href="#"class="shareLink"><img src="/assets/whatsapp.svg" alt=""></a></li>
+          <li><a href="#" class="shareLink"><img src="/assets/facebook.svg" alt=""></a></li>
+          <li><a href="#" class="shareLink"><img src="/assets/email.svg" alt=""></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const currentImage = $('.currentImage')
+  $('.thumbnailImage').hover(event => {
+    const imageUrl = $(event.target).data('image')
+    currentImage.css("background-image", `url('${imageUrl}')`)
+
+  })
+</script>
+
+<div class="recommendations">
+  <h2>You Might Also Like</h2>
+  <%- include('./snippets/list-products.ejs', { products: recommendedProducts, empty: "No products to recommend." }) %>
+</div>
+
 <%- include('../partials/store-tail.ejs') %>
 
 
