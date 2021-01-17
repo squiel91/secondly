@@ -1,65 +1,274 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link rel="stylesheet" href="/bootstrap.css">
-    <link href="/assets/styles.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Alata&display=swap" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <title><%= PREFERENCES.storeName %></title>
-    <style>
-      .logo-title-container {
-        display: flex;
-        align-items: center;
-      }
-    
-      .logo {
-        width: 60px;
-        margin-right: 12px;
-      }
-    
-      h1 {
-        margin: 0em;
-        font-family: 'Alata', sans-serif;
-        font-size: 3em;
-      }
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title><%= PREFERENCES.title %> Manage Area</title>
+      <meta name="description" content="The straight-forward e-commerce platform for selling your products"></head>
+      <link rel="stylesheet" href="/bootstrap.css">
+      <link href="/assets/styles.css" rel="stylesheet">
+      <link rel="preconnect" href="https://fonts.gstatic.com">
+      <link href="https://fonts.googleapis.com/css2?family=Alata&display=swap" rel="stylesheet">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
       
-      nav ul {
-        display: flex;
-        list-style-type: none;
-        padding: 0;
-      }
-    
-      nav {
-        padding-bottom: 20px;
-      }
-    
-      nav li {
-        margin-right: 20px;
-      }
-    
-      a {
-        color: black;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <nav>
-        <ul>
-          <li><a href="/admin">Dashboard</a></li>
-          <li><a href="/admin/customize">Customize</a></li>
-          <li><a href="/admin/categories">Categories</a></li>
-          <li><a href="/admin/products">Products</a></li>
-          <li><a href="/admin/orders">Orders</a></li>
-          <li><a href="/admin/users">Users</a></li>
-          <li><a href="/admin/pages">Pages</a></li>
-          <li><a href="/" target="_blank">Live store</a></li>
-        </ul>
-        <div class="logo-title-container">
-          <img class="logo" src="/assets/hands-high-five-ol-if-512.png">
-          <h1><%= PREFERENCES.storeName %></h1>
-        </div>
-      </nav>
+      <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+      <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+      <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+      <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+      <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+      <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+      <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+      <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+      <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+      <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+      <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+      <link rel="manifest" href="/manifest.json">
+      <meta name="msapplication-TileColor" content="#ffffff">
+      <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+      <meta name="theme-color" content="#ffffff">
+  
+      <style>
+  
+        body {
+          --mobile: 700px;
+        }
+  
+        a.logo-title-link {
+          color: inherit; /* blue colors for links too */
+          text-decoration: inherit;
+          color: black;
+          display: flex;
+          align-items: center;
+        }
+        
+        .logo {
+          width: 60px;
+          margin-right: 12px;
+          margin-bottom: 10px;
+        }
+      
+        .topMenu {
+          display: flex;
+          flex-wrap: nowrap;
+          align-items: center;
+          margin-top: 10px;
+        }
+  
+        .topMenu .menuItem {
+          padding: 8px 0px 8px 0px;
+          margin-left: 20px;
+          flex-shrink: 0;
+        }
+  
+        .desktop-menu {
+          display: flex; 
+          flex-grow: 1;
+          align-items: flex-start;
+        }
+  
+        nav {
+          padding-bottom: 40px;
+          position: relative;
+        }
+  
+        a[href="/openStore"] {
+          display: flex;
+          align-items: center
+        }
+  
+        .openStore, .menuIcon {
+          width: 26px;
+          margin-right: 6px;
+        }
+  
+        .responsiveSearchBar {
+          flex-grow: 1;
+          margin: 0 20px 0 32px;
+        }
+  
+        .separator {
+          flex-grow: 1;
+          height: 10px;
+        }
+  
+        .collapsableMenu {
+          display: none;
+        }
+  
+        .collapsableMenu.open {
+            background-color: white;
+            display: block !important;
+            position: absolute;
+            margin-top: 0px;
+            padding: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 0.9px 2.2px rgba(0,0,0,.02), 0 2.2px 5.3px rgba(0,0,0,.028), 0 4.1px 10px rgba(0,0,0,.035), 0 7.4px 17.9px rgba(0,0,0,.042), 0 13.8px 33.4px rgba(0,0,0,.05), 0 33px 80px rgba(0,0,0,.07);
+            opacity: 0;
+            transition: all 0.2s;
+            z-index: 2;
+            min-width: 200px;
+          }
+  
+          .collapsableMenu.left {
+            right: 0;
+          }
+  
+          .collapsableMenu a.menuItem {
+            display: block;
+            margin-left: 0;
+            padding: 10px 30px;
+          }
+  
+          .collapsableMenu .titleSeparator {
+            padding: 25px 30px 5px 30px;
+            font-size: small;
+            color: gray;
+          }
+  
+          .menuOverlay {
+            display: none;
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.115);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+          }
+  
+        @media screen and (max-width: 1200px) {
+          .hideOnLarge {
+            display: none;
+          }  
+        }
+  
+        @media screen and (max-width: 992px) {
+          .topMenu {
+            flex-wrap: wrap;
+          }
+          
+          .responsiveSearchBar {
+            margin: 8px 0 0 0;
+            order: 1;
+            flex-basis: 100%;
+          }
+  
+          .separator {
+            display: block;
+          }
+  
+          .logo {
+            width: 50px;
+          }
+  
+          /* Category list */
+          .positionRelative {
+            position: relative;
+          }
+  
+          .collapsableMenu.open {
+            width: 100%;
+          }
+  
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <nav>
+          <div class="topMenu">
+            <a class="logo-title-link" href="/admin">
+              <img class="logo" src="/assets/hands-high-five-ol-if-512.png">
+              <h1><%= PREFERENCES.storeName %></h1>
+            </a>
+            <div class="separator"></div>
+            <a class="menuItem hideOnLarge" href="/admin">Dashboard</a>
+            <a class="menuItem hideOnLarge" href="/admin/customize">Customize</a>
+            <a class="menuItem hideOnLarge" href="/admin/categories">Categories</a>
+            <a class="menuItem hideOnLarge" href="/admin/products">Products</a>
+            <a class="menuItem hideOnLarge" href="/admin/orders">Orders</a>
+            <a class="menuItem hideOnLarge" href="/admin/users">Users</a>
+            <a class="menuItem hideOnLarge" href="/admin/pages">Pages</a>
+            <div class="menuItem openStore pseudo-a">
+              <a href="/">
+                <svg xmlns="http://www.w3.org/2000/svg" style="position: relative; bottom: 2px;" width="24" height="24" fill="currentColor" class="bi bi-shop-window" viewBox="0 0 16 16">
+                  <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.371 2.371 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976l2.61-3.045zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0zM1.5 8.5A.5.5 0 0 1 2 9v6h12V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5zm2 .5a.5.5 0 0 1 .5.5V13h8V9.5a.5.5 0 0 1 1 0V13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a.5.5 0 0 1 .5-.5z"/>
+                </svg>
+              </a>
+            </div>
+            <div class="menuItem pseudo-a d-md-block d-xl-none">
+              <div class="toggleMenu">
+                <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="menuIcon" viewBox="0 0 100 100">
+                  <style type="text/css">
+                    .menuLines{
+                      fill:none;
+                      stroke-width:8;
+                      stroke-linecap:round;
+                      stroke-linejoin:round;
+                    }
+                  </style>
+                  <line class="menuLines" x1="90.1" y1="21.3" x2="33.8" y2="21.3"/>
+                  <line class="menuLines" x1="90.1" y1="48.6" x2="15.3" y2="48.6"/>
+                  <line class="menuLines" x1="90.1" y1="75.9" x2="44.8" y2="75.9"/>
+                </svg>
+              </div>
+              <div class="collapsableMenu positionRelative left">
+                <a class="menuItem" href="/admin">Dashboard</a>
+                <a class="menuItem" href="/admin/customize">Customize</a>
+                <a class="menuItem" href="/admin/categories">Categories</a>
+                <a class="menuItem" href="/admin/products">Products</a>
+                <a class="menuItem" href="/admin/orders">Orders</a>
+                <a class="menuItem" href="/admin/users">Users</a>
+                <a class="menuItem" href="/admin/pages">Pages</a>
+              </div>
+              <div class="menuOverlay"></div>
+            </div>
+          </div>
+          <script>
+            $('#searchBar').on('keypress', event => {
+              const query = $(event.target).val() 
+              if(event.which == 13 && query) {
+                window.location.replace(`/search?q=${query}`) 
+              }
+            })
+  
+            function openMenu(collapsable) {
+              const menuOverlay = collapsable.next()
+              menuOverlay.fadeIn(200)
+              collapsable.addClass('open')
+              setTimeout(function() {
+                collapsable.css("opacity", '1');
+                collapsable.css("margin-top", '20px');
+              }, 0)
+            }
+  
+            function closeMenu(collapsable) {
+              const menuOverlay = collapsable.next()
+              menuOverlay.fadeOut(200)
+              collapsable.css("opacity", '0');
+              collapsable.css("margin-top", '0px');
+              setTimeout(function() {
+                collapsable.removeClass('open')
+              }, 200)
+            }
+  
+            $('.toggleMenu').click(event => {
+              let collapsable
+              if ($(event.target).hasClass('toggleMenu'))
+                collapsable = $(event.target).next()
+              else
+                collapsable = $(event.target).parent().next()
+              if (!collapsable.hasClass('open')) {
+                openMenu(collapsable)
+  
+                collapsable.next().click((event) => {
+                  closeMenu($(event.target).prev())
+                })
+              } else {
+                closeMenu(collapsable)
+              }
+            })
+          </script>
+        </nav>
