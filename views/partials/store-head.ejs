@@ -41,6 +41,7 @@
         color: black;
         display: flex;
         align-items: center;
+        flex-shrink: 0;
       }
       
       .logo {
@@ -96,48 +97,49 @@
 
       .collapsableMenu {
         display: none;
+        margin-top: 0px;
+        padding: 15px 0;
+        border-radius: 8px;
+        box-shadow: 0 0.9px 2.2px rgba(0,0,0,.02), 0 2.2px 5.3px rgba(0,0,0,.028), 0 4.1px 10px rgba(0,0,0,.035), 0 7.4px 17.9px rgba(0,0,0,.042), 0 13.8px 33.4px rgba(0,0,0,.05), 0 33px 80px rgba(0,0,0,.07);
+        opacity: 0;
+        transition: all 0.2s;
+        z-index: 2;
+        min-width: 200px;
+        background-color: white;
       }
 
       .collapsableMenu.open {
-          background-color: white;
-          display: block !important;
-          position: absolute;
-          margin-top: 0px;
-          padding: 15px 0;
-          border-radius: 8px;
-          box-shadow: 0 0.9px 2.2px rgba(0,0,0,.02), 0 2.2px 5.3px rgba(0,0,0,.028), 0 4.1px 10px rgba(0,0,0,.035), 0 7.4px 17.9px rgba(0,0,0,.042), 0 13.8px 33.4px rgba(0,0,0,.05), 0 33px 80px rgba(0,0,0,.07);
-          opacity: 0;
-          transition: all 0.2s;
-          z-index: 2;
-          min-width: 200px;
-        }
+        position: absolute;
+        display: block;
+      }
 
-        .collapsableMenu.left {
-          right: 0;
-        }
+      .collapsableMenu.left {
+        right: 0;
+      }
 
-        .collapsableMenu a.menuItem {
-          display: block;
-          margin-left: 0;
-          padding: 10px 30px;
-        }
+      .collapsableMenu a.menuItem {
+        display: block;
+        margin-left: 0;
+        padding: 10px 30px;
+      }
 
-        .collapsableMenu .titleSeparator {
-          padding: 25px 30px 5px 30px;
-          font-size: small;
-          color: gray;
-        }
+      .collapsableMenu .titleSeparator {
+        padding: 25px 30px 5px 30px;
+        font-size: small;
+        color: gray;
+      }
 
-        .menuOverlay {
-          display: none;
-          position: fixed;
-          background-color: rgba(0, 0, 0, 0.115);
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 1;
-        }
+      .menuOverlay {
+        display: none;
+        position: fixed;
+        background-color: rgba(0, 0, 0, 0.115);
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+        transition: opacity 0.2s;
+      }
 
       @media screen and (max-width: 1200px) {
         .hideOnLarge {
@@ -182,7 +184,7 @@
         <svg style="margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
           <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
         </svg>
-        Manage the store    
+        Manage the store  
       </a>
     <% } %>
     <div class="container">
@@ -202,8 +204,8 @@
               <a class="menuItem hideOnLarge <%= menuItem.classes %>" href="<%= menuItem.link %>"><%= menuItem.text %></a>
             <% })
           } %>
-          <div class="menuItem pseudo-a hideOnLarge positionRelative">
-            <div class="toggleMenu">
+          <div class="menuItem hideOnLarge positionRelative">
+            <div class="toggleMenu pseudo-a">
               Categories
               <svg style="width: 16px; margin-top: -2px; margin-left: 2px;" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66.33 41.46">
                 <defs>
@@ -250,8 +252,8 @@
               <%= cartItemQty > 0? ' (' + cartItemQty + ')' : '' %>
             </a>
           </div>
-          <div class="menuItem pseudo-a d-md-block d-xl-none">
-            <div class="toggleMenu">
+          <div class="menuItem d-md-block d-xl-none">
+            <div class="toggleMenu pseudo-a">
               <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="menuIcon" viewBox="0 0 100 100">
                 <style type="text/css">
                   .menuLines{
@@ -289,6 +291,9 @@
           </div>
         </div>
         <script>
+
+          let timeout = null
+
           $('#searchBar').on('keypress', event => {
             const query = $(event.target).val() 
             if(event.which == 13 && query) {
@@ -300,7 +305,7 @@
             const menuOverlay = collapsable.next()
             menuOverlay.fadeIn(200)
             collapsable.addClass('open')
-            setTimeout(function() {
+            timeout = setTimeout(function() {
               collapsable.css("opacity", '1');
               collapsable.css("margin-top", '20px');
             }, 0)
@@ -311,12 +316,13 @@
             menuOverlay.fadeOut(200)
             collapsable.css("opacity", '0');
             collapsable.css("margin-top", '0px');
-            setTimeout(function() {
+            timeout = setTimeout(function() {
               collapsable.removeClass('open')
             }, 200)
           }
 
           $('.toggleMenu').click(event => {
+            clearTimeout(timeout)
             let collapsable
             if ($(event.target).hasClass('toggleMenu'))
               collapsable = $(event.target).next()

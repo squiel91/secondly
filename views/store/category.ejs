@@ -1,6 +1,10 @@
 <%- include('../partials/store-head.ejs') %>
 <h1 class="categoryTitle lead underline"><%= category.title %></h1>
-<div class="store__category__description"><%- category.description %></div>
+<% if (category.description) { 
+  console.log(category.description) %>
+
+  <div class="store__category__description"><%- category.description %></div>
+<% } %>
 <%- include('./snippets/list-products.ejs', { products: category.products, empty: "There are no products in this category yet!" }) %>
 
 <%- include('../partials/store-tail.ejs') %>
