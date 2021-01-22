@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.get("/gallery", galleryController.getGallery)
 router.post("/gallery", upload, galleryController.postGallery)
-router.patch("/:id", galleryController.patchGallery)
-router.delete("/:id", galleryController.deleteGallery)
+router.patch("/:imageId", galleryController.patchGallery)
+router.delete("/:imageId", galleryController.deleteGallery)
 
 module.exports = router

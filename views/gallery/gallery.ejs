@@ -20,7 +20,7 @@
       method="post"
       enctype="multipart/form-data"
     >
-    <input type="file" name="gallery" onchange="form.submit()" />
+    <input type="file" name="image" id="image" onchange="gallery()"/>
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     </form>
   </div>
@@ -28,12 +28,12 @@
 
 
 <h2>Gallery</h2>
-<% if (datas && datas.length > 0) { %>
-  <% for (let data of datas) { %>
+<% if (images && images.length > 0) { %>
+  <% images.forEach(image => { %>
     <div class="col-md-3 imageColumn">
-      <div class="currentImage" style="background-image: url('<%= data.src %>');"></div>
+      <div class="currentImage" style="background-image: url('<%= image.src %>');"></div>
     </div>
-    <% } %>
+    <% }) %>
 <% } else { %>
   <p>You don't have any images yet!</p>
 <% } %>
@@ -45,3 +45,27 @@
 </style> 
 
 <%- include('../partials/admin-tail.ejs') %>
+
+<script>
+  function gallery() {
+    const fileInput = document.querySelector('#image') ;
+    const formData = new FormData();
+    formData.append('image', fileInput.files[0]);
+    if (image) { 
+      fetch('/gallery', {
+        method: 'POST',
+        body: formData
+      })
+        .then((response) => {
+          response.json()
+          location.reload()
+        })
+        .then(body => {
+          console.log(body)
+        })
+        .catch(function(error) {
+          console.log(error)
+        })
+    }
+  }
+</script>

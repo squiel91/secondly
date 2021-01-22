@@ -21,6 +21,6 @@ const fileStorage = multer.diskStorage({
     }
   }
   
-  const upload = multer({ storage: fileStorage, fileFilter }).single('gallery')
+  const upload = multer({ storage: fileStorage, fileFilter }).single('image')
 
   module.exports = upload

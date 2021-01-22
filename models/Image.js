@@ -3,9 +3,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const imageSchema = new Schema({
-  name: {
-    type: String,
-  },
+  name: String,
   src: {
     type: String,
     required: true
