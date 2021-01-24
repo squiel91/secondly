@@ -1,71 +1,220 @@
-<%- include('../partials/admin-head.ejs') %> 
-<style>
-  .currentImage {
-    width: 100%;
-    padding-bottom: 100%;
-    background-size: cover;
-    background-position: center;
-    background-color: blueviolet;
-    border-radius: 4px;
-  }
-</style>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery - Secondly</title>
+    <link rel="stylesheet" href="/bootstrap.css">
+    <link href="/assets/styles.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Alata&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
 
-<div class="row">
-  <div class="col-md-6">
-    <h2>Image Gallery</h2>
-    <form
-      action="/gallery?_csrf=<%= csrfToken %>"
-      method="post"
-      enctype="multipart/form-data"
-    >
-    <input type="file" name="image" id="image" onchange="gallery()"/>
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    </form>
-  </div>
-</div>
+      .imagesGallery {
+        border-left: 1px solid lightgray;
+        border-top: 1px solid lightgray;
+      }
 
+      .image {
+        position: relative;
+        width: 100%;
+        padding-bottom: 100%;
+        background-size: cover;
+        background-position: center;
+        border-right: 1px solid lightgray;
+        border-bottom: 1px solid lightgray;
+      }
 
-<h2>Gallery</h2>
-<% if (images && images.length > 0) { %>
-  <% images.forEach(image => { %>
-    <div class="col-md-3 imageColumn">
-      <div class="currentImage" style="background-image: url('<%= image.src %>');"></div>
+      .imagesGallery .image button.edit {
+        display: none;
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+      }
+
+      .imagesGallery .image .checked {
+        display: none;
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background-color: deepskyblue;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+      }
+
+      .imagesGallery.editMode .image button.edit,
+      .imagesGallery .image.selected .checked {
+        display: block;
+      }
+
+    </style>
+  </head>
+  <body style="padding: 12px;">
+    <div style="display: flex; flex-direction: column;">
+      <header>
+        <div style="display: flex; align-items: center;">
+          <h2 style="flex-grow: 1;"><button onclick="parent.closeGallery()">X</button>  Image Gallery</h2>
+          <input type="checkbox" onchange="toggleEditMode(event)" id="edit"><label for="edit">Edit mode</label>
+          <input type="file" name="image" id="imageUpload" style="display: none;" onchange="uploadImage(event)"/>
+        </div>
+      </header>
+      <div class="imagesGallery row" style="flex-grow: 1; margin-left: 0; margin-right: 0;">
+        <div class="col-lg-2 col-md-3 col-4 uploadNew" style="padding-left: 0; padding-right: 0;">
+          <div class="image" onclick="$('#imageUpload').click()">
+            <div style="position: absolute; top: 0; bottom: 0; right: 0; left: 0; display: flex; align-items: center; justify-content: center;">
+              Click to upload a new image
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer>
+        <button class="primary" onclick="returnSelection()">Select</button>
+      </footer>
     </div>
-    <% }) %>
-<% } else { %>
-  <p>You don't have any images yet!</p>
-<% } %>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search)
+      preselectedProdutcIds = urlParams.get('selected')?.split(',') || []
 
-<style>
-  form {
-    display: inline
-  }
-</style> 
+      var selectedImaged = []
+      var editMode = false
 
-<%- include('../partials/admin-tail.ejs') %>
+      const imageIndex = {}
 
-<script>
-  function gallery() {
-    const fileInput = document.querySelector('#image') ;
-    const formData = new FormData();
-    formData.append('image', fileInput.files[0]);
-    if (image) { 
-      fetch('/gallery', {
-        method: 'POST',
-        body: formData
-      })
+      load()
+
+      function returnSelection() {
+        // Convert the index to a list and returns only the images that are selected
+        const selectedImages = Object.values(imageIndex).filter(imageIndexRecord => imageIndexRecord.selected).map(imageIndexRecord => imageIndexRecord.image)
+        parent.selectedImages(selectedImages)
+      }
+
+      function appendImage(image, selected) {
+        const newElem = $(`
+          <div class="col-lg-2 col-md-3 col-4" style="padding-left: 0; padding-right: 0;">
+            <div 
+              data-image-id="${image.id}"
+              class="image ${selected? 'selected' : ''}" 
+              onclick="toggleImageSelection(event)"
+              style="background-image: url('${image.src}');"
+            >
+              <div class="checked"></div>
+            </div>
+          </div>`).insertAfter('.imagesGallery .uploadNew')
+      }
+  
+      function load() {
+        fetch('/gallery', {
+          method: 'GET'
+        })
+          .then((response) => {
+            return response.json()
+          })
+          .then(body => {
+            if (body.success) {
+              body.images.forEach(image => {
+                const isSelected = preselectedProdutcIds.includes(image.id)
+                imageIndex[image.id] = {
+                  selected: isSelected,
+                  image
+                }
+                appendImage(image, isSelected)
+              })
+            } else {
+              if (body.error) {
+                alert(body.message || 'There was an error uploading the image')
+                console.log('There was an error')
+              }
+            }
+          })
+          .catch(function(error) {
+            alert('Ups! There was an error uploading the image')
+            console.log(error)
+          })
+      }
+
+      function toggleImageSelection(event) {
+        if (!editMode) {
+          const imageId = $(event.target).data('image-id')
+          if (!imageIndex[imageId].selected) {
+            imageIndex[imageId].selected = true
+            $(event.target).addClass('selected')
+          } else {
+            imageIndex[imageId].selected = false
+            $(event.target).removeClass('selected')
+          }
+        } else {
+          // TODO: take me to image edition panel
+          deleteImage(event)
+        }
+      }
+
+      function toggleEditMode(event) {
+        editMode = $(event.target).prop('checked')
+        if (editMode) {
+          $('.imagesGallery').addClass('editMode')
+        } else {
+          $('.imagesGallery').removeClass('editMode')
+        }
+      }
+
+      function editImage(event) {
+        alert('Not yet implemented!')
+      }
+
+      function deleteImage(event) {
+        const imageId = $(event.target).data('image-id')
+        fetch(`/gallery/${imageId}?_csrf=<%= csrfToken %>`, {
+          method: 'DELETE',
+          credentials: 'same-origin'
+        })
         .then((response) => {
-          response.json()
-          location.reload()
+          return response.json()
         })
         .then(body => {
-          console.log(body)
+          $(event.target).parent().remove()
+          delete imageIndex[imageId]
+          parent.removeImageIfSelected(imageId)
         })
         .catch(function(error) {
+          alert('Ups! There was an error deleting the image')
           console.log(error)
         })
-    }
-  }
-</script>
+      }
+
+      function uploadImage(event) {
+        const fileInput = event.target;
+        const formData = new FormData();
+        formData.append('image', fileInput.files[0]);
+        fetch('/gallery?_csrf=<%= csrfToken %>', {
+          method: 'POST',
+          body: formData
+        })
+          .then((response) => {
+            return response.json()
+          })
+          .then(body => {
+            if (body.success) {
+              let image = body.image
+              imageIndex[image.id] = {
+                selected: true,
+                image
+              }
+              appendImage(image, true)
+            } else {
+              if (body.error) {
+                alert(body.message || 'There was an error uploading the image')
+                console.log('There was an error')
+              }
+            }
+          })
+          .catch(function(error) {
+            alert('Ups! There was an error uploading the image')
+            console.log(error)
+          })
+      }
+    </script>
+  </body>
+</html>

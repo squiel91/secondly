@@ -13,7 +13,16 @@ const productSchema = new Schema({
     type: String,
     index: true
   },
-  imagePaths: [String],
+  images: [
+    {
+      id: String,
+      src: {
+        type: String,
+        required: true
+      },
+      alt: String
+    }
+  ],
   price: {
     type: Number,
     require: true
@@ -36,7 +45,7 @@ const productSchema = new Schema({
 productSchema.methods.categories = function(categoriesIds) {
   if (categoriesIds) {
     return Promise.all(
-      categoriesIds.map(categoryId => Category.findByIdAndUpdate(categoryId, {'$addToSet': { products: this._id } }))
+      categoriesIds.map(categoryId => Category.findByIdAndUpdate(categoryId, { '$addToSet': { products: this._id } }))
     )
   } else {
     // this should be optimized having the categories in the mirrored in the products

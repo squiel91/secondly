@@ -8,6 +8,6 @@ const subscriptionSchema = new Schema({
     require: true,
     unique: true
   }
-}, { timestamps: { createdAt: 'created' } })
+}, { timestamps: true })
 
 module.exports = mongoose.model('Subscription', subscriptionSchema)

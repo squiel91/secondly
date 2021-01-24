@@ -5,7 +5,6 @@ const router = express.Router();
 const storeController = require("../controllers/store-controller");
 
 router.get("/", storeController.getHomepage);
-router.get("/products", storeController.getProducts);
 router.get("/products/:productId", storeController.getProductDetails);
 router.get("/cart", storeController.getCart);
 router.get("/cart/shipping", storeController.getCartShipping);

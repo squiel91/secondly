@@ -29,8 +29,8 @@ router.post('/categories/:categoryHandle/delete', adminController.postDeleteCate
 router.get('/products', adminController.getProducts)
 router.get('/products/new', adminController.getCreateProduct)
 router.get('/products/:productId', adminController.getEditProduct)
-router.post('/products', adminController.productFileUpload, adminController.postProduct)
-router.post('/products/:productId/edit', adminController.productFileUpload, adminController.postProduct)
+router.post('/products', adminController.postProduct)
+router.post('/products/:productId/edit', adminController.postProduct)
 router.post('/products/:productId/delete', adminController.deleteProduct)
 
 

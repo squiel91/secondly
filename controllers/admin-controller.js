@@ -1,14 +1,15 @@
 const fs = require('fs')
-const multer = require('multer')
 
 const Product = require('../models/Product')
+const Image = require('../models/Image')
 const Page = require('../models/Page')
 const Order = require('../models/Order')
 const Category = require('../models/Category')
 const rootPath = require('../utils/root-path')
 const prefills = require('../utils/prefills')
 const User = require('../models/User')
-const { isNull } = require('util')
+const imageTemplate = require('../templates/images')
+
 
 // General
 
@@ -215,51 +216,21 @@ exports.getCreateProduct = (req, res, next) => {
     })
 }
 
-exports.getEditProduct = (req, res, next) => {
-  Product.findById(req.params.productId)
-    .then(product => {
-      this.product = product
-      return Category.find()
-    })
-    .then(allCategories => {
-      const prefill = prefills.retrive(req);
-      (prefill._returnStatus? res.status(prefill._returnStatus) : res).render('admin/product.ejs', { 
-        prefill,
-        product: this.product, 
-        allCategories: allCategories,
-      })
-    })
-    .catch(err => console.log(err))
+exports.getEditProduct = async (req, res, next) => {
+  const product = await Product.findById(req.params.productId)
+  const allCategories = await Category.find()
+  const prefill = prefills.retrive(req);
+  (prefill._returnStatus? res.status(prefill._returnStatus) : res).render('admin/product.ejs', { 
+    prefill,
+    product: product, 
+    allCategories: allCategories
+  })
 }
 
-const fileStorage = multer.diskStorage({
-  destination(req, file, callback) {
-    callback(null, 'images')
-  },
-  filename(req, file, callback) {
-    callback(null, Date.now().toString() + '-' + file.originalname)
-  }
-})
-
-const fileFilter = (req, file, callback) => {
-  if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg')
-    callback(null, true)
-  else callback(null, false)
-}
-
-const upload = multer({ storage: fileStorage, fileFilter })
-
-exports.productFileUpload = upload.fields([
-  { name: 'image1', maxCount: 1 },
-  { name: 'image2', maxCount: 1 },
-  { name: 'image3', maxCount: 1 },
-  { name: 'image4', maxCount: 1 },
-  { name: 'image5', maxCount: 1 }
-])
-
-exports.postProduct = (req, res, next) => {
-  const files = req.files
-
+exports.postProduct = async (req, res, next) => {
+  
+  // TODO: move all these validation to another place outside this controller
+  //////////////////////////////////////////////////// VALIDATION
   allValid = true
   const prefill = {}
   Object.entries(req.body).forEach(entry => prefill[entry[0]] = { value: entry[1] })
@@ -317,66 +288,63 @@ exports.postProduct = (req, res, next) => {
     allValid = false
     prefill.stock.error = 'Stock must be 0 or more'
   }
+  //////////////////////////////////////////////////// VALIDATION
 
   if (!allValid) {
     prefill._returnStatus = 422
     req.flash('prefill', prefill)
     res.redirect(productId? `/admin/products/${req.params.productId}` : '/admin/products/new') // here there is a folk
+    return
+  }  
+  let product;
+
+  if (!productId) {
+    // TODO: new product and Images
+    const newProduct = new Product({
+      title: title,
+      description: description,
+      price: price,
+      compareAt: compareAt,
+      shippingCost: shippingCost,
+      stock: stock,
+      publish: publish
+    })
+    product = await newProduct.save()
+    await product.categories(req.body.categories)
+    await Image.updateProductImages(product, req.body.images)
   } else {
+    product = await Product.findById(req.params.productId)
+    
+    product.title = title
+    product.price = price
+    product.compareAt = compareAt
+    product.shippingCost = shippingCost
+    product.stock = stock
+    product.description = description
+    product.publish = publish
+    
+    // maybe I can save it after all just once
+    product = await product.save()
 
-    let productPromise
+    await Image.updateProductImages(product, req.body.images)
 
-    if (!productId) {
-      productPromise = new Product({
-        title: title,
-        description: description,
-        imagePaths: files? Object.values(files).map(fileArray => '/' + fileArray[0].destination + '/' + fileArray[0].filename) : [],
-        price: price,
-        compareAt: compareAt,
-        shippingCost: shippingCost,
-        stock: stock,
-        publish: publish
-      }).save()
-        .then(product => product.categories(req.body.categories))
-    } else {
-      productPromise = Product.findById(req.params.productId)
-        .then(product => {
-          product.title = title
-          product.price = price
-          product.compareAt = compareAt
-          product.shippingCost = shippingCost
-          product.stock = stock
-          product.description = description
-          product.publish = publish
-          this.product = product 
-          return product.save()
-      })
-        .then(() => this.product.categories())
-        .then(oldCategories => {
-          const oldCategoryIds = oldCategories.map(category => category.id)
-          const newCategoryIds = req.body.categories || []
-          
-          let toAddCategoryIds = newCategoryIds.filter(x => oldCategoryIds.indexOf(x) < 0 )
-          this.toRemoveCategoryIds = oldCategoryIds.filter(x => newCategoryIds.indexOf(x) < 0 )
+    const oldCategories = await product.categories()
+    const oldCategoryIds = oldCategories.map(category => category.id)
+    const newCategoryIds = req.body.categories || []
+    
+    let toAddCategoryIds = newCategoryIds.filter(x => oldCategoryIds.indexOf(x) < 0 )
+    let toRemoveCategoryIds = oldCategoryIds.filter(x => newCategoryIds.indexOf(x) < 0 )
 
-          return Category.updateMany({
-            '_id': { $in: toAddCategoryIds }},
-            {'$push': { products: this.product._id } }
-          )
-        })
-        .then(() => Category.updateMany({
-          '_id': { $in: this.toRemoveCategoryIds }},
-          {'$pull': { products: this.product._id } })
-        )
-    }
-    productPromise
-      .then(() => {
-        res.redirect('/admin/products')
-      })
-      .catch(err => {
-        console.log(err)
-      })
+    await Category.updateMany(
+      { '_id': { $in: toAddCategoryIds }},
+      { '$push': { products: product._id } }
+    )
+    await Category.updateMany(
+      { '_id': { $in: toRemoveCategoryIds } },
+      {'$pull': { products: product._id } }
+    )
   }
+  res.redirect('/admin/products')
 }
 
 exports.deleteProduct = (req, res, next) => {

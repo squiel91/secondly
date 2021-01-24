@@ -6,7 +6,7 @@ exports.isAdmin = (req, res, next) => {
 
 exports.isCustomer = (req, res, next) => {
   if (req.user) {
-    next( )
+    next()
   } else {
     res.redirect('/account')
   }

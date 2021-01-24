@@ -1,12 +1,13 @@
 const express = require("express")
+
 const galleryController = require("../controllers/gallery-controller")
-const upload = require('../upload/index')
+
 const router = express.Router()
 
-
+router.get("/galleryDemo", galleryController.getGalleryDemo)
 router.get("/gallery", galleryController.getGallery)
-router.post("/gallery", upload, galleryController.postGallery)
-router.patch("/:imageId", galleryController.patchGallery)
-router.delete("/:imageId", galleryController.deleteGallery)
+router.post("/gallery", galleryController.saveToFS, galleryController.postGallery)
+router.patch("/gallery/:imageId", galleryController.patchGallery)
+router.delete("/gallery/:imageId", galleryController.deleteGallery)
 
 module.exports = router

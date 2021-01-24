@@ -33,10 +33,10 @@
           <input 
             type="checkbox" 
             name="products[]" 
-            value="<%= product._id %>" id="<%= product._id %>" 
-            <%= category && category.products.indexOf(product._id) >= 0 ? 'checked' : '' %>
+            value="<%= product.id %>" id="<%= product.id %>" 
+            <%= category && category.products.indexOf(product.id) >= 0 ? 'checked' : '' %>
           >
-          <label for="<%= product._id %>"><%= product.title %></label>
+          <label for="<%= product.id %>"><%= product.title %></label>
         </li>
       <% }); %>  
     </ul>

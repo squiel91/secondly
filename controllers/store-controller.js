@@ -43,57 +43,29 @@ exports.getHomepage = async (req, res, next) => {
 
 exports.getCategories = (req, res, next) => {
   let user = req.user
-  Category.find().populate('products').exec((err, categories) => {
+  Category.find().populate('products.images').exec((err, categories) => {
     categories.forEach(category => filterOutUnpublishedProducts(category))
     res.render('store/categories.ejs', { categories })
   })
 }
 
-exports.getCategory = (req, res, next) => {
-  let user = req.user
-  Category.findOne({ handle: req.params.categoryHandle }).populate('products').exec((err, categories) => {
-    filterOutUnpublishedProducts(categories)
-    res.render('store/category.ejs', { category: categories })
-  })
+exports.getCategory = async (req, res, next) => {
+  let categories = await Category.findOne({ handle: req.params.categoryHandle }).populate('products')
+  filterOutUnpublishedProducts(categories)
+  res.render('store/category.ejs', { category: categories })
 }
 
 // Products
 
-exports.getProducts = (req, res, next) => {
-  Product.find({publish: true})
-    .then(products => {
-      con
-      let user = req.user
-   
-      res.render('store/products.ejs', { 
-        products,
-      })
-    })
-    .catch(err => console.log(err))
-}
+exports.getProductDetails = async (req, res, next) => {
+  const product = await Product.findOne({ _id: req.params.productId, publish: true })  
+  if (!product) next()
 
-exports.getProductDetails = (req, res, next) => {
-  Product.findOne({ _id: req.params.productId, publish: true })
-    .then(product => {
-      if (!product) next()
-      console.log(product)
-      this.product = product 
-      Product.find({_id: { $ne: product._id }, publish: true}).limit(4)
-        .then(products => {
-          let user = req.user
-          
-          res.render('store/product.ejs', { 
-            product: this.product,
-            recommendedProducts: products
-          })
-        })
-        .catch(err => console.log(err))
-    })
-    .catch(err => console.log(err))
+  const recommendedProducts = await Product.find({_id: { $ne: product._id }, publish: true}).limit(4)
+  res.render('store/product.ejs', { product, recommendedProducts })
 }
 
 exports.getCart = (req, res, next) => {
-  let cart;
   if (req.user) {
     req.user.populate('cart.product').execPopulate()
       .then(user => {

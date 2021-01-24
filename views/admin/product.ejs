@@ -4,9 +4,14 @@
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="/richtext.min.css">
 
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" integrity="sha512-0bEtK0USNd96MnO4XhH8jhv3nyRF0eK87pJke6pkYf3cM0uDIhNJy9ltuzqgypoIFXw3JSuiy04tVk4AjpZdZw==" crossorigin="anonymous"></script>
+
 <h2>Product Editor</h2>
 
-<form action="/admin/products<%= product ? `/${product._id}/edit` : '' %>?_csrf=<%= csrfToken %>" method="post" enctype="multipart/form-data">
+<form action="/admin/products<%= product ? `/${product._id}/edit` : '' %>" method="post">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <div class="row topPanel">
     <div class="col-sm-12">
       <div class="secondlyValidatableInput  <%= prefill?.title?.error ? 'error' : '' %>"">
@@ -74,13 +79,11 @@
   
   <div>
     <label for="images">Images</label>
-    <ul>
-      <li><input type="file" name="image1"></li>
-      <li><input type="file" name="image2"></li>
-      <li><input type="file" name="image3"></li>
-      <li><input type="file" name="image4"></li>
-      <li><input type="file" name="image5"></li>
-    </ul>
+    <div id="galleryIframe"></div>
+    <div class="selectedImages" id="sortable">
+
+    </div>
+    <button type="button" onclick="loadGallery()">Pick images</button>
   </div>
 
   <div class="previews"></div>
@@ -118,10 +121,73 @@
   .topPanel {
     margin-bottom: 40px;
   }
+
+  #galleryIframe {
+      position: fixed;
+      margin: 20px;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: none;
+  }
+
+  .image-preview {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    background-position: center;
+  }
+
 </style>
 
 <script src="/jquery.richtext.min.js"></script>
 <script>
+
+  let galleryLoaded = false
+
+  const initialImages = <%- JSON.stringify(product?.images || []) %>;
+  selectedImages(initialImages)
+
+  function closeGallery() {
+    $('#galleryIframe').hide();
+  }
+
+  function removeImageIfSelected(imageId) {
+    $(`.selectedImages .image-preview[data-image-id='${imageId}']`).remove()
+  }
+  
+  function selectedImages(images) {
+    closeGallery()
+    console.log(images)
+    $('.selectedImages').empty()
+    images.forEach(image => {
+      $(`<div class="image-preview" data-image-id="${image.id}" style="background-image: url('${image.src}')">
+          <input type="hidden" name="images[]" value="${image.id}">
+        </div>`).appendTo('.selectedImages')
+    })
+    $( "#sortable" ).sortable();
+  }
+
+  function loadGallery() {
+    if (!galleryLoaded) {
+      $('<iframe>', {
+        src: '/gallerydemo?' + (new URLSearchParams({selected: initialImages.map(image => image.id)})).toString(),
+        id:  'gallery',
+        'border-radius': '4px',
+        width: "100%",
+        height: "100%",
+        frameborder: 0,
+        }).appendTo('#galleryIframe');
+  
+      $('#galleryIframe').show()
+      galleryLoaded = true
+    } else {
+      $('#galleryIframe').show()
+    }
+  }
+
   $('textarea#description').richText();
 
   function remove() {

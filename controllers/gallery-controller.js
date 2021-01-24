@@ -1,43 +1,85 @@
+const multer = require("multer")
+const fs = require("fs")
+
+const rootPath = require('../utils/root-path')
 const Image = require('../models/Image')
 
-// get image gallery
+const imageTemplate = require('../templates/images')
+
+exports.getGalleryDemo = async (req, res, next) => {
+    const images = await Image.find().sort({ createdAt : "desc" })
+    res.render('gallery/gallery.ejs', { images })
+}
+
+// Store image with Multer
+const fileStorage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    callback(null, "public/gallery")
+  },
+  filename: (req, file, callback) => {
+    callback(null, `${Date.now()}-${file.originalname}`)
+  }
+})
+
+const fileFilter = (req, file, callback) => {
+  callback(null, ['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype))
+}
+
+exports.saveToFS = multer({ storage: fileStorage, fileFilter }).single('image')
+
 exports.getGallery = async (req, res, next) => {
-    Image.find().then((images)=>{
-        res.render("gallery/gallery.ejs",{images})
-    })
+  const images = await Image.find().sort({ createdAt : "asc" })
+  return res.json({
+    success: true,
+    images: imageTemplate(images)
+  })
 }
 
-// post image into gallery
 exports.postGallery = async (req, res, next) => {
-    
-    var filePath = req.file.path.replace("public","")
-    filePath = filePath.replace(/\\/g, "/")
-        let image = new Image({
-            name: req.file.originalname.trim(),
-            src: filePath.trim(),
-            alt: req.file.fieldname
-        })
+  if (!req.file) 
+    return res.status(400).json({ error: true, message: 'Unsuported type'})
+  
+  var filePath = req.file.path.replace('public','')
+  filePath = filePath.replace(/\\/g, '/')
+  
+  let image = new Image({
+      name: req.file.originalname,
+      src: filePath
+  })
         
-        const newImage = await image.save()
-        res.json({success: true, image: newImage})
+  image = await image.save()
+  res.json({ success: true, image: imageTemplate(image) })
 }
 
-// PATCH gallery API
 exports.patchGallery = async (req, res, next) => {
+    const populatedImage = await  Image.findById(req.params.imageId).populate('products')
+    populatedImage.alt = req.body.alt
+    populatedImage.name = req.body.name
+    
+    for (let product of populatedImage.products) {
+      let updatedProductImage = product.images.find(productImage => {
+        productImage.id === populatedImage.id
+      })
+      updatedProductImage.alt = populatedImage.alt
+      updatedProductImage.name = populatedImage.name
+      await product.save()
+    }
+    await populatedImage.save()
 
-    let imageName = req.body.name
-    let imageAlt = req.body.alt
-    let id = req.params.imageId
-
-    await Image.findByIdAndUpdate(id,{$set:{name: imageName, alt: imageAlt}},{new:true, upsert:true}).then((data)=>{
-        res.json({success: true})
-    })
+    res.json({ success: true, image: imageTemplate(populatedImage) })
 }
 
-// DELETE gallery API
 exports.deleteGallery = async (req, res, next) => {
-    let id = req.params.imageId
-    await Image.findByIdAndDelete(id).then((data)=>{
-        res.json({success: true})
-    })
+  let populatedImage = await Image.findById(req.params.imageId).populate('products')
+  for (let product of populatedImage.products) {
+    product.images = product.images.filter(productImage => productImage.id != populatedImage.id)
+    await product.save()
+  }
+  await Image.findByIdAndDelete(req.params.imageId)
+  fs.unlink(
+    rootPath('public', populatedImage.src),
+    error => { if (error) console.log(error) }
+  )
+
+  res.json({ success: true })
 }

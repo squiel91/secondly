@@ -85,7 +85,7 @@
     padding-bottom: 100%;
     background-size: cover;
     background-position: center;
-    background-color: blueviolet;
+    background-color: #f5f5f5;
     border-radius: 4px;
 
   }
@@ -105,14 +105,13 @@
   }
 
 </style>
-
 <div class="row">
   <div class="col-md-6 imageColumn">
-    <div class="currentImage" style="background-image: url('<%= product.imagePaths[0] %>');"></div>
-    <% if (product.imagePaths?.length > 1) { %>
+    <div class="currentImage" <%- product.images?.length > 0? `style="background-image: url('${product.images[0].src}');"` : '' %>></div>
+    <% if (product.images?.length > 1) { %>
       <div class="thumbnailImageContainer">
-        <% product.imagePaths.forEach((imagePath, index) => { %>
-          <div class="thumbnailImage" data-image="<%= imagePath%>" style="background-image: url('<%= imagePath%>');"></div>
+        <% product.images.forEach((image, index) => { %>
+          <div class="thumbnailImage" data-image="<%= image.src %>" style="background-image: url('<%= image.src %>');"></div>
         <% }) %>
       </div>
     <% } %>
