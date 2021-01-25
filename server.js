@@ -14,6 +14,7 @@ const compression = require("compression")
 const rootPath = require("./utils/root-path")
 
 const accessRoutes = require("./routes/access-routes")
+const accessApiRoutes = require("./routes/access-api-routes")
 const apiRoutes = require("./routes/api-routes")
 const adminRoutes = require("./routes/admin-routes")
 const storeRoutes = require("./routes/store-routes")
@@ -66,7 +67,9 @@ server.set("template engine", "ejs")
 server.use(bodyParser.urlencoded({ extended: true }))
 server.use(bodyParser.json())
 
-server.use(csrf()) // To protect against CSRF attacks
+if(env != 'development'){
+  server.use(csrf()) // To protect against CSRF attacks
+}
 server.use(connectFlash())
 // server.use(helmet())
 server.use(compression())
@@ -79,6 +82,7 @@ server.use(storeRoutes)
 server.use("/api", apiRoutes)
 server.use("/admin", adminRoutes)
 server.use(galleryRoutes)
+server.use("/api/account",accessApiRoutes)
 
 server.use(express.static(rootPath("public")))
 server.use("/images", express.static(rootPath("images")))

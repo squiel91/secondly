@@ -3,6 +3,7 @@
     "MONGO_USER": "node",
     "MONGO_PASSWORD": "T7S5Khn4JHOzpLnV",
     "MONGO_DEFAULT_DATABASE": "shop",
-    "STRIPE_KEY": "strip_key"
+    "STRIPE_KEY": "strip_key",
+    "JWT_SECRET":"secondly"
   }
 }
