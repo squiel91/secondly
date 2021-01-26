@@ -77,12 +77,12 @@ server.use(compression())
 // const accessLogStream = fs.createWriteStream(rootPath('access.log'), {flags: 'a'})
 // server.use(morgan('combined', { stream: accessLogStream }))
 
+server.use("/api/account",accessApiRoutes)
 server.use(accessRoutes)
 server.use(storeRoutes)
 server.use("/api", apiRoutes)
 server.use("/admin", adminRoutes)
 server.use(galleryRoutes)
-server.use("/api/account",accessApiRoutes)
 
 server.use(express.static(rootPath("public")))
 server.use("/images", express.static(rootPath("images")))
