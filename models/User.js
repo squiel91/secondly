@@ -19,21 +19,20 @@ const userSchema = new Schema({
   admin: {
     type: {
       owner: Boolean
-    },
-    default: null
+    }
   },
   passHash: {
     type: String,
     required: true
   },
+  passResetToken: String,
+  passResetExp: Date,
   shippment: {
     address: String,
     state: String,
     city: String,
     zip: String
   },
-  resetToken: String,
-  resetTokenExp: Date,
   cart: [
     {
       product: { 

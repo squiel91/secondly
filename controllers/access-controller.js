@@ -11,9 +11,9 @@ const Category = require('../models/Category')
 
 exports.setupAuth = async (req, res, next) => {
   
-  res.locals.csrfToken = req.csrfToken()
+  res.locals.csrfToken = "disabled in development"  //req.csrfToken()
   res.locals.listedCategories = await Category.find({ listed: true })
-
+  
   if (req.session.userId) {
     req.user = await User.findById(req.session.userId)
     res.locals.user = req.user
