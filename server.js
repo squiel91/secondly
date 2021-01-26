@@ -14,9 +14,11 @@ const compression = require("compression")
 const rootPath = require("./utils/root-path")
 
 const accessRoutes = require("./routes/access-routes")
+const accessApiRoutes = require("./routes/access-api-routes")
 const apiRoutes = require("./routes/api-routes")
 const adminRoutes = require("./routes/admin-routes")
 const storeRoutes = require("./routes/store-routes")
+const storeApiRoutes = require("./routes/store-api-routes")
 const galleryRoutes = require("./routes/gallery-routes")
 const User = require("./models/User")
 const server = express()
@@ -66,7 +68,9 @@ server.set("template engine", "ejs")
 server.use(bodyParser.urlencoded({ extended: true }))
 server.use(bodyParser.json())
 
-server.use(csrf()) // To protect against CSRF attacks
+if(env != 'development'){
+  server.use(csrf()) // To protect against CSRF attacks
+}
 server.use(connectFlash())
 // server.use(helmet())
 server.use(compression())
@@ -74,8 +78,10 @@ server.use(compression())
 // const accessLogStream = fs.createWriteStream(rootPath('access.log'), {flags: 'a'})
 // server.use(morgan('combined', { stream: accessLogStream }))
 
+server.use("/api/account",accessApiRoutes)
 server.use(accessRoutes)
 server.use(storeRoutes)
+server.use("/api/cart",storeApiRoutes)
 server.use("/api", apiRoutes)
 server.use("/admin", adminRoutes)
 server.use(galleryRoutes)
