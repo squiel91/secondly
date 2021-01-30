@@ -1,24 +1,8 @@
-// deprecated
-exports.errorResponse = (name,message) => {
-
-    let FIELD_ERRORS_LIST = {
-        "name":name,
-        "message":message
-    }
-    let errorResponse = {
-        "error": true,
-        "fields": FIELD_ERRORS_LIST
-    }
-    return errorResponse
-}
-
-// deprecated
-exports.successResponse = (user) => {
-  let successResponse = {
-      "success": true,
-      "User": user
-  }
-  return successResponse
+exports._200 = (res, payload) => {
+  return res.json({
+    success: true,
+    ...payload
+  })
 }
 
 exports._400 = (res, name,message) => {

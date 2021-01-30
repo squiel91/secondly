@@ -1,8 +1,9 @@
-const env = process.env.NODE_ENV?.toLowerCase()
+const node_env = process.env.NODE_ENV?.toLowerCase()
 
 module.exports = {
-  raw: env,
-  isDev: !['stagging', 'production'].includes(env),
-  isStag: env == 'stagging',
-  isProd: env == 'production'
+  raw: node_env,
+  isDev: !['stagging', 'production'].includes(node_env),
+  isStag: node_env == 'stagging',
+  isProd: node_env == 'production',
+  port: process.env.PORT || 3000
 }

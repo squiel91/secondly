@@ -288,41 +288,6 @@ exports.getCheckoutFail = (req, res, next) => {
   res.render('store/fail.ejs')
 }
 
-// API
-
-// Subscribe
-
-exports.postSubscribe = (req, res, next) => {
-  let email = req.body.email.toLowerCase().trim()
-  console.log(email)
-  if (validator.validate(email)) {
-    Subscription.findOne({ email })
-      .then(subscriptor => {
-        console.log(subscriptor)
-        if (subscriptor) {
-          res.json({
-            error: 'You are already subscribed!'
-          })
-        } else {
-          let subscriptor = new Subscription({ email })
-          subscriptor.save()
-            .then(() => {
-              res.json({
-                success: true
-              })
-            })
-            .catch(error => {
-              res.json({
-                error: 'Our error! Try again.'
-              })
-            })
-        }
-      })
-  } else res.json({
-    error: 'Invalid email' 
-  }) 
-}
-
 // Search
 
 exports.getSearch = (req, res, next) => {

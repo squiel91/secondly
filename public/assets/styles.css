@@ -182,15 +182,13 @@ input[type="checkbox"] {
 }
 
 .secondlyInput, .secondlyValidatableInput .secondlyInputInner {
+  display: flex;
   width: 100%;
-  border-radius: 0;
   border: none;
-  margin-top: 4px;
-  margin-bottom: 12px;
   background-color: #f5f5f5;
   padding: 15px 25px;
   border-radius: 50px;
-  display: flex;
+  align-items: center;
 }
 
 .secondlyValidatableInput .secondlyInputInner {

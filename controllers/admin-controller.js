@@ -2,13 +2,13 @@ const fs = require('fs')
 
 const Product = require('../models/Product')
 const Image = require('../models/Image')
+const imageTemplate = require('../models//templates/image')
 const Page = require('../models/Page')
 const Order = require('../models/Order')
 const Category = require('../models/Category')
 const rootPath = require('../utils/root-path')
 const prefills = require('../utils/prefills')
 const User = require('../models/User')
-const imageTemplate = require('../templates/images')
 
 
 // General

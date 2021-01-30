@@ -53,17 +53,15 @@ exports.postLogin = async (req, res, next) => {
       const passIsAMatch = await bcrypt.compare(req.body.password, user.passHash)
       if (!passIsAMatch) return stdRes._400(res, 'password', 'The password is incorrect')
       
-      // Time to login the user
+      // Time to log the user in
       req.session.userId = user.id
-      if(!req.body.remember) req.session.cookie.maxAge = 0
+      // if(!req.body.remember) req.session.cookie.maxAge = 0
 
       res.json({ 
         success: true,
         user: userTemplate(user)
       })
-  } catch (error) {
-      stdRes._500(res, error.message)
-  }
+  } catch (error) { stdRes._500(res, error.message) }
 }
 
 exports.postRequestPasswordReset = async (req, res, next) => {

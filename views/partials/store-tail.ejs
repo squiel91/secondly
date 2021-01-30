@@ -82,7 +82,7 @@
         const email = $('input#newsletter').val()
         if (email) { // valid email
           $('.newsletter button').text('Subscribing...').prop('disabled', true)
-          fetch('/subscribe', {
+          fetch('/api/subscribe', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -91,13 +91,12 @@
             body: JSON.stringify({ email, _csrf: '<%= csrfToken %>' })
           })
             .then((response) => {
-              console.log(response)
               return response.json()
             })
             .then(body => {
               console.log(body)
               if (body.error) {
-                throw  new Error(body.error);
+                throw  new Error(body.fields[0].message);
               } else {
                 $('.newsletter-column').html('<p style="font-weight: bold; color: green;">You just subscribed!</p><p>Now you will receive the best deals into your inbox.</p>')
               }

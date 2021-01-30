@@ -4,7 +4,7 @@ const fs = require("fs")
 const rootPath = require('../utils/root-path')
 const Image = require('../models/Image')
 
-const imageTemplate = require('../templates/images')
+const imageTemplate = require('../models/templates/image')
 
 exports.getGalleryDemo = async (req, res, next) => {
     const images = await Image.find().sort({ createdAt : "desc" })

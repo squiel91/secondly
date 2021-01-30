@@ -2,7 +2,6 @@ const express = require('express')
 
 const router = express.Router()
 
-const adminValidator = require('../validators/admin-validator')
 const adminController = require('../controllers/admin-controller')
 
 // General
