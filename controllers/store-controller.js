@@ -239,78 +239,80 @@ exports.getSearch = (req, res, next) => {
 //   }
 // }
 
-// exports.getCheckoutSuccess = (req, res, next) => {
-//   let user = req.user;
+exports.getCheckoutSuccess = async (req, res, next) => {
+  let user = req.user;
 
-//   (req.user? req.user.populate('cart.product').execPopulate() : req.sessionCart.getAll())
-//     .then(fullCart => {
-//       if (req.user) fullCart = fullCart.cart
-//       if (!fullCart || fullCart.length == 0) throw Error('The cart is cannot be empty')
-//       let orderProducts = []
-//       let stockUpdatePromises = []
+  const cart = await req.cart().get()
+  
+  (req.user? req.user.populate('cart.product').execPopulate() : req.sessionCart.getAll())
+    .then(fullCart => {
+      if (req.user) fullCart = fullCart.cart
+      if (!fullCart || fullCart.length == 0) throw Error('The cart is cannot be empty')
+      let orderProducts = []
+      let stockUpdatePromises = []
 
-//       for (let item of fullCart) {
-//         orderProducts.push({
-//           originalProduct: item.product._id,
-//           title: item.product.title,
-//           unitPrice: item.product.price,
-//           unitShippingCost: item.product.shippingCost,
-//           quantity: item.quantity
-//         })
+      for (let item of fullCart) {
+        orderProducts.push({
+          originalProduct: item.product._id,
+          title: item.product.title,
+          unitPrice: item.product.price,
+          unitShippingCost: item.product.shippingCost,
+          quantity: item.quantity
+        })
 
-//         stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, {$inc: { stock: -item.quantity }}))
-//       }
+        stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, {$inc: { stock: -item.quantity }}))
+      }
 
-//       const order = new Order({
-//         user: user,
-//         personal: {
-//           firstName:req.session.shippment.firstName, 
-//           lastName: req.session.shippment.lastName,
-//           email: req.session.shippment.email
-//         },
-//         shipping: {
-//           state: req.session.shippment.state,
-//           city: req.session.shippment.city,
-//           state: req.session.shippment.state,
-//           address: req.session.shippment.address,
-//           zip: req.session.shippment.zip
-//         },
-//         items: orderProducts
-//       })
+      const order = new Order({
+        user: user,
+        personal: {
+          firstName:req.session.shippment.firstName, 
+          lastName: req.session.shippment.lastName,
+          email: req.session.shippment.email
+        },
+        shipping: {
+          state: req.session.shippment.state,
+          city: req.session.shippment.city,
+          state: req.session.shippment.state,
+          address: req.session.shippment.address,
+          zip: req.session.shippment.zip
+        },
+        items: orderProducts
+      })
 
-//       // reduce the number of stock (if there is a -1 then you inform to the staff)
-//       Promise.all(stockUpdatePromises)
-//         .then(result => {
-//           return order.save()
-//         })
-//         .then(order => {
-//           if (req.user) {
-//             req.user.cart = []
-//             req.user.save()
-//           } else req.session.sessionCart.reset()
-//         })
-//         .then(result => {
-//           if (process.env.NODE_ENV == 'production') {
-//             mailer(['enrique@secondly.store', 'ezequiel@secondly.store'], 'New Order Received', `Order Received from ${order.personal.firstName} ${order.personal.lastName}.\n\nYou can check it here: https://secondly.store/admin/orders/${order.id}`)
-//             .then(() => {
-//               return mailer(order.personal.email, 'Order Received', `Your order has been received!\n\nIt is now being processes and we will let you know as soon as it is shipped (24 hours max.).\n\nThe Secondly Team`)
-//             })
-//             .then(() => {
-//               res.render('store/success.ejs')
-//             })
-//             .catch(error => {
-//               console.log(error)
-//             })
-//           } else {
-//             res.render('store/success.ejs')
-//           }
-//         })
-//     })
-//     .catch(error => {
-//       console.error(error)
-//       throw Error()
-//     })
-// }
+      // reduce the number of stock (if there is a -1 then you inform to the staff)
+      Promise.all(stockUpdatePromises)
+        .then(result => {
+          return order.save()
+        })
+        .then(order => {
+          if (req.user) {
+            req.user.cart = []
+            req.user.save()
+          } else req.session.sessionCart.reset()
+        })
+        .then(result => {
+          if (process.env.NODE_ENV == 'production') {
+            mailer(['enrique@secondly.store', 'ezequiel@secondly.store'], 'New Order Received', `Order Received from ${order.personal.firstName} ${order.personal.lastName}.\n\nYou can check it here: https://secondly.store/admin/orders/${order.id}`)
+            .then(() => {
+              return mailer(order.personal.email, 'Order Received', `Your order has been received!\n\nIt is now being processes and we will let you know as soon as it is shipped (24 hours max.).\n\nThe Secondly Team`)
+            })
+            .then(() => {
+              res.render('store/success.ejs')
+            })
+            .catch(error => {
+              console.log(error)
+            })
+          } else {
+            res.render('store/success.ejs')
+          }
+        })
+    })
+    .catch(error => {
+      console.error(error)
+      throw Error()
+    })
+}
 
 // exports.getCheckoutFail = (req, res, next) => {
 //   res.render('store/fail.ejs')
