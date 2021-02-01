@@ -4,22 +4,32 @@ const router = express.Router()
 
 const storeApiValidator = require('../controllers/validators/api-store-validator')
 const storeApiController = require('../controllers/api-store-controller')
- 
-// Get Products
-router.get("/products", storeApiController.getProducts)
-router.get("/products/:productId", storeApiController.getProductDetails)
 
-// Get Categories
-router.get("/categories", storeApiController.getCategories)
-router.get("/categories/:categoryHandle", storeApiController.getCategoryDetails) //need to discuss
+// get Products
+router.get('/products', storeApiController.getProduct)
+router.get('/products/:productId', storeApiController.getProduct)
 
-// Get Pages
-router.get("/pages", storeApiController.getPages)
-router.get("/pages/:pageId", storeApiController.getPageDetails)
+// get Categories
+router.get('/categories', storeApiController.getCategories)
+router.get('/categories/:categoryHandle', storeApiController.getCategory) // need to discuss
 
-// cart/checkout
-router.post('/cart', storeApiValidator.postCart, storeApiController.postCart)
-router.post('/cart/checkout', storeApiValidator.postCheckout, storeApiController.postCheckout)
+// get Pages
+router.get('/pages', storeApiController.getPages)
+router.get('/pages/:pageId', storeApiController.getPage)
+
+// cart & checkout
+router.post('/cart',
+  storeApiValidator.postCart,
+  storeApiController.customerSetup,
+  storeApiController.postCart
+)
+
+router.post('/cart/checkout',
+  storeApiValidator.postCheckout,
+  storeApiController.customerSetup,
+  storeApiController.postCheckout
+)
+
 router.post('/subscribe', storeApiValidator.postSubscribe, storeApiController.postSubscribe)
 
 module.exports = router

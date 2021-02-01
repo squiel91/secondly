@@ -1,0 +1,49 @@
+<%- include('../partials/store-head.ejs') %>
+<div class="errorMessage"></div>
+<h2>Register</h2>
+
+<%- include('../partials/validatable-input.ejs', { label: 'Email', name:'email' }) %>
+<%- include('../partials/validatable-input.ejs', { label: 'First name', name:'firstName' }) %>
+<%- include('../partials/validatable-input.ejs', { label: 'Last name', name:'lastName' }) %>
+<%- include('../partials/validatable-password.ejs') %>
+<div>
+  <input type="checkbox" id="remember" checked> <label for="remember">Remember in this device</label>
+</div>
+
+<button class="primary" onclick="register()">Register</button>
+<p>Have an account? <a href="/account/login">Login.</a></p>
+
+
+<script src="/scripts/utils.js" async></script>
+<script>
+  function register() {
+    $('.validatable-input input').keydown(event => {
+      $(event.target).parent().parent().removeClass('error')
+    })
+
+    const firstName = $('#firstName').val()
+    const lastName = $('#lastName').val()
+    const email = $('#email').val()
+    const password = $('#password').val()
+    const remember = $('#remember').is(':checked')
+
+    fetchApi('/api/account/register', {
+      params: { 
+        firstName,
+        lastName,
+        email, 
+        password, 
+        remember, 
+        _csrf: '<%= csrfToken %>'
+      },
+      success: function (data) {
+        window.location.replace('/')
+      }
+    })
+  }
+
+  $('.validatable-input input').on('keypress', event => {
+    if(event.which == 13) register()
+  })
+</script>
+<%- include('../partials/store-tail.ejs') %>

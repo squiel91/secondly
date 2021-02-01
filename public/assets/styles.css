@@ -177,11 +177,11 @@ input[type="checkbox"] {
   margin-right: 10px;
 }
 
-.secondlyValidatableInput {
+.validatable-input {
   margin-bottom: 12px;
 }
 
-.secondlyInput, .secondlyValidatableInput .secondlyInputInner {
+.secondlyInput, .validatable-input .secondlyInputInner {
   display: flex;
   width: 100%;
   border: none;
@@ -191,15 +191,15 @@ input[type="checkbox"] {
   align-items: center;
 }
 
-.secondlyValidatableInput .secondlyInputInner {
+.validatable-input .secondlyInputInner {
   margin-bottom: 6px;
 }
 
-.secondlyValidatableInput.error .secondlyInputInner {
+.validatable-input.error .secondlyInputInner {
   background-color: #ffe0e0;
 }
 
-.secondlyValidatableInput .secondlyErrorMessage {
+.validatable-input .secondlyErrorMessage {
   text-align: center;
   margin-bottom: 16px;
   color: #eb4d4b;
@@ -207,11 +207,11 @@ input[type="checkbox"] {
   display: none;
 }
 
-.secondlyValidatableInput.error .secondlyErrorMessage {
+.validatable-input.error .secondlyErrorMessage {
   display: block;
 }
 
-.secondlyInput label, .secondlyValidatableInput label {
+.secondlyInput label, .validatable-input label {
   flex-shrink: 0;
   color: #a7a7a7;
   padding-right: 6px;
@@ -221,8 +221,8 @@ input[type="checkbox"] {
 
 .secondlyInput input,
 .secondlyInput select,
-.secondlyValidatableInput input,
-.secondlyValidatableInput select {
+.validatable-input input,
+.validatable-input select {
   width: 0;
   flex-grow: 1;
   border: none;
@@ -258,6 +258,10 @@ input[type="checkbox"] {
   padding: 20px;
   background-color: #ffa5a5;
   border-radius: 8px;
+}
+
+.errorMessage:empty {
+  display: none;
 }
 
 .template {

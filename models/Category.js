@@ -13,7 +13,7 @@ const userSchema = new Schema({
   },
   description: String,
   products: [
-    { 
+    {
       type: Schema.Types.ObjectId,
       ref: 'Product',
       required: true

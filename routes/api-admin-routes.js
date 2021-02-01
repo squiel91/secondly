@@ -4,6 +4,7 @@ const router = express.Router()
 const adminApiValidator = require('../controllers/validators/api-admin-validator')
 const adminApiController = require('../controllers/api-admin-controller')
 const authenticate = adminApiController.adminAuth
+
 // Page
 router.post('/page', authenticate, adminApiValidator.postPage, adminApiController.postPage)
 router.patch('/page/:pageId', authenticate, adminApiController.patchPage)

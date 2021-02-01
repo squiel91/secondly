@@ -23,10 +23,7 @@
     </table>
 
     <h3>Saved address</h3>
-    <form action="/logout" method="POST">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button class="primary" type="submit">Logout</button>
-    </form>
+    <button class="primary" onclick="logout()">Logout</button>
   </div>
   <div class="col-md-6">
     <h3>Orders</h3>
@@ -51,5 +48,31 @@
     <% } %>
   </div>
 </div>
+
+<script>
+  function logout() {
+    fetch('/api/account/logout', {
+      method: 'POST',
+      credentials: 'same-origin',
+      xhrFields: { withCredentials: true },
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then((response) => {
+        return response.json()
+      })
+      .then(body => {
+        if (body.success) {
+          window.location.replace('/')
+        } else {
+          // there was an error
+          alert(body.message)
+        }
+      })
+      .catch(function(error) {
+        console.log(error)
+        alert('There was an error. Please try again.')
+      })
+  }
+</script>
 
 <%- include('../partials/store-tail.ejs') %>

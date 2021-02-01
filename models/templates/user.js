@@ -4,7 +4,7 @@ module.exports = user => {
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.email,
-    admin: user.admin? true : undefined,
-    owner: user.admin?.owner? true : undefined
+    admin: user.admin || undefined,
+    owner: user.admin?.owner || undefined
   }
 }

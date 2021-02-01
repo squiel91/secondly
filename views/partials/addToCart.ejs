@@ -1,6 +1,21 @@
-<form action="/cart" style="display: inline-block;" method="post">
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-  <input type="hidden" name="productId" value="<%= product._id %>">
-  <input type="hidden" name="add" value="1">
-  <button type="submit" class="primary">Add to cart</button>
-</form>
+<button class="primary" onclick="addProdToCart()">Add to cart</button>
+
+<script src="/scripts/utils.js" async></script>
+<script>
+  function addProdToCart() {
+    const email = $('#email').val()
+    const password = $('#password').val()
+    const remember = $('#remember').is(':checked')
+
+    fetchApi('/api/cart', {
+      params: { 
+        productId: '<%= product._id %>',
+        quantity: 1, 
+        _csrf: '<%= csrfToken %>'
+      },
+      success: function (data) {
+        window.location.replace('/cart')
+      }
+    })
+  }
+</script>

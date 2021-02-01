@@ -31,7 +31,7 @@ const orderSchema = new Schema({
     email: {
       type: String,
       required: true
-    },
+    }
   },
   shipping: {
     state: {
@@ -54,7 +54,7 @@ const orderSchema = new Schema({
   },
   items: [
     {
-      originalProduct: { 
+      originalProduct: {
         type: Schema.Types.ObjectId,
         ref: 'Product',
         required: true
@@ -79,7 +79,7 @@ const orderSchema = new Schema({
   ]
 }, { timestamps: { createdAt: 'created' } })
 
-orderSchema.methods.totalPrice = function() {
+orderSchema.methods.totalPrice = function () {
   return this.items.reduce((accum, item) => accum + (item.unitPrice + item.unitShippingCost) * item.quantity, 0)
 }
 

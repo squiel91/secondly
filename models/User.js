@@ -35,7 +35,7 @@ const userSchema = new Schema({
   },
   cart: [
     {
-      product: { 
+      product: {
         type: Schema.Types.ObjectId,
         ref: 'Product',
         required: true
@@ -49,12 +49,12 @@ const userSchema = new Schema({
 })
 
 // this HAS to be a function() and not () => {}
-userSchema.methods.addToCart = function(productId, quantity) {
+userSchema.methods.addToCart = function (productId, quantity) {
   if (!quantity) quantity = 1
- 
+
   const cartProductIndex = this.cart.findIndex((elem) => elem.product.toString() === productId.toString())
   if (cartProductIndex >= 0) {
-    let item = this.cart[cartProductIndex]
+    const item = this.cart[cartProductIndex]
     item.quantity += quantity
 
     if (item.quantity <= 0) {

@@ -16,7 +16,7 @@ router.get('/', adminController.getDashboard)
 router.get('/customize', adminController.getCustomize)
 router.post('/customize', adminController.postCustomize)
 
-//Categories
+// Categories
 router.get('/categories', adminController.getCategories)
 router.get('/categories/new', adminController.getNewCategory)
 router.get('/categories/:categoryHandle', adminController.getEditCategory)
@@ -32,12 +32,10 @@ router.post('/products', adminController.postProduct)
 router.post('/products/:productId/edit', adminController.postProduct)
 router.post('/products/:productId/delete', adminController.deleteProduct)
 
-
 // Orders
 router.get('/orders', adminController.getOrders)
 router.get('/orders/:orderId', adminController.getOrder)
 router.post('/orders/:orderId', adminController.postOrder)
-
 
 // Users
 router.get('/users', adminController.getUsers)
@@ -46,8 +44,8 @@ router.get('/users', adminController.getUsers)
 router.get('/pages', adminController.getPages)
 router.get('/pages/new', adminController.getPageCreation)
 router.get('/pages/:pageHandle/edit', adminController.getPageEdition)
-router.post('/pages',  adminController.postCreatePage)
-router.post('/pages/:pageHandle',  adminController.postEditPage)
-router.post('/pages/:pageHandle/delete',  adminController.postDeletePage)
+router.post('/pages', adminController.postCreatePage)
+router.post('/pages/:pageHandle', adminController.postEditPage)
+router.post('/pages/:pageHandle/delete', adminController.postDeletePage)
 
 module.exports = router

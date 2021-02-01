@@ -14,7 +14,7 @@
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <div class="row topPanel">
     <div class="col-sm-12">
-      <div class="secondlyValidatableInput  <%= prefill?.title?.error ? 'error' : '' %>"">
+      <div class="validatable-input  <%= prefill?.title?.error ? 'error' : '' %>"">
         <div class="secondlyInputInner">
           <label for="title">Title:</label>
           <input id="title" type="text" name="title" value="<%= prefill.valueOfOr('title', product?.title) %>">
@@ -26,7 +26,7 @@
     </div>
   
     <div class="col-md-3 col-sm-6">
-      <div class="secondlyValidatableInput  <%= prefill?.price?.error ? 'error' : '' %>"">
+      <div class="validatable-input  <%= prefill?.price?.error ? 'error' : '' %>"">
         <div class="secondlyInputInner">
           <label for="price">Price:</label>
           <input id="price" type="text" step="0.01" name="price" value="<%= prefill.valueOfOr('price', product?.price) %>">
@@ -38,7 +38,7 @@
     </div>
 
     <div class="col-md-3 col-sm-6">
-      <div class="secondlyValidatableInput  <%= prefill?.compareAt?.error ? 'error' : '' %>"">
+      <div class="validatable-input  <%= prefill?.compareAt?.error ? 'error' : '' %>"">
         <div class="secondlyInputInner">
           <label for="compareAt">Compare at:</label>
           <input id="compareAt" type="text" step="0.01" name="compareAt" value="<%= prefill.valueOfOr('compareAt', product?.compareAt) %>">
@@ -50,7 +50,7 @@
     </div>
   
     <div class="col-md-3 col-sm-6">
-      <div class="secondlyValidatableInput  <%= prefill?.shippingCost?.error ? 'error' : '' %>"">
+      <div class="validatable-input  <%= prefill?.shippingCost?.error ? 'error' : '' %>"">
         <div class="secondlyInputInner">
           <label for="shippingCost">Shipping $</label>
           <input id="shippingCost" type="text" step="0.01" name="shippingCost" value="<%= prefill.valueOfOr('shippingCost', product?.shippingCost) %>">
@@ -62,7 +62,7 @@
     </div>
   
     <div class="col-md-3 col-sm-6">
-      <div class="secondlyValidatableInput  <%= prefill?.stock?.error ? 'error' : '' %>"">
+      <div class="validatable-input  <%= prefill?.stock?.error ? 'error' : '' %>"">
         <div class="secondlyInputInner">
           <label for="stock">Stock</label>
           <input id="stock" type="text" step="0.01" name="stock" value="<%= prefill.valueOfOr('stock', product?.stock) %>">

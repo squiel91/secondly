@@ -45,7 +45,9 @@ const productSchema = new Schema({
 productSchema.methods.categories = function(categoriesIds) {
   if (categoriesIds) {
     return Promise.all(
-      categoriesIds.map(categoryId => Category.findByIdAndUpdate(categoryId, { '$addToSet': { products: this._id } }))
+      categoriesIds.map(
+        categoryId => Category.findByIdAndUpdate(categoryId, { $addToSet: { products: this._id } })
+      )
     )
   } else {
     // this should be optimized having the categories in the mirrored in the products

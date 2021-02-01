@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const subscriptionSchema = new Schema({
-  email:  {
+  email: {
     type: String,
     require: true,
     unique: true

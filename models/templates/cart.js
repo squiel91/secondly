@@ -1,13 +1,14 @@
+// TODO: doesnt make sense
 module.exports = cart => {
-    return [{
-        product: {
-            id: cart.product._id,
-            title: cart.product.title,
-            price: cart.product.price,
-            stock: cart.product.stock? cart.product.stock: undefined,
-            shippingCost: cart.product.shippingCost,
-            imagePaths: cart.product.imagePaths,
-        },
-        quantity: cart.newQuantity
-    }]
+  return [{
+    product: {
+      id: cart.product.id,
+      title: cart.product.title,
+      price: cart.product.price,
+      stock: cart.product.stock,
+      shippingCost: cart.product.shippingCost,
+      imagePaths: cart.product.imagePaths
+    },
+    quantity: cart.newQuantity
+  }]
 }

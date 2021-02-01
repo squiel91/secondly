@@ -1,128 +1,125 @@
-const Cart = require('../models/cart')
+// models
+const Cart = require('../models/Cart')
+const User = require('../models/User')
 const Category = require('../models/Category')
 const Product = require('../models/Product')
 const Page = require('../models/Page')
-const stdRes = require('../utils/standard-response')
+const Subscription = require('../models/subscription')
 
+// templates
 const cartTemplate = require('../models/templates/cart')
 const productTemplate = require('../models/templates/product')
 const categoryTemplate = require('../models/templates/category')
 const pageTemplate = require('../models/templates/page')
 
-// Get products
+const stdRes = require('../utils/standard-response')
+
+exports.customerSetup = async (req, res, next) => {
+  // is required to load the user into the request before initalizing the cart
+  if (req.session.userId) req.user = await User.findById(req.session.userId)
+
+  req.cart = new Cart(req)
+  next()
+}
+
+// get products
 exports.getProducts = async (req, res, next) => {
-  try{
-      const productFound = await Product.find({ publish:'true' })
+  try {
+    const products = await Product.find({ publish: true })
 
-      res.json({ 
-          success: true,
-          product: productFound
-        })
-  }catch(error){
-      stdRes._500(res, error.message)
-  }
+    res.json({
+      success: true,
+      product: products?.map(product => productTemplate(product))
+    })
+  } catch (error) { stdRes._500(res, error.message) }
 }
 
-exports.getProductDetails = async (req, res, next) => {
-  try{
-      let productId = req.params.productId
-      const productFound = await Product.findOne({ _id: productId, publish:'true' })
+// get product
+exports.getProduct = async (req, res, next) => {
+  try {
+    const product = await Product.findOne({
+      _id: req.params.productId,
+      publish: 'true'
+    })
 
-      res.json({ 
-          success: true,
-          product: productTemplate(productFound)
-        })
-  }catch(error){
-      stdRes._500(res, error.message)
-  }
+    if (product) return stdRes._400(res, 'Product not found')
+
+    res.json({
+      success: true,
+      product: productTemplate(product)
+    })
+  } catch (error) { stdRes._500(res, error.message) }
 }
 
-
-// Get categories
+// get categories (not populated with it's products)
 exports.getCategories = async (req, res, next) => {
-  try{
-      const categoryFound = await Category.find().populate('products')
+  try {
+    const categories = await Category.find()
 
-      res.json({ 
-          success: true,
-          category: categoryFound
-        })
-  }catch(error){
-      stdRes._500(res, error.message)
-  }
+    res.json({
+      success: true,
+      category: categories?.map(category => categoryTemplate(category))
+    })
+  } catch (error) { stdRes._500(res, error.message) }
 }
 
-exports.getCategoryDetails = async (req, res, next) => {
-  try{
-      let categoryHandle = req.params.categoryHandle
+// get category (populated with it's products)
+exports.getCategory = async (req, res, next) => {
+  try {
+    const category = await Category.findOne({
+      handle: req.params.categoryHandle
+    }).populate('products')
 
-      const categoryFound = await Category.findOne({ handle: categoryHandle }).populate('products')
+    if (category) return stdRes._400(res, 'Category not found')
 
-      res.json({ 
-          success: true,
-          category: categoryTemplate(categoryFound)
-        })
-  }catch(error){
-      stdRes._500(res, error.message)
-  }
+    res.json({
+      success: true,
+      category: categoryTemplate(category)
+    })
+  } catch (error) { stdRes._500(res, error.message) }
 }
 
-// Get pages
+// get pages
 exports.getPages = async (req, res, next) => {
-  try{
-      const pageFound = await Page.find()
+  try {
+    const pages = await Page.find()
 
-      res.json({ 
-          success: true,
-          page: pageFound
-        })
-  }catch(error){
-      stdRes._500(res, error.message)
-  }
+    res.json({
+      success: true,
+      page: pages?.map(page => pageTemplate(page))
+    })
+  } catch (error) { stdRes._500(res, error.message) }
 }
 
-exports.getPageDetails = async (req, res, next) => {
-  try{
+// get page
+exports.getPage = async (req, res, next) => {
+  try {
+    const page = await Page.findOne({ _id: req.params.pageId })
 
-      let pageId = req.params.pageId
+    if (page) return stdRes._400(res, 'Page not found')
 
-      const pageFound = await Page.findOne({ _id: pageId })
-
-      res.json({ 
-          success: true,
-          page: pageTemplate(pageFound)
-        })
-  }catch(error){
-      stdRes._500(res, error.message)
-  }
-} 
+    res.json({
+      success: true,
+      page: pageTemplate(page)
+    })
+  } catch (error) { stdRes._500(res, error.message) }
+}
 
 // Post Cart
 exports.postCart = async (req, res, next) => {
-  try{
-    let productId = req.body.productId
-    let quantity = req.body.quantity
-    
-    const productFound = await Product.findOne({_id:productId,publish:'true'})
-    if(!productFound) return stdRes._400(res, 'productId', 'Either Product Id is not valid or product is not published.')
-
-    const matchProduct = await Cart.findOne({productId:productFound._id})
-    if(matchProduct) newQuantity = parseInt(quantity) + parseInt(matchProduct.quantity)
-
-    await Cart.updateOne({_id:matchProduct._id},{quantity:newQuantity})
-    const product = await Product.findById(productId).select('title price stock shippingCost imagePaths')
-    
-    let response = {
-      product,
-      newQuantity
-    }
-    stdRes._200(res, { cart: cartTemplate(response) })
-  
+  try {
+    req.cart.modifyItems(req.body.productId, req.body.quantity)
+    await req.cart.save()
+    const cart = await req.cart.get()
+    res.json({
+      success: true,
+      cart
+    })
   } catch (error) { stdRes._500(res, error.message) }
 }
 
 exports.postCheckout = async (req, res, next) => {
-  try{
+  try {
     req.session.shipping = {
       firstName: req.body.firstName,
       lastname: req.body.lastname,
@@ -132,19 +129,19 @@ exports.postCheckout = async (req, res, next) => {
       city: req.body.city,
       zip: req.body.zip
     }
-    stdRes._200(res)
-      
+    res.json({
+      success: true
+    })
   } catch (error) { stdRes._500(res, error.message) }
 }
 
 exports.postSubscribe = async (req, res, next) => {
   try {
-    let email = req.body.email
+    const email = req.body.email
     const duplicateEmail = await Subscription.findOne({ email })
     if (duplicateEmail) return stdRes._400(res, 'email', 'You are already subscribed!')
-    let subscriptor = new Subscription({ email })
+    const subscriptor = new Subscription({ email })
     await subscriptor.save()
-    stdRes._200(res)
-
+    res.json({ success: true })
   } catch (error) { stdRes._500(res, error.message) }
 }
