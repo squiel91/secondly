@@ -60,20 +60,18 @@ module.exports = class SessionCart {
     }
   }
 
-  reset (callback) {
+  reset () {
     this.items = []
     if (!this.session.remember) this.session.shippment = undefined
-    if (callback) return this.save(callback)
-    else {
-      return new Promise((resolve, reject) => {
-        try {
-          this.save(result => {
-            resolve(result)
-          })
-        } catch (error) {
-          reject(error)
-        }
-      })
-    }
+
+    return new Promise((resolve, reject) => {
+      try {
+        this.save(result => {
+          resolve(result)
+        })
+      } catch (error) {
+        reject(error)
+      }
+    })
   }
 }

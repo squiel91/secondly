@@ -6,7 +6,6 @@ module.exports = product => {
     compareAt: product.compareAt,
     stock: product.stock,
     shippingCost: product.shippingCost,
-    publish: product.publish,
     images: product.imagePaths
   }
 }

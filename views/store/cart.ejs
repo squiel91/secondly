@@ -1,4 +1,85 @@
 <%- include('../partials/store-head.ejs') %>
+<style>
+  .cart__error {
+    color: red;
+    font-weight: bold;
+    background-image: url(/assets/alert.svg);
+    background-repeat: no-repeat;
+    background-size: contain;
+    padding-left: 40px;
+  }
+
+  .cart__item-list {
+    padding: 0;
+  }
+  
+  .cart__item {
+    display: flex;
+    box-shadow: 0 0.9px 2.2px rgba(0,0,0,.02), 0 2.2px 5.3px rgba(0,0,0,.028), 0 4.1px 10px rgba(0,0,0,.035), 0 7.4px 17.9px rgba(0,0,0,.042), 0 13.8px 33.4px rgba(0,0,0,.05), 0 33px 80px rgba(0,0,0,.07);
+    align-items: center;
+    border-radius: 16px;
+    padding-right: 30px;
+    margin-bottom: 35px;
+  }
+
+  .cart__thumbnail {
+    background-size: cover;
+    background-position: center;
+    margin-right: 30px;
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+    width: 190px;
+    height: 190px;
+    background-color: #f5f5f5;
+  }
+
+  .cart__priceDetails {
+    margin-top: 0px;
+    font-size: larger;
+    margin-bottom: 0;
+  }
+
+  .cart__total {
+    margin-top: 4px;
+    padding-top: 7px;
+    font-size: large;
+    font-weight: bold;
+    border-top: 1px solid #e5e3d8;
+  }
+
+  .cart__details {
+    flex-grow: 1;
+  }
+
+  form {
+    display: inline;
+  }
+
+  .quantity {
+    width: unset;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  .quantity button {
+    background-color: transparent;
+    padding: 0px 14px;
+    color: deepskyblue;
+    font-weight: bold;  
+    border: none; 
+  }
+
+  .quantity button:disabled {
+    color: lightgray;
+  }
+
+  button.primary.spacing {
+    margin-top: 31px;
+    margin-bottom: 50px;
+  }
+
+</style>
+
 <% var error = false %>
 <% if (cart && cart.length > 0) { %>
   <h2>In your cart</h2>
@@ -27,29 +108,19 @@
             <% } %>
           </div>
           <div class="secondlyInput quantity"> 
-            <form action="/cart" method="post">
-              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-              <input type="hidden" name="productId" value="<%= cartItem.product._id %>">
-              <input type="hidden" name="remove" value="1">
-              <button type="submit">-</button>
-            </form>
+            <button onclick="modifyCart('<%= cartItem.product._id %>', -1)">-</button>
             <%= cartItem.quantity %>
-            <form action="/cart" method="post">
-              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-              <input type="hidden" name="productId" value="<%= cartItem.product._id %>">
-              <input type="hidden" name="add" value="1">
-              <button type="submit" <%= cartItem.product.stock <= cartItem.quantity? 'disabled' : '' %>>+</button>
-            </form>
+            <button onclick="modifyCart('<%= cartItem.product._id %>', 1)" <%= cartItem.product.stock <= cartItem.quantity? 'disabled' : '' %>>+</button>
           </div>
         </div>
       </div>
     <% } %>
   </div>
   <p class="cart__priceDetails">
-    Sub-total: $ <%= subtotal %><br>
-    Shipping: $ <%= shipping %>
+    Sub-total: $ <span id="subtotal"><%= subtotal %></span><br>
+    Shipping: $ <span id="shippingCost"><%= shipping %></span>
   </p>
-  <p class="cart__total">Total: $ <%= totalPrice %></p>
+  <p class="cart__total">Total: $ <span id="total"><%= totalPrice %></span></p>
   <a href="/cart/shipping">
     <button class="primary" <%= error? 'disabled' : ' ' %>>Proceed to Checkout</button>
   </a>
@@ -64,87 +135,23 @@
     </a>
   </div>
 <% } %>
-  
-  <style>
-
-    .cart__error {
-      color: red;
-      font-weight: bold;
-      background-image: url(/assets/alert.svg);
-      background-repeat: no-repeat;
-      background-size: contain;
-      padding-left: 40px;
+  <script src="/scripts/utils.js" async></script>
+  <script>
+    function modifyCart(productId, quantity) {
+      fetchApi('/api/cart', {
+        params: { 
+          productId: productId,
+          quantity: quantity, 
+          _csrf: '<%= csrfToken %>'
+        },
+        success: function (data) {
+          $('#subtotal').text(data.cart.subtotal)
+          $('#shippingCost').text(data.cart.shippingCost)
+          $('#total').text(data.cart.total)
+          console.log(data.cart)
+        }
+      })
     }
-
-    .cart__item-list {
-      padding: 0;
-    }
-    
-    .cart__item {
-      display: flex;
-      box-shadow: 0 0.9px 2.2px rgba(0,0,0,.02), 0 2.2px 5.3px rgba(0,0,0,.028), 0 4.1px 10px rgba(0,0,0,.035), 0 7.4px 17.9px rgba(0,0,0,.042), 0 13.8px 33.4px rgba(0,0,0,.05), 0 33px 80px rgba(0,0,0,.07);
-      align-items: center;
-      border-radius: 16px;
-      padding-right: 30px;
-      margin-bottom: 35px;
-    }
-
-    .cart__thumbnail {
-      background-size: cover;
-      background-position: center;
-      margin-right: 30px;
-      border-top-left-radius: 16px;
-      border-bottom-left-radius: 16px;
-      width: 190px;
-      height: 190px;
-      background-color: #f5f5f5;
-    }
-
-    .cart__priceDetails {
-      margin-top: 0px;
-      font-size: larger;
-      margin-bottom: 0;
-    }
-
-    .cart__total {
-      margin-top: 4px;
-      padding-top: 7px;
-      font-size: large;
-      font-weight: bold;
-      border-top: 1px solid #e5e3d8;
-    }
-
-    .cart__details {
-      flex-grow: 1;
-    }
-
-    form {
-      display: inline;
-    }
-
-    .quantity {
-      width: unset;
-      padding-left: 5px;
-      padding-right: 5px;
-    }
-
-    .quantity button {
-      background-color: transparent;
-      padding: 0px 14px;
-      color: deepskyblue;
-      font-weight: bold;  
-      border: none; 
-    }
-
-    .quantity button:disabled {
-      color: lightgray;
-    }
-
-    button.primary.spacing {
-      margin-top: 31px;
-      margin-bottom: 50px;
-    }
-
-  </style>
+  </script>
   
   <%- include('../partials/store-tail.ejs') %>

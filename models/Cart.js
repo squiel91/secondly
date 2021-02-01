@@ -48,6 +48,15 @@ class Cart {
       return this.sessionCart.save()
     }
   }
+
+  async reset () {
+    if (this.user) {
+      this.user.cart = []
+      return await this.user.save()
+    } else {
+      return await this.sessionCart.reset()
+    }
+  }
 }
 
 module.exports = Cart
