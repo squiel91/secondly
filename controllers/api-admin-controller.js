@@ -4,6 +4,7 @@ const Page = require('../models/Page')
 const Category = require('../models/Category')
 const Product = require('../models/Product')
 const User = require('../models/User')
+const SessionCart = require('../models/SessionCart')
 
 const stdRes = require('../utils/standard-response')
 
