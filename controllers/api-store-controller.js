@@ -113,7 +113,7 @@ exports.postCart = async (req, res, next) => {
     const cart = await req.cart.get()
     res.json({
       success: true,
-      cart
+      cart: cartTemplate(cart)
     })
   } catch (error) { stdRes._500(res, error.message) }
 }

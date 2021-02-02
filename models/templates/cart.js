@@ -1,14 +1,18 @@
-// TODO: doesnt make sense
+const productTemplate = require('./product')
+
 module.exports = cart => {
-  return [{
-    product: {
-      id: cart.product.id,
-      title: cart.product.title,
-      price: cart.product.price,
-      stock: cart.product.stock,
-      shippingCost: cart.product.shippingCost,
-      imagePaths: cart.product.imagePaths
-    },
-    quantity: cart.newQuantity
-  }]
+  const subtotal = cart.reduce((accum, item) => item.product.price * item.quantity + accum, 0)
+  const shippingCost = cart.reduce((accum, item) => item.product.shippingCost * item.quantity + accum, 0)
+
+  return {
+    subtotal,
+    shippingCost,
+    total: subtotal + shippingCost,
+    items: cart.map(item => {
+      return {
+        product: productTemplate(item.product),
+        quantity: item.quantity
+      }
+    })
+  }
 }
