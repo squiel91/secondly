@@ -3,31 +3,24 @@
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="/richtext.min.css">
 
-<h2>Page Editor</h2>
+<h1>Page Editor</h1>
 
-<form action="/admin/pages<%= page ? `/${page.handle}` : '' %>" method="post">
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <div class="row topPanel">
     <div class="col-md-8">
-      <div class="secondlyInput">
-        <label for="title">Title</label>
-        <input id="title" type="text" name="title" value="<%= page ? page.title : '' %>">
-      </div>
+      <%- include('../partials/validatable-input.ejs', { label: 'Title', value: locals.page ? page.title : '', help: 'The main title of the page, showed at the very top. Very important for search engines.'}) %> 
     </div>
     <div class="col-md-4">
-      <div class="secondlyInput">
-        <label for="handle">Handle</label>
-        <input id="handle" type="text" name="handle" value="<%= page ? page.handle : '' %>">
-      </div>
+      <%- include('../partials/validatable-input.ejs', { label: 'Handle', value: locals.page ? page.handle : '', help: 'Make the URL human readable. You will access the page  appending /pages/[handler] to the end of your store domain.'}) %> 
     </div>
   </div>
   <textarea name="content" id="content" cols="30" rows="10"><%= page ? page.content : '' %></textarea>
   
-  <button class="primary" type="submit"><%= page ? 'Update' : 'Create' %></button>
-</form>
+  <button class="primary" onclick="submitPage()"><%= page ? 'Update' : 'Create' %></button>
+
 
 <script src="/jquery.richtext.min.js"></script>
-<script>
+<script src="/scripts/utils.js" async></script>
+<script async>
   $('textarea#content').richText();
 
   $('#title').blur(event => {
@@ -39,12 +32,26 @@
       }
     } 
   })
-</script>
 
-<style>
-  .topPanel {
-    margin-bottom: 40px;
+  function submitPage () {
+    const title = $('#title').val()
+    const handle = $('#handle').val()
+    const content = $('#content').val()
+
+    fetchApi('/api/pages<%= page ? `/${page.id}` : '' %>', {
+      method: '<%= page ? 'PATCH' : 'POST' %>',
+      params: { 
+        title,
+        handle,
+        content, 
+        _csrf: '<%= csrfToken %>'
+      },
+      success: function (data) {
+        window.location.replace('/admin/pages')
+      }
+    })
   }
-</style>
+  
+</script>
 
 <%- include('../partials/admin-tail.ejs') %>

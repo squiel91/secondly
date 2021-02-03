@@ -1,7 +1,7 @@
 const express = require('express')
 const fs = require('fs')
 const session = require('express-session')
-var MongoDBStore = require('connect-mongodb-session')(session)
+const MongoDBStore = require('connect-mongodb-session')(session)
 const bodyParser = require('body-parser')
 const csrf = require('csurf')
 const connectFlash = require('connect-flash')
@@ -25,13 +25,10 @@ const galleryRoutes = require('./routes/gallery-routes')
 
 const server = express()
 
-const prodDbUri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@omlab.l5mcm.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}`
-const devDbUri = `mongodb://localhost:27017/secondly`
-const conUri = process.env.NODE_ENV == 'production' ? prodDbUri : devDbUri
-
-var store = new MongoDBStore({
+const conUri = 'mongodb://localhost:27017/secondly'
+const store = new MongoDBStore({
   uri: conUri,
-  collection: 'sessions',
+  collection: 'sessions'
 })
 
 // Catch errors
@@ -43,14 +40,14 @@ server.use(
   require('express-session')({
     secret: 'j4gU4R',
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year
+      maxAge: 1000 * 60 * 60 * 24 * 365 // 1 year
     },
     store: store,
     // Boilerplate options, see:
     // * https://www.npmjs.com/package/express-session#resave
     // * https://www.npmjs.com/package/express-session#saveuninitialized
     resave: true,
-    saveUninitialized: true,
+    saveUninitialized: true
   })
 )
 
@@ -67,6 +64,10 @@ server.use(compression())
 
 // const accessLogStream = fs.createWriteStream(rootPath('access.log'), {flags: 'a'})
 // server.use(morgan('combined', { stream: accessLogStream }))
+
+server.post('/cardaccio', (req, res, next) => {
+  res.json({ reply: 'This is a message from the server' })
+})
 
 server.use('/api',
   accessApiRoutes,

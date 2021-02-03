@@ -17,15 +17,17 @@ const userTemplate = require('../models/templates/user')
 exports.adminAuth = async (req, res, next) => {
   if (req.session.userId) {
     req.user = await User.findById(req.session.userId)
-    if (!req.user.admin) {
+    if (req.user.admin) next()
+    else {
       return res
         .status(401)
         .json({ error: true, message: 'Only admin access' })
     }
   } else {
-    req.sessionCart = SessionCart.load(req.session)
+    return res
+      .status(401)
+      .json({ error: true, message: 'You need to be authenticated as an admin' })
   }
-  next()
 }
 
 // Page

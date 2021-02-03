@@ -1,8 +1,8 @@
 <%- include('../partials/store-head.ejs') %>
 <div class="errorMessage"></div>
-<h2>Login</h2>
-<%- include('../partials/validatable-input.ejs', { label: 'Email', name:'email' }) %>
-<%- include('../partials/validatable-password.ejs') %>
+<h1>Login</h1>
+<%- include('../partials/validatable-input.ejs', { label: 'Email' }) %>
+<%- include('../partials/validatable-input.ejs', { label: 'Password', type: 'password' }) %>
 <p>Did you forget your password? <a href="/account/request-password-reset">Reset it.</a></p>
 <div>
   <input type="checkbox" id="remember" checked> <label for="remember">Remember in this device</label>

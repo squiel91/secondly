@@ -20,7 +20,12 @@ function fetchApi (url, options) {
       for (const fieldError of data.fields) {
         const validatableInput = $(`.validatable-input.${fieldError.name}`)
         validatableInput.addClass('error')
-        validatableInput.find('.secondlyErrorMessage').text(fieldError.message)
+        const errorTooltip = validatableInput.find('.secondlyErrorMessage')
+        if (errorTooltip.length > 0) {
+          const tippyInstance = errorTooltip[0]._tippy
+          tippyInstance.setContent(fieldError.message)
+          tippyInstance.show()
+        }
       }
     }
   }
