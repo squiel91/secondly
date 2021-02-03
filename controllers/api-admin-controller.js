@@ -25,6 +25,7 @@ exports.adminAuth = async (req, res, next) => {
     }
   } else {
     req.sessionCart = SessionCart.load(req.session)
+    res.locals.listedCategories = await Category.find({ listed: true })
   }
   next()
 }

@@ -1,3 +1,9 @@
+/* eslint-disable no-unused-vars */
+// eslint-disable-next-line camelcase
+const Publishable_Key = 'pk_test_51Hsv6KLzpNoJw5cRqsZQiQh1hqWafCluHiYVFIt68Y4RjWYsEFX4HGPaquJ3lcxNjOh393Ms39m0V4akBZ46727J00EzprcXql'
+// eslint-disable-next-line camelcase
+const Secret_Key = 'sk_test_51Hsv6KLzpNoJw5cRhFtvtSixJDOpLwLY0ZzDR6dM0nYcJUv4XV8zV4HUCpRVw0j0vjrhwotun4vAvmrESk4Chgzg00QakDHuoW'
+const stripe = require('stripe')(Secret_Key)
 // models
 const Cart = require('../models/Cart')
 const User = require('../models/User')
@@ -120,19 +126,80 @@ exports.postCart = async (req, res, next) => {
 
 exports.postCheckout = async (req, res, next) => {
   try {
+    const cart = await req.cart.get()
+    const subtotal = cart.reduce((accum, item) => item.product.price * item.quantity + accum, 0)
+    const shippingCost = cart.reduce((accum, item) => item.product.shippingCost * item.quantity + accum, 0)
+    const total = ((subtotal + shippingCost) * 100)
+
+    const name = req.body.firstName + ' ' + req.body.lastName
+    const customer = await stripe.customers.create({
+      address: {
+        city: req.body.city,
+        country: req.body.country,
+        postal_code: req.body.zip,
+        state: req.body.state
+      },
+      email: req.body.email,
+      name: name,
+      phone: req.body.phone
+    })
+
+    // Creating payment method
+    const paymentMethod = await stripe.paymentMethods.create({
+      type: 'card',
+      card: {
+        number: req.body.number,
+        exp_month: req.body.exp_month,
+        exp_year: req.body.exp_year,
+        cvc: req.body.cvc
+      },
+      billing_details: {
+        address: customer.address,
+        email: customer.email,
+        name: customer.name,
+        phone: customer.phone
+      }
+    })
+
+    // Attaching payment method to customer
+    const attachPaymentToCustomer = await stripe.paymentMethods.attach(
+      paymentMethod.id,
+      { customer: customer.id }
+    )
+
+    // creating charges
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: total, // $20
+      currency: 'usd',
+      customer: customer.id
+    })
+
+    // charges confirmation
+    const paymentIntentConfirmation = await stripe.paymentIntents.confirm(
+      paymentIntent.id,
+      { payment_method: paymentMethod.id }
+    )
+
     req.session.shipping = {
       firstName: req.body.firstName,
-      lastname: req.body.lastname,
+      lastName: req.body.lastName,
       email: req.body.email,
       address: req.body.address,
       state: req.body.state,
       city: req.body.city,
       zip: req.body.zip
     }
+    // res.render('store/success.ejs')
+    // console.log('paymentIntentConfirmation', paymentIntentConfirmation)
+    // console.log('cart', cart)
     res.json({
-      success: true
+      success: true,
+      data: cart
     })
-  } catch (error) { stdRes._500(res, error.message) }
+  } catch (error) {
+    console.log('error', error)
+    stdRes._500(res, error.message)
+  }
 }
 
 exports.postSubscribe = async (req, res, next) => {

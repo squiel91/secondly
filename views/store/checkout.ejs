@@ -33,10 +33,11 @@
   </div>
   <div class="col-md-4">
     <div class="secondlyInput">
-      <label for="address">Full address:</label>
-      <input type="text" name="address" id="address">
+      <label for="phone">Phone:</label>
+      <input type="text" name="phone" id="phone">
     </div>
   </div>
+  
   <div class="col-md-3">
     <div class="secondlyInput">
       <label for="state">State:</label>
@@ -100,8 +101,14 @@
   </div>
   <div class="col-md-3">
     <div class="secondlyInput">
-      <label for="zip">City:</label>
+      <label for="city">City:</label>
       <input type="text" name="city" id="city">
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="secondlyInput">
+      <label for="country">Country:</label>
+      <input type="text" name="country" id="country">
     </div>
   </div>
   <div class="col-md-2">
@@ -115,7 +122,32 @@
 <p>
   <input type="checkbox" id="remember" checked><label for="remember">Remember my shipping address in this device</label>
 </p>
-<button id="checkout-button" class="primary">Proceed to Payment</button>
+<h2>Card details</h2>
+<div class="col-md-4">
+    <div class="secondlyInput">
+      <label for="number">Card number:</label>
+      <input type="text" name="number" id="number">
+    </div>
+  </div>
+  <div class="col-md-4">
+      <div class="secondlyInput">
+          <label for="exp_month">Expiry month:</label>
+          <input type="text" name="exp_month" id="exp_month">
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="secondlyInput">
+            <label for="exp_year">Year:</label>
+            <input type="text" name="exp_year" id="exp_year">
+        </div>
+    </div>
+    <div class="col-md-4">
+      <div class="secondlyInput">
+        <label for="cvc">cvc:</label>
+        <input type="text" name="cvc" id="cvc">
+      </div>
+    </div>
+<button id="checkout-button" class="primary">Pay</button>
 
 <img class="stripe" src="/assets/stripe.svg" alt="Powered by Stripe">
 
@@ -124,54 +156,70 @@
 
 <script type="text/javascript">
   // Create an instance of the Stripe object with your publishable API key
-  // var stripe = Stripe('pk_test_51HsvHmF1g3qjNQo3PgYrH1aeV11EBkeOYk7O4SMsGHQoTq0jeYvcAA1Hi1J9uDe2BjYm9m6ysOmyMumkVkjVUydb00eHDltip5');
+  var stripe = Stripe('pk_test_51Hsv6KLzpNoJw5cRqsZQiQh1hqWafCluHiYVFIt68Y4RjWYsEFX4HGPaquJ3lcxNjOh393Ms39m0V4akBZ46727J00EzprcXql');
   var checkoutButton = document.getElementById('checkout-button');
 
-  checkoutButton.addEventListener('click', function(event) {
+  checkoutButton.addEventListener('click', async function(event) {
     const shipping = {
-      firstName: $('#firstName').val(),
-      lastName: $('#lastName').val(),
-      email: $('#email').val(),
-      address: $('#address').val(),
-      state: $('#state').val(),
-      city: $('#city').val(),
-      zip: $('#zip').val(),
-      _csrf: '<%= csrfToken %>',
-      remember: $('#remember').is(":checked")
+        firstName: $('#firstName').val(),
+        lastName: $('#lastName').val(),
+        email: $('#email').val(),
+        phone: $('#phone').val(),
+        country: $('#country').val(),
+        state: $('#state').val(),
+        city: $('#city').val(),
+        zip: $('#zip').val(),
+        number: $('#number').val(),
+        exp_month: $('#exp_month').val(),
+        exp_year: $('#exp_year').val(),
+        cvc: $('#cvc').val(),
+        _csrf: '<%= csrfToken %>',
+        remember: $('#remember').is(":checked")
     }
     
-    $(event.target).text('Redirecting to Stripe...').prop('disabled', true)
+    // $(event.target).text('Redirecting to Stripe...').prop('disabled', true)
     // Create a new Checkout Session using the server-side endpoint you
     // created in step 3.
-    fetch('checkout', {
+    await fetch('/api/cart/checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(shipping)
-    })
+      })
       .then(function(response, ok) {
-        return response.json();
+        return response.json()
       })
-      .then(function(session) {
-        if (session.error) {
-          throw session.error;
-        }
-        return stripe.redirectToCheckout({ sessionId: session.id });
-      })
-      .then(function(result) {
-        // If `redirectToCheckout` fails due to a browser or network
-        // error, you should display the localized error message to your
-        // customer using `error.message`.
-        if (result.error) {
-          alert(result.error.message);
-        }
+      .then(async function(data){
+        console.log('dataaaa', data)
+          if (data.success) {
+            window.location.replace('/')
+            // await fetch('/cart/checkout/success', {
+            //   method: 'GET',
+            // })
+            // .then(function(response){
+            //   return response.json()
+            // })
+            // .catch(function(error) {
+            //   alert(error)
+            // })
+          } else {
+            await fetch('/cart/checkout/fail', {
+              method: 'GET',
+            })
+            .then(function(response){
+              return response.json()
+            })
+            .catch(function(error) {
+              alert("fail")
+            })
+          }
       })
       .catch(function(error) {
-        alert(error)
+        // alert(error)
         $(event.target).text('Proceed to Payment').prop('disabled', false)
         // console.error('Error:', error);
-      });
-  });
+      })
+  })
 </script>
 

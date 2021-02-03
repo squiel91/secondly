@@ -1,15 +1,16 @@
+/* eslint-disable func-call-spacing */
 // const stripe = require('stripe')('sk_test_51HsvHmF1g3qjNQo3UKVTBTvzNgJEnECDCwjrj33NVknPH9JkhQil7XdATmhRIciU53LCfie21wig5DqgCJ5qF8m500nA4ViP5a')
 const mongoose = require('mongoose')
 
 const Product = require('../models/Product')
 const Page = require('../models/Page')
-// const Order = require('../models/Order')
+const Order = require('../models/Order')
 const Category = require('../models/Category')
 // const validator = require('email-validator')
 
-// const mailer = require('../utils/mailer')
+const mailer = require('../utils/mailer')
 
-function filterOutUnpublishedProducts(category) {
+function filterOutUnpublishedProducts (category) {
   category.products = category.products.filter(product => product.publish)
 }
 
@@ -80,7 +81,8 @@ exports.getCart = async (req, res, next) => {
 // get shipping form
 exports.getCartShipping = (req, res, next) => {
   // TODO: check if the user has at least one product
-  res.render('store/shipping.ejs')
+  // res.render('store/shipping.ejs')
+  res.render('store/checkout.ejs')
 }
 
 // get shipping form
@@ -189,14 +191,14 @@ exports.getSearch = (req, res, next) => {
 // Checkout
 // exports.postCheckout = async (req, res) => {
 //   if (validator.validate(req.body.email)) {
-//     (req.user? req.user.populate('cart.product').execPopulate() : req.sessionCart.getAll()) 
+//     (req.user? req.user.populate('cart.product').execPopulate() : req.sessionCart.getAll())
 //       .then(cartItems => {
 //         if (req.user) cartItems = cartItems.cart
 //         req.session.remember = req.body.remember
 //         delete req.body['remember']
 //         req.session.shippment = { ...req.body }
 //         req.session.save(async () => {
-//           // here I should do the last ckeck if I have the products 
+//           // here I should do the last ckeck if I have the products
 //           let lineItems = cartItems.map(item => {
 //             return {
 //               price_data: {
@@ -214,7 +216,7 @@ exports.getSearch = (req, res, next) => {
 //           if (totalShippmentCost > 0) lineItems.push({
 //             price_data: {
 //               currency: 'usd',
-//               product_data: { 
+//               product_data: {
 //                 name: 'Standard USPS Shipping',
 //                 images: ['https://secondly.store/assets/usps.jpeg']
 //               },
@@ -230,90 +232,89 @@ exports.getSearch = (req, res, next) => {
 //             success_url: (process.env.NODE_ENV == 'production'? 'https://secondly.store' : 'http://localhost:3000') + '/cart/checkout/success?session_id={CHECKOUT_SESSION_ID}',
 //             cancel_url: (process.env.NODE_ENV == 'production'? 'https://secondly.store' : 'http://localhost:3000') +'/cart/checkout/fail'
 //           })
-//           res.json({ id: session.id }) 
+//           res.json({ id: session.id })
 //         })
 //     })
 //   } else {
 //     console.log('ERROR VALIDATING')
-//     res.status(400).json({ error: 'invalid email' }) 
+//     res.status(400).json({ error: 'invalid email' })
 //   }
 // }
 
-// exports.getCheckoutSuccess = async (req, res, next) => {
-//   let user = req.user;
+exports.getCheckoutSuccess = async (req, res, next) => {
+  // const user = req.user
 
-//   const cart = await req.cart().get()
-  
-//   (req.user? req.user.populate('cart.product').execPopulate() : req.sessionCart.getAll())
-//     .then(fullCart => {
-//       if (req.user) fullCart = fullCart.cart
-//       if (!fullCart || fullCart.length == 0) throw Error('The cart is cannot be empty')
-//       let orderProducts = []
-//       let stockUpdatePromises = []
+  const cart = await req.cart.get()
+  // (req.user ? req.user.populate('cart.product').execPopulate() : req.sessionCart.getAll())
+  const data = req.user ? req.user.populate('cart.product').execPopulate() : req.cart.get()
+  data
+    .then(fullCart => {
+      if (req.user) fullCart = fullCart.cart
+      // eslint-disable-next-line eqeqeq
+      if (!fullCart || fullCart.length == 0) throw Error('The cart is cannot be empty')
+      const orderProducts = []
+      const stockUpdatePromises = []
 
-//       for (let item of fullCart) {
-//         orderProducts.push({
-//           originalProduct: item.product._id,
-//           title: item.product.title,
-//           unitPrice: item.product.price,
-//           unitShippingCost: item.product.shippingCost,
-//           quantity: item.quantity
-//         })
+      for (const item of cart) {
+        orderProducts.push({
+          originalProduct: item.product._id,
+          title: item.product.title,
+          unitPrice: item.product.price,
+          unitShippingCost: item.product.shippingCost,
+          quantity: item.quantity
+        })
 
-//         stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, {$inc: { stock: -item.quantity }}))
-//       }
+        stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
+      }
+      // console.log('req.session', req.session)
+      const order = new Order({
+        // user: user,
+        personal: {
+          firstName: req.session.shipping.firstName,
+          lastName: req.session.shipping.lastName,
+          email: req.session.shipping.email
+        },
+        shipping: {
+          state: req.session.shipping.state,
+          city: req.session.shipping.city,
+          address: req.session.shipping.address,
+          zip: req.session.shipping.zip
+        },
+        items: orderProducts
+      })
 
-//       const order = new Order({
-//         user: user,
-//         personal: {
-//           firstName:req.session.shippment.firstName, 
-//           lastName: req.session.shippment.lastName,
-//           email: req.session.shippment.email
-//         },
-//         shipping: {
-//           state: req.session.shippment.state,
-//           city: req.session.shippment.city,
-//           state: req.session.shippment.state,
-//           address: req.session.shippment.address,
-//           zip: req.session.shippment.zip
-//         },
-//         items: orderProducts
-//       })
+      // reduce the number of stock (if there is a -1 then you inform to the staff)
+      Promise.all(stockUpdatePromises)
+        .then(result => {
+          // return order.save()
+        })
+        .then(order => {
+          req.cart.reset()
+        })
+        .then(result => {
+          // eslint-disable-next-line eqeqeq
+          if (process.env.NODE_ENV == 'production') {
+            mailer(['enrique@secondly.store', 'ezequiel@secondly.store'], 'New Order Received', `Order Received from ${order.personal.firstName} ${order.personal.lastName}.\n\nYou can check it here: https://secondly.store/admin/orders/${order.id}`)
+              .then(() => {
+                return mailer(order.personal.email, 'Order Received', 'Your order has been received!\n\nIt is now being processes and we will let you know as soon as it is shipped (24 hours max.).\n\nThe Secondly Team')
+              })
+              .then(() => {
+                res.render('store/success.ejs')
+              })
+              .catch(error => {
+                console.log(error)
+              })
+          } else {
+            res.render('store/success.ejs')
+          }
+        })
+    })
+    .catch(error => {
+      console.error(error)
+      throw Error()
+    })
+}
 
-//       // reduce the number of stock (if there is a -1 then you inform to the staff)
-//       Promise.all(stockUpdatePromises)
-//         .then(result => {
-//           return order.save()
-//         })
-//         .then(order => {
-//           if (req.user) {
-//             req.user.cart = []
-//             req.user.save()
-//           } else req.session.sessionCart.reset()
-//         })
-//         .then(result => {
-//           if (process.env.NODE_ENV == 'production') {
-//             mailer(['enrique@secondly.store', 'ezequiel@secondly.store'], 'New Order Received', `Order Received from ${order.personal.firstName} ${order.personal.lastName}.\n\nYou can check it here: https://secondly.store/admin/orders/${order.id}`)
-//             .then(() => {
-//               return mailer(order.personal.email, 'Order Received', `Your order has been received!\n\nIt is now being processes and we will let you know as soon as it is shipped (24 hours max.).\n\nThe Secondly Team`)
-//             })
-//             .then(() => {
-//               res.render('store/success.ejs')
-//             })
-//             .catch(error => {
-//               console.log(error)
-//             })
-//           } else {
-//             res.render('store/success.ejs')
-//           }
-//         })
-//     })
-//     .catch(error => {
-//       console.error(error)
-//       throw Error()
-//     })
-// }
-
-// exports.getCheckoutFail = (req, res, next) => {
-//   res.render('store/fail.ejs')
-// }
+exports.getCheckoutFail = (req, res, next) => {
+  res.render('store/fail.ejs')
+}

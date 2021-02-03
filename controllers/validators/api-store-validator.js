@@ -30,8 +30,8 @@ exports.postCheckout = (req, res, next) => {
     req.body.email = req.body.email.trim().toLowerCase()
     if (!validator.isEmail(req.body.email)) return stdRes._400(res, 'email', 'Enter a valid email')
 
-    if (!req.body.address) return stdRes._400(res, 'address', 'Please enter an address')
-    req.body.address = req.body.address.trim()
+    if (!req.body.country) return stdRes._400(res, 'country', 'Please enter an country')
+    req.body.country = req.body.country.trim()
 
     if (!req.body.state) return stdRes._400(res, 'state', 'Please enter a state')
     req.body.state = req.body.state.trim()
@@ -41,7 +41,7 @@ exports.postCheckout = (req, res, next) => {
 
     if (!req.body.zip) return stdRes._400(res, 'zip', 'Please enter a zip code')
     req.body.zip = req.body.zip
-    if (!validator.isLength(req.body.zip,{min:5, max: 5})) return stdRes._400(res, 'zip', 'Enter a valid zip code')
+    if (!validator.isLength(req.body.zip, { min: 5, max: 5 })) return stdRes._400(res, 'zip', 'Enter a valid zip code')
 
     req.body.remember = req.body.remember === 'true'
 
