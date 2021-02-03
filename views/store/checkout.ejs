@@ -192,28 +192,12 @@
       })
       .then(async function(data){
         console.log('dataaaa', data)
-          if (data.success) {
-            window.location.replace('/')
-            // await fetch('/cart/checkout/success', {
-            //   method: 'GET',
-            // })
-            // .then(function(response){
-            //   return response.json()
-            // })
-            // .catch(function(error) {
-            //   alert(error)
-            // })
-          } else {
-            await fetch('/cart/checkout/fail', {
-              method: 'GET',
-            })
-            .then(function(response){
-              return response.json()
-            })
-            .catch(function(error) {
-              alert("fail")
-            })
-          }
+          // if (data.success) {
+          //   window.location.replace('/cart/checkout/success')
+          // } else {
+            // alert(data.message)
+            // window.location.replace('/cart/checkout/fail')
+          // }
       })
       .catch(function(error) {
         // alert(error)
