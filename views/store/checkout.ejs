@@ -191,13 +191,12 @@
         return response.json()
       })
       .then(async function(data){
-        console.log('dataaaa', data)
-          // if (data.success) {
-          //   window.location.replace('/cart/checkout/success')
-          // } else {
-            // alert(data.message)
-            // window.location.replace('/cart/checkout/fail')
-          // }
+          if (data.success) {
+            window.location.replace('/cart/checkout/success')
+          } else {
+            alert(data.message)
+            window.location.replace('/cart/checkout/fail')
+          }
       })
       .catch(function(error) {
         // alert(error)

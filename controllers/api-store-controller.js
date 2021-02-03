@@ -11,6 +11,7 @@ const Category = require('../models/Category')
 const Product = require('../models/Product')
 const Page = require('../models/Page')
 const Subscription = require('../models/subscription')
+const Order = require('../models/Order')
 
 // templates
 const cartTemplate = require('../models/templates/cart')
@@ -18,6 +19,7 @@ const productTemplate = require('../models/templates/product')
 const categoryTemplate = require('../models/templates/category')
 const pageTemplate = require('../models/templates/page')
 
+const mailer = require('../utils/mailer')
 const stdRes = require('../utils/standard-response')
 
 exports.customerSetup = async (req, res, next) => {
@@ -180,92 +182,83 @@ exports.postCheckout = async (req, res, next) => {
       { payment_method: paymentMethod.id }
     )
 
-  //   if (isASuccess(paymentIntentConfirmation)) {
-      
 
-  //     const cart = await req.cart.get()
-  // // (req.user ? req.user.populate('cart.product').execPopulate() : req.sessionCart.getAll())
-  // const data = req.user ? req.user.populate('cart.product').execPopulate() : req.cart.get()
-  // data
-  //   .then(fullCart => {
-  //     if (req.user) fullCart = fullCart.cart
-  //     // eslint-disable-next-line eqeqeq
-  //     if (!fullCart || fullCart.length == 0) throw Error('The cart is cannot be empty')
-  //     const orderProducts = []
-  //     const stockUpdatePromises = []
+    if (paymentIntentConfirmation) {
+      const cart = await req.cart.get()
+      // (req.user ? req.user.populate('cart.product').execPopulate() : req.sessionCart.getAll())
+      const data = req.user ? req.user.populate('cart.product').execPopulate() : req.cart.get()
+      data
+        .then(fullCart => {
+          if (req.user) fullCart = fullCart.cart
+          // eslint-disable-next-line eqeqeq
+          if (!fullCart || fullCart.length == 0) throw Error('The cart is cannot be empty')
+          const orderProducts = []
+          const stockUpdatePromises = []
 
-  //     for (const item of cart) {
-  //       orderProducts.push({
-  //         originalProduct: item.product._id,
-  //         title: item.product.title,
-  //         unitPrice: item.product.price,
-  //         unitShippingCost: item.product.shippingCost,
-  //         quantity: item.quantity
-  //       })
+          for (const item of cart) {
+            orderProducts.push({
+              originalProduct: item.product._id,
+              title: item.product.title,
+              unitPrice: item.product.price,
+              unitShippingCost: item.product.shippingCost,
+              quantity: item.quantity
+            })
 
-  //       stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
-  //     }
-  //     // console.log('req.session', req.session)
-  //     const order = new Order({
-  //       // user: user,
-  //       personal: {
-  //         firstName: req.session.shipping.firstName,
-  //         lastName: req.session.shipping.lastName,
-  //         email: req.session.shipping.email
-  //       },
-  //       shipping: {
-  //         state: req.session.shipping.state,
-  //         city: req.session.shipping.city,
-  //         address: req.session.shipping.address,
-  //         zip: req.session.shipping.zip
-  //       },
-  //       items: orderProducts
-  //     })
+            stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
+          }
+          const order = new Order({
+          // user: user,
+            personal: {
+              firstName: req.session.shipping.firstName,
+              lastName: req.session.shipping.lastName,
+              email: req.session.shipping.email
+            },
+            shipping: {
+              state: req.session.shipping.state,
+              city: req.session.shipping.city,
+              address: req.session.shipping.address,
+              zip: req.session.shipping.zip
+            },
+            items: orderProducts
+          })
 
-  //     // reduce the number of stock (if there is a -1 then you inform to the staff)
-  //     Promise.all(stockUpdatePromises)
-  //       .then(result => {
-  //         // return order.save()
-  //       })
-  //       .then(order => {
-  //         req.cart.reset()
-  //       })
-  //       .then(result => {
-  //         // eslint-disable-next-line eqeqeq
-  //         if (process.env.NODE_ENV == 'production') {
-  //           mailer(['enrique@secondly.store', 'ezequiel@secondly.store'], 'New Order Received', `Order Received from ${order.personal.firstName} ${order.personal.lastName}.\n\nYou can check it here: https://secondly.store/admin/orders/${order.id}`)
-  //             .then(() => {
-  //               return mailer(order.personal.email, 'Order Received', 'Your order has been received!\n\nIt is now being processes and we will let you know as soon as it is shipped (24 hours max.).\n\nThe Secondly Team')
-  //             })
-  //             .then(() => {
-  //               res.render('store/success.ejs')
-  //             })
-  //             .catch(error => {
-  //               console.log(error)
-  //             })
-  //         } else {
-  //           res.render('store/success.ejs')
-  //         }
-  //       })
-  //   })
-  //   .catch(error => {
-  //     console.error(error)
-  //     throw Error()
-  //   })
+          // reduce the number of stock (if there is a -1 then you inform to the staff)
+          Promise.all(stockUpdatePromises)
+            .then(result => {
+              return order.save()
+            })
+            .then(async order => {
+              await req.cart.reset()
+            })
+            .then(result => {
+            // eslint-disable-next-line eqeqeq
+              if (process.env.NODE_ENV == 'production') {
+                mailer(['enrique@secondly.store', 'ezequiel@secondly.store'], 'New Order Received', `Order Received from ${order.personal.firstName} ${order.personal.lastName}.\n\nYou can check it here: https://secondly.store/admin/orders/${order.id}`)
+                  .then(() => {
+                    return mailer(order.personal.email, 'Order Received', 'Your order has been received!\n\nIt is now being processes and we will let you know as soon as it is shipped (24 hours max.).\n\nThe Secondly Team')
+                  })
+                  .catch(error => {
+                    console.log(error)
+                  })
+              }
+            })
+        })
+        .catch(error => {
+          console.error(error)
+          throw Error()
+        })
+    }
 
-  //   res.json({
-  //     success: true,
-  //     data: cart
-  //   })
+    res.json({
+      success: true
+    })
 
-  //   } else {
-  //     stdRes(res, message: getError(paymentIntentConfirmation))
-  //   }
-
+    //   } else {
+    //     stdRes(res, message: getError(paymentIntentConfirmation))
+    //   }
 
     // console.log('paymentIntentConfirmation', paymentIntentConfirmation)
     // console.log('cart', cart)
-
   } catch (error) {
     console.log('error', error)
     stdRes._500(res, error.message)
