@@ -15,6 +15,7 @@ const userTemplate = require('../models/templates/user')
 
 // Admin authentication
 exports.adminAuth = async (req, res, next) => {
+  console.log('Authenitcating')
   if (req.session.userId) {
     req.user = await User.findById(req.session.userId)
     if (req.user.admin) next()
@@ -32,7 +33,7 @@ exports.adminAuth = async (req, res, next) => {
 
 // Page
 exports.postPage = async (req, res, next) => {
-  try {
+  // try {
     let page = new Page({
       title: req.body.title,
       handle: req.body.handle,
@@ -43,7 +44,7 @@ exports.postPage = async (req, res, next) => {
       success: true,
       page: pageTemplate(page)
     })
-  } catch (error) { stdRes._500(res, error.message) }
+  // } catch (error) { stdRes._500(res, error.message) }
 }
 
 exports.patchPage = async (req, res, next) => {

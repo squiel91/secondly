@@ -70,9 +70,9 @@ server.post('/cardaccio', (req, res, next) => {
 })
 
 server.use('/api',
+  adminApiRoutes,
   accessApiRoutes,
   storeApiRoutes,
-  adminApiRoutes
 )
 
 server.use(accessRoutes)

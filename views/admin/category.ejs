@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="/richtext.min.css">
 
-<h2>Category Editor</h2>
+<h1>Category Editor</h1>
 
 <form action="/admin/categories<%= category ? `/${category.handle}` : '' %>" method="post">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
