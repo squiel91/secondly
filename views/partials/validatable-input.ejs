@@ -10,7 +10,7 @@
     <% if (locals.options) { %>
       <select id="<%= name %>" style="margin-bottom: -3px;">>
         <% options.forEach(option => { %>
-          <option val="<%= option.value || option.text || option %>"><%= option.text || option.value || option %></option>
+          <option value="<%= option.value || option.text || option %>"><%= option.text || option.value || option %></option>
         <% }) %>
       </select>
     <% } else { %>

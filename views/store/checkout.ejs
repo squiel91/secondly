@@ -16,21 +16,23 @@
 <%- include('../partials/validatable-input.ejs', { label: 'First name' }) %> 
 <%- include('../partials/validatable-input.ejs', { label: 'Last name' }) %> 
 <%- include('../partials/validatable-input.ejs', { label: 'Email' }) %>
+<%- include('../partials/validatable-input.ejs', { label: 'Phone' }) %>
 
 <h1>Shipping Address</h1>
+<%- include('../partials/validatable-input.ejs', { label: 'Line 1', help: 'The format you should use is the following: [Street name] [House/flat number] [Unit number]' }) %> 
+<%- include('../partials/validatable-input.ejs', { label: 'Line 2', help: 'The format you should use is the following: [Street name] [House/flat number] [Unit number]' }) %> 
 <%- include('../partials/validatable-input.ejs', { label: 'Country', options: countryCodes }) %>
 
 <%- include('../partials/validatable-input.ejs', { label: 'State' }) %> 
 <%- include('../partials/validatable-input.ejs', { label: 'City' }) %> 
-<%- include('../partials/validatable-input.ejs', { label: 'Address', help: 'The format you should use is the following: [Street name] [House/flat number] [Unit number]' }) %> 
 <%- include('../partials/validatable-input.ejs', { label: 'Zip code', name: 'zip', help: 'A 5 digits code that uniquely identifies a geographic area' }) %> 
 <p>
   <input type="checkbox" id="remember" checked><label for="remember">Remember my shipping address in this device</label>
 </p>
 <h1>Card details</h1>
-<%- include('../partials/validatable-input.ejs', { label: 'Card number', name: 'number' }) %> 
+<%- include('../partials/validatable-input.ejs', { label: 'Card number', name: 'cardNumber' }) %> 
 <%- include('../partials/validatable-input.ejs', { label: 'Expiration date (MM/YY)', name: 'cardExpiration' }) %> 
-<%- include('../partials/validatable-input.ejs', { label: 'CVC', name: 'number', help: 'A 3 digits code, usually displayed at the back of the card' }) %> 
+<%- include('../partials/validatable-input.ejs', { label: 'CVC', name: 'cvc', help: 'A 3 digits code, usually displayed at the back of the card' }) %> 
 
 <div class="errorMessage"></div>
 
@@ -38,13 +40,8 @@
 
 <img class="stripe" src="/assets/stripe.svg" alt="Powered by Stripe">
 
-<!-- MANO: I believe we are not using Stripe here -->
-<script src="https://js.stripe.com/v3/"></script>
-
 <script src="/scripts/utils.js" async></script>
 <script async>
-  // MANO: I believe we are not using Stripe here
-  var stripe = Stripe('pk_test_51Hsv6KLzpNoJw5cRqsZQiQh1hqWafCluHiYVFIt68Y4RjWYsEFX4HGPaquJ3lcxNjOh393Ms39m0V4akBZ46727J00EzprcXql');
 
   function pay () {
 
@@ -53,13 +50,14 @@
       lastName: $('#lastName').val(),
       email: $('#email').val(),
       phone: $('#phone').val(),
+      line1: $('#line1').val(),
+      line2: $('#line2').val(),
       country: $('#country').val(),
       state: $('#state').val(),
       city: $('#city').val(),
       zip: $('#zip').val(),
-      number: $('#number').val(),
-      exp_month: $('#exp_month').val(),
-      exp_year: $('#exp_year').val(),
+      cardNumber: $('#cardNumber').val(),
+      cardExpiration: $('#cardExpiration').val(),
       cvc: $('#cvc').val(),
       _csrf: '<%= csrfToken %>',
       remember: $('#remember').is(":checked")

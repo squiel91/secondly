@@ -60,18 +60,9 @@ module.exports = class SessionCart {
     }
   }
 
-  reset () {
+  async reset () {
     this.items = []
     if (!this.session.remember) this.session.shippment = undefined
-
-    return new Promise((resolve, reject) => {
-      try {
-        this.save(result => {
-          resolve(result)
-        })
-      } catch (error) {
-        reject(error)
-      }
-    })
+    await this.save()
   }
 }
