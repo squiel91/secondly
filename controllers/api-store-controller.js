@@ -10,7 +10,7 @@ const User = require('../models/User')
 const Category = require('../models/Category')
 const Product = require('../models/Product')
 const Page = require('../models/Page')
-const Subscription = require('../models/subscription')
+const Subscription = require('../models/Subscription')
 const Order = require('../models/Order')
 
 // templates

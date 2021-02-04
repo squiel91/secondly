@@ -42,10 +42,10 @@ const orderSchema = new Schema({
       type: String,
       required: true
     },
-    // address: {
-    //   type: String,
-    //   required: true
-    // },
+    address: {
+      type: String,
+      required: true
+    },
     zip: {
       type: String,
       required: true

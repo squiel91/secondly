@@ -3,13 +3,19 @@
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title><%= PREFERENCES.title %> Manage Area</title>
+      <title><%= PREFERENCES.storeName %> Manage Area</title>
       <meta name="description" content="The straight-forward e-commerce platform for selling your products"></head>
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+      <script src="/bootstrap.min.js"></script>
       <link rel="stylesheet" href="/bootstrap.css">
       <link href="/assets/styles.css" rel="stylesheet">
       <link rel="preconnect" href="https://fonts.gstatic.com">
       <link href="https://fonts.googleapis.com/css2?family=Alata&display=swap" rel="stylesheet">
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+      <!-- Tippy -->
+      <script src="https://unpkg.com/@popperjs/core@2"></script>
+      <script src="https://unpkg.com/tippy.js@6"></script>
       
       <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
       <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
@@ -181,7 +187,7 @@
           <div class="topMenu">
             <a class="logo-title-link" href="/admin">
               <img class="logo" src="/assets/hands-high-five-ol-if-512.png">
-              <h1><%= PREFERENCES.storeName %></h1>
+              <div class="main-brand"><%= PREFERENCES.storeName %></div>
             </a>
             <div class="separator"></div>
             <a class="menuItem hideOnLarge" href="/admin">Dashboard</a>

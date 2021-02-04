@@ -6,23 +6,23 @@ const adminApiController = require('../controllers/api-admin-controller')
 const authenticate = adminApiController.adminAuth
 
 // Page
-router.post('/page', authenticate, adminApiValidator.postPage, adminApiController.postPage)
-router.patch('/page/:pageId', authenticate, adminApiController.patchPage)
-router.delete('/page/:pageId', authenticate, adminApiController.deletePage)
+router.post('/pages', authenticate, adminApiValidator.postPage, adminApiController.postPage)
+router.patch('/pages/:pageId', authenticate, adminApiController.patchPage)
+router.delete('/pages/:pageId', authenticate, adminApiController.deletePage)
 
 // Categories
-router.post('/category', authenticate, adminApiValidator.postCategory, adminApiController.postCategory)
-router.patch('/category/:categoryId', authenticate, adminApiController.patchCategory)
-router.delete('/category/:categoryId', authenticate, adminApiController.deleteCategory)
+router.post('/categories', authenticate, adminApiValidator.postCategory, adminApiController.postCategory)
+router.patch('/categories/:categoryId', authenticate, adminApiController.patchCategory)
+router.delete('/categories/:categoryId', authenticate, adminApiController.deleteCategory)
 
 // Product
-router.post('/product', authenticate, adminApiValidator.postProduct, adminApiController.postProduct)
-router.patch('/product/:productId', authenticate, adminApiController.patchProduct)
-router.delete('/product/:productId', authenticate, adminApiController.deleteProduct)
+router.post('/products', authenticate, adminApiValidator.postProduct, adminApiController.postProduct)
+router.patch('/products/:productId', authenticate, adminApiController.patchProduct)
+router.delete('/products/:productId', authenticate, adminApiController.deleteProduct)
 
 // User
-router.post('/user', authenticate, adminApiValidator.postUser, adminApiController.postUser)
-router.patch('/user/:userId', authenticate, adminApiController.patchUser)
-router.delete('/user/:userId', authenticate, adminApiController.deleteUser)
+router.post('/users', authenticate, adminApiValidator.postUser, adminApiController.postUser)
+router.patch('/users/:userId', authenticate, adminApiController.patchUser)
+router.delete('/users/:userId', authenticate, adminApiController.deleteUser)
 
 module.exports = router
