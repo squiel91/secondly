@@ -23,7 +23,7 @@ exports.postCheckout = (req, res, next) => {
     if (!req.body.firstName) return stdRes._400(res, 'firstName', 'Please enter your first name')
     req.body.firstName = req.body.firstName.trim()
 
-    if (!req.body.lastName) return stdRes._400(res, 'lastName', 'Please enter last name')
+    if (!req.body.lastName) return stdRes._400(res, 'lastName', 'Please enter your last name')
     req.body.lastName = req.body.lastName.trim()
 
     if (!req.body.email) return stdRes._400(res, 'email', 'Please enter an email')
@@ -40,9 +40,9 @@ exports.postCheckout = (req, res, next) => {
     req.body.city = req.body.city.trim()
 
     if (!req.body.zip) return stdRes._400(res, 'zip', 'Please enter a zip code')
-    req.body.zip = req.body.zip
-    if (!validator.isLength(req.body.zip, { min: 5, max: 5 })) return stdRes._400(res, 'zip', 'Enter a valid zip code')
+    if (req.body.zip.length !== 5) return stdRes._400(res, 'zip', 'Enter a valid zip code')
 
+    // MANO: Here we are not validating the card params. Take into account the cardExpiration that is a string of the form MM/YY and needs to be valid and not expired
     req.body.remember = req.body.remember === 'true'
 
     next()

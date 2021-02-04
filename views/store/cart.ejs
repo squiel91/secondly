@@ -121,7 +121,7 @@
     Shipping: $ <span id="shippingCost"><%= shipping %></span>
   </p>
   <p class="cart__total">Total: $ <span id="total"><%= totalPrice %></span></p>
-  <a href="/cart/shipping">
+  <a href="/cart/checkout">
     <button class="primary" <%= error? 'disabled' : ' ' %>>Proceed to Checkout</button>
   </a>
 <% }  else { %>

@@ -7,7 +7,9 @@ const storeController = require('../controllers/store-controller')
 router.get('/', storeController.getHomepage)
 router.get('/products/:productId', storeController.getProduct)
 router.get('/cart', storeController.getCart)
-router.get('/cart/shipping', storeController.getCartShipping)
+router.get('/cart/checkout', storeController.getCheckout)
+
+// MANO: I want to show the order in the success page with a success message on top. You can reuse the code from admin/order but status and tracking not being editable.
 router.get('/cart/checkout/success', storeController.getCheckoutSuccess)
 router.get('/cart/checkout/fail', storeController.getCheckoutFail)
 router.get('/orders', storeController.getOrders)

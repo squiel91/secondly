@@ -135,6 +135,7 @@ exports.postCheckout = async (req, res, next) => {
 
     const name = req.body.firstName + ' ' + req.body.lastName
     const customer = await stripe.customers.create({
+      // MANO: you are never sending the customer address to Stripe. Shouldnt be sent as a line1?
       address: {
         city: req.body.city,
         country: req.body.country,
@@ -151,7 +152,7 @@ exports.postCheckout = async (req, res, next) => {
       type: 'card',
       card: {
         number: req.body.number,
-        exp_month: req.body.exp_month,
+        exp_month: req.body.exp_year.exp_month,
         exp_year: req.body.exp_year,
         cvc: req.body.cvc
       },
@@ -182,70 +183,67 @@ exports.postCheckout = async (req, res, next) => {
       { payment_method: paymentMethod.id }
     )
 
-
+    // MANO: here is 
     if (paymentIntentConfirmation) {
       const cart = await req.cart.get()
-      // (req.user ? req.user.populate('cart.product').execPopulate() : req.sessionCart.getAll())
-      const data = req.user ? req.user.populate('cart.product').execPopulate() : req.cart.get()
-      data
-        .then(fullCart => {
-          if (req.user) fullCart = fullCart.cart
-          // eslint-disable-next-line eqeqeq
-          if (!fullCart || fullCart.length == 0) throw Error('The cart is cannot be empty')
-          const orderProducts = []
-          const stockUpdatePromises = []
 
-          for (const item of cart) {
-            orderProducts.push({
-              originalProduct: item.product._id,
-              title: item.product.title,
-              unitPrice: item.product.price,
-              unitShippingCost: item.product.shippingCost,
-              quantity: item.quantity
-            })
+      if (!cart || cart.length === 0) throw Error('The cart cannot be empty')
 
-            stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
-          }
-          const order = new Order({
-          // user: user,
-            personal: {
-              firstName: req.session.shipping.firstName,
-              lastName: req.session.shipping.lastName,
-              email: req.session.shipping.email
-            },
-            shipping: {
-              state: req.session.shipping.state,
-              city: req.session.shipping.city,
-              address: req.session.shipping.address,
-              zip: req.session.shipping.zip
-            },
-            items: orderProducts
-          })
+      const orderProducts = []
+      const stockUpdatePromises = []
 
-          // reduce the number of stock (if there is a -1 then you inform to the staff)
-          Promise.all(stockUpdatePromises)
-            .then(result => {
-              return order.save()
-            })
-            .then(async order => {
-              await req.cart.reset()
-            })
-            .then(result => {
-            // eslint-disable-next-line eqeqeq
-              if (process.env.NODE_ENV == 'production') {
-                mailer(['enrique@secondly.store', 'ezequiel@secondly.store'], 'New Order Received', `Order Received from ${order.personal.firstName} ${order.personal.lastName}.\n\nYou can check it here: https://secondly.store/admin/orders/${order.id}`)
-                  .then(() => {
-                    return mailer(order.personal.email, 'Order Received', 'Your order has been received!\n\nIt is now being processes and we will let you know as soon as it is shipped (24 hours max.).\n\nThe Secondly Team')
-                  })
-                  .catch(error => {
-                    console.log(error)
-                  })
-              }
-            })
+      // use cart.forEach
+      for (const item of cart) {
+        orderProducts.push({
+          originalProduct: item.product._id,
+          title: item.product.title,
+          unitPrice: item.product.price,
+          unitShippingCost: item.product.shippingCost,
+          quantity: item.quantity
         })
-        .catch(error => {
-          console.error(error)
-          throw Error()
+
+        // MANO: Update only if stock is set. If the stock is not set then there is no need to update it
+        stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
+      }
+      const order = new Order({
+        // MANO: if the user is logged in (req.user) then we should associate the order with the user
+        // user: user,
+        personal: {
+          firstName: req.session.shipping.firstName,
+          lastName: req.session.shipping.lastName,
+          email: req.session.shipping.email
+        },
+        shipping: {
+          state: req.session.shipping.state,
+          city: req.session.shipping.city,
+          address: req.session.shipping.address,
+          zip: req.session.shipping.zip
+        },
+        items: orderProducts
+      })
+
+      // reduce the number of stock (if there is a -1 then you inform to the staff)
+      // MANO: dont use then, use async await. In the front-end is ok becouse then has more support on browsers but for the back-end it makes no sense.
+      Promise.all(stockUpdatePromises)
+        .then(result => {
+          return order.save()
+        })
+        .then(async order => {
+          await req.cart.reset()
+        })
+        .then(result => {
+        // eslint-disable-next-line eqeqeq
+
+          // MANO: use the env helper in utils
+          if (process.env.NODE_ENV === 'production') {
+            mailer(['enrique@secondly.store', 'ezequiel@secondly.store'], 'New Order Received', `Order Received from ${order.personal.firstName} ${order.personal.lastName}.\n\nYou can check it here: https://secondly.store/admin/orders/${order.id}`)
+              .then(() => {
+                return mailer(order.personal.email, 'Order Received', 'Your order has been received!\n\nIt is now being processes and we will let you know as soon as it is shipped (24 hours max.).\n\nThe Secondly Team')
+              })
+              .catch(error => {
+                console.log(error)
+              })
+          }
         })
     }
 

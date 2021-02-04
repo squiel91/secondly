@@ -4,11 +4,10 @@ const mongoose = require('mongoose')
 
 const Product = require('../models/Product')
 const Page = require('../models/Page')
-const Order = require('../models/Order')
 const Category = require('../models/Category')
+const countryCodes = require('../utils/country-codes')
 // const validator = require('email-validator')
 
-const mailer = require('../utils/mailer')
 
 function filterOutUnpublishedProducts (category) {
   category.products = category.products.filter(product => product.publish)
@@ -79,10 +78,10 @@ exports.getCart = async (req, res, next) => {
 }
 
 // get shipping form
-exports.getCartShipping = (req, res, next) => {
+exports.getCheckout = (req, res, next) => {
   // TODO: check if the user has at least one product
   // res.render('store/shipping.ejs')
-  res.render('store/checkout.ejs')
+  res.render('store/checkout.ejs', { countryCodes })
 }
 
 // get shipping form
@@ -242,8 +241,6 @@ exports.getSearch = (req, res, next) => {
 // }
 
 exports.getCheckoutSuccess = async (req, res, next) => {
-  // const user = req.user
-
   res.render('store/success.ejs')
 }
 
