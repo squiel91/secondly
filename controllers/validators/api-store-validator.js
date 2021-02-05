@@ -54,7 +54,7 @@ exports.postCheckout = (req, res, next) => {
 
     req.body.remember = req.body.remember === 'true'
     if (!req.body.cardNumber) return stdRes._400(res, 'cardNumber', 'Please enter a Card Number')
-    if (req.body.cardNumber.length > 14 && req.body.cardNumber.length < 16) return stdRes._400(res, 'cardNumber', 'Enter a valid Card Number')
+    if (req.body.cardNumber.length < 14 || req.body.cardNumber.length > 16) return stdRes._400(res, 'cardNumber', 'Enter a valid Card Number')
 
     // eslint-disable-next-line prefer-regex-literals
     if (!req.body.cardExpiration) return stdRes._400(res, 'cardExpiration', 'Please enter a cardExpiration code')

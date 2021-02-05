@@ -5,6 +5,7 @@ const mongoose = require('mongoose')
 const Product = require('../models/Product')
 const Page = require('../models/Page')
 const Category = require('../models/Category')
+const Order = require('../models/Order')
 const countryCodes = require('../utils/country-codes')
 // const validator = require('email-validator')
 
@@ -241,7 +242,8 @@ exports.getSearch = (req, res, next) => {
 // }
 
 exports.getCheckoutSuccess = async (req, res, next) => {
-  res.render('store/success.ejs')
+  const order = await Order.findOne({ _id: req.query.orderId })
+  res.render('store/success.ejs', { order })
 }
 
 exports.getCheckoutFail = (req, res, next) => {

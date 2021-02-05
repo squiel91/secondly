@@ -66,7 +66,7 @@
     fetchApi('/api/cart/checkout', { // POST is the default method
       params: checkoutParams,
       success: function (data) {
-        window.location.replace('/cart/checkout/success')
+        window.location.replace('/cart/checkout/success?orderId='+ data.orderData._id)
       }
     })
   }

@@ -186,7 +186,7 @@ exports.postCheckout = async (req, res, next) => {
       paymentIntent.id,
       { payment_method: paymentMethod.id }
     )
-
+    let order = ''
     if (paymentIntentConfirmation) {
       const cart = await req.cart.get()
 
@@ -205,9 +205,9 @@ exports.postCheckout = async (req, res, next) => {
         })
 
         // MANO: Update only if stock is set. If the stock is not set then there is no need to update it
-        stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
+        // stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
       })
-      const order = new Order({
+      order = new Order({
         user: (req.user) ? req.user : undefined,
         personal: {
           firstName: req.body.firstName,
@@ -241,7 +241,8 @@ exports.postCheckout = async (req, res, next) => {
     }
 
     res.json({
-      success: true
+      success: true,
+      orderData: order
     })
   } catch (error) {
     console.log('error', error)
