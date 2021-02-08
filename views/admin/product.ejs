@@ -1,324 +1,10 @@
-<!-- pass a product argument if edition -->
+<%# pass a product argument if edition %>
 <%- include('../partials/admin-head.ejs') %>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<%# styles %>
+<link rel="stylesheet" href="/statics/richtext.min.css">
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="/richtext.min.css">
-
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" integrity="sha512-0bEtK0USNd96MnO4XhH8jhv3nyRF0eK87pJke6pkYf3cM0uDIhNJy9ltuzqgypoIFXw3JSuiy04tVk4AjpZdZw==" crossorigin="anonymous"></script>
-
-<h1>Product Editor</h1>
-
-<form action="/admin/products<%= product ? `/${product._id}/edit` : '' %>" method="post">
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-  <div class="row topPanel">
-    <div class="col-sm-12">
-      <div class="validatable-input  <%= prefill?.title?.error ? 'error' : '' %>"">
-        <div class="secondlyInputInner">
-          <label for="title">Title:</label>
-          <input id="title" type="text" name="title" value="<%= prefill.valueOfOr('title', product?.title) %>">
-        </div>
-        <div class="secondlyErrorMessage">
-          <%= prefill?.title?.error %>  
-        </div>
-      </div>
-    </div>
-  
-    <div class="col-md-3 col-sm-6">
-      <div class="validatable-input  <%= prefill?.price?.error ? 'error' : '' %>"">
-        <div class="secondlyInputInner">
-          <label for="price">Price:</label>
-          <input id="price" type="text" step="0.01" name="price" value="<%= prefill.valueOfOr('price', product?.price) %>">
-        </div>
-        <div class="secondlyErrorMessage">
-          <%= prefill?.price?.error %>  
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3 col-sm-6">
-      <div class="validatable-input  <%= prefill?.compareAt?.error ? 'error' : '' %>"">
-        <div class="secondlyInputInner">
-          <label for="compareAt">Compare at:</label>
-          <input id="compareAt" type="text" step="0.01" name="compareAt" value="<%= prefill.valueOfOr('compareAt', product?.compareAt) %>">
-        </div>
-        <div class="secondlyErrorMessage">
-          <%= prefill?.compareAt?.error %>  
-        </div>
-      </div>
-    </div>
-  
-    <div class="col-md-3 col-sm-6">
-      <div class="validatable-input  <%= prefill?.shippingCost?.error ? 'error' : '' %>"">
-        <div class="secondlyInputInner">
-          <label for="shippingCost">Shipping $</label>
-          <input id="shippingCost" type="text" step="0.01" name="shippingCost" value="<%= prefill.valueOfOr('shippingCost', product?.shippingCost) %>">
-        </div>
-        <div class="secondlyErrorMessage">
-          <%= prefill?.shippingCost?.error %>  
-        </div>
-      </div>
-    </div>
-  
-    <div class="col-md-3 col-sm-6">
-      <div class="validatable-input  <%= prefill?.stock?.error ? 'error' : '' %>"">
-        <div class="secondlyInputInner">
-          <label for="stock">Stock</label>
-          <input id="stock" type="text" step="0.01" name="stock" value="<%= prefill.valueOfOr('stock', product?.stock) %>">
-        </div>
-        <div class="secondlyErrorMessage">
-          <%= prefill?.stock?.error %>  
-        </div>
-      </div>
-    </div>
-  </div>
-  <div>
-    <textarea name="description" id="description" cols="30" rows="10"><%= product ? product.description : '' %></textarea>
-  </div>
-  
-  <div>
-    <label for="images">Images</label>
-    <div id="galleryIframe">
-      <div style="padding: 12px;">
-        <style>
-      
-          .imagesGallery {
-            border-left: 1px solid lightgray;
-            border-top: 1px solid lightgray;
-          }
-      
-          .image {
-            position: relative;
-            width: 100%;
-            padding-bottom: 100%;
-            background-size: cover;
-            background-position: center;
-            border-right: 1px solid lightgray;
-            border-bottom: 1px solid lightgray;
-          }
-      
-          .imagesGallery .image button.edit {
-            display: none;
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-          }
-      
-          .imagesGallery .image .checked {
-            display: none;
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background-color: deepskyblue;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-          }
-      
-          .imagesGallery.editMode .image button.edit,
-          .imagesGallery .image.selected .checked {
-            display: block;
-          }
-      
-        </style>
-        <div style="display: flex; flex-direction: column;">
-          <header>
-            <div style="display: flex; align-items: center;">
-              <h2 style="flex-grow: 1;"><button type="button" onclick="closeGallery()">X</button>  Image Gallery</h2>
-              <input type="checkbox" onchange="toggleEditMode(event)" id="edit"><label for="edit">Delete mode</label>
-              <input type="file" name="image" id="imageUpload" style="display: none;" onchange="uploadImage(event)"/>
-            </div>
-          </header>
-          <div class="imagesGallery row" style="flex-grow: 1; margin-left: 0; margin-right: 0;">
-            <div class="col-lg-2 col-md-3 col-4 uploadNew" style="padding-left: 0; padding-right: 0;">
-              <div class="image" onclick="$('#imageUpload').click()">
-                <div style="position: absolute; top: 0; bottom: 0; right: 0; left: 0; display: flex; align-items: center; justify-content: center;">
-                  Click to upload a new image
-                </div>
-              </div>
-            </div>
-          </div>
-          <footer>
-            <button class="primary" type="button" onclick="returnSelection()">Select</button>
-          </footer>
-        </div>
-        <script>
-          const urlParams = new URLSearchParams(window.location.search)
-          preselectedProdutcIds = urlParams.get('selected')?.split(',') || []
-      
-          var editMode = false
-      
-          const imageIndex = {}
-      
-          function returnSelection() {
-            // Convert the index to a list and returns only the images that are selected
-            selectedImages(Object.values(imageIndex).filter(imageIndexRecord => imageIndexRecord.selected).map(imageIndexRecord => imageIndexRecord.image))
-          }
-      
-          function appendImage(image, selected) {
-            const newElem = $(`
-              <div class="col-lg-2 col-md-3 col-4" style="padding-left: 0; padding-right: 0;">
-                <div 
-                  data-image-id="${image.id}"
-                  class="image ${selected? 'selected' : ''}" 
-                  onclick="toggleImageSelection(event)"
-                  style="background-image: url('${image.src}');"
-                >
-                  <div class="checked"></div>
-                </div>
-              </div>`).insertAfter('.imagesGallery .uploadNew')
-          }
-          
-          function load(preselectedProdutcIds) {
-            fetch('/gallery', {
-              method: 'GET'
-            })
-              .then((response) => {
-                return response.json()
-              })
-              .then(body => {
-                if (body.success) {
-                  body.images.forEach(image => {
-                    const isSelected = preselectedProdutcIds.includes(image.id)
-                    imageIndex[image.id] = {
-                      selected: isSelected,
-                      image
-                    }
-                    appendImage(image, isSelected)
-                  })
-                } else {
-                  if (body.error) {
-                    alert(body.message || 'There was an error uploading the image')
-                    console.log('There was an error')
-                  }
-                }
-              })
-              .catch(function(error) {
-                alert('Ups! There was an error uploading the image')
-                console.log(error)
-              })
-          }
-      
-          function toggleImageSelection(event) {
-            if (!editMode) {
-              const imageId = $(event.target).data('image-id')
-              if (!imageIndex[imageId].selected) {
-                imageIndex[imageId].selected = true
-                $(event.target).addClass('selected')
-              } else {
-                imageIndex[imageId].selected = false
-                $(event.target).removeClass('selected')
-              }
-            } else {
-              // TODO: take me to image edition panel
-              deleteImage(event)
-            }
-          }
-      
-          function toggleEditMode(event) {
-            editMode = $(event.target).prop('checked')
-            if (editMode) {
-              $('.imagesGallery').addClass('editMode')
-            } else {
-              $('.imagesGallery').removeClass('editMode')
-            }
-          }
-      
-          function editImage(event) {
-            alert('Not yet implemented!')
-          }
-      
-          function deleteImage(event) {
-            const imageId = $(event.target).data('image-id')
-            fetch(`/gallery/${imageId}?_csrf=<%= csrfToken %>`, {
-              method: 'DELETE',
-              credentials: 'same-origin'
-            })
-            .then((response) => {
-              return response.json()
-            })
-            .then(body => {
-              $(event.target).parent().remove()
-              delete imageIndex[imageId]
-              removeImageIfSelected(imageId)
-            })
-            .catch(function(error) {
-              alert('Ups! There was an error deleting the image')
-              console.log(error)
-            })
-          }
-      
-          function uploadImage(event) {
-            const fileInput = event.target;
-            const formData = new FormData();
-            formData.append('image', fileInput.files[0]);
-            fetch('/gallery?_csrf=<%= csrfToken %>', {
-              method: 'POST',
-              body: formData
-            })
-              .then((response) => {
-                return response.json()
-              })
-              .then(body => {
-                if (body.success) {
-                  let image = body.image
-                  imageIndex[image.id] = {
-                    selected: true,
-                    image
-                  }
-                  appendImage(image, true)
-                } else {
-                  if (body.error) {
-                    alert(body.message || 'There was an error uploading the image')
-                    console.log('There was an error')
-                  }
-                }
-              })
-              .catch(function(error) {
-                alert('Ups! There was an error uploading the image')
-                console.log(error)
-              })
-          }
-        </script>
-      </div>
-    </div>
-    <div class="selectedImages" id="sortable">
-
-    </div>
-    <button type="button" onclick="loadGallery()">Pick images</button>
-  </div>
-
-  <div class="previews"></div>
-
-  <div>
-    <label>Categories</label>
-    
-    <% if (allCategories && (allCategories.length > 0)) { %>
-      <a href="/admin/categories/new">New Category</a>
-      <ul>
-        <% for (let category of allCategories) { %>
-          <li>
-            <input 
-              type="checkbox"
-              name="categories[]"
-              value="<%= category._id %>"
-              id="<%= category._id %>"
-              <%= product && category.products.indexOf(product._id) >= 0 ? 'checked' : '' %>
-            >
-            <label for="<%= category._id %>"><%= category.title %></label>
-          </li>
-        <% } %>
-      </ul>
-    <% } else { %>
-      <p>You dont have any category yet! <a href="/admin/categories/new">Go create one!</a></p>
-    <% } %>
-  </div>
-  <div>
-    <input type="checkbox" name="publish" id="publish" <%= product && product.publish ? 'checked' : '' %>> <label for="publish">Publish (in not is a draft)</label>
-  </div>
-  <button class="primary" type="submit"><%= product ? 'Update' : 'Create' %></button>
-</form>
 
 <style>
   .topPanel {
@@ -347,64 +33,147 @@
 
 </style>
 
-<script src="/jquery.richtext.min.js"></script>
-<script>
+<%# content %>
+<h1>Product Editor</h1>
 
-  let galleryLoaded = false
 
-  const initialImages = <%- JSON.stringify(product?.images || []) %>;
-  selectedImages(initialImages)
+<div class="row topPanel">
+  <div class="col-sm-8">
+    <%- include('../partials/validatable-input.ejs', { label: 'Title', value: locals.product?.title }) %>
+  </div>
+  <div class="col-md-4">
+    <%- include('../partials/validatable-input.ejs', { label: 'Handle', value: locals.product ? product.handle : '', help: 'You will access the product appending /pages/[handle] to the end of your store domain. You can only use lowercase letters, numbers and hyphens (-).'}) %> 
+  </div>
 
-  function closeGallery() {
-    $('#galleryIframe').hide();
-  }
+  <div class="col-md-3 col-sm-6">
+    <%- include('../partials/validatable-input.ejs', { label: 'Price $', name: 'price', type: 'number', value: locals.product?.price, help: 'Final price including taxes.' }) %>
+  </div>
 
-  function removeImageIfSelected(imageId) {
-    $(`.selectedImages .image-preview[data-image-id='${imageId}']`).remove()
-  }
+  <div class="col-md-3 col-sm-6">
+    <%- include('../partials/validatable-input.ejs', { label: 'Compare at $', name: 'compareAt', type: 'number', value: locals.product?.compareAt, help: 'The original price of the product which is disccounted from. Is optional and often used as a marketing strategy.' }) %>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <%- include('../partials/validatable-input.ejs', { label: 'Shipping $', name: 'shippingCost', type: 'number', value: locals.product?.shippingCost, help: 'The price of the shipping the user will have to pay to have it delivered. Use 0 if free.' }) %>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <%- include('../partials/validatable-input.ejs', { label: 'Stock', type: 'number', value: locals.product?.stock, help: 'If you dont want to track the stock just leave it empty. If tracked, each time a product is bought the stock will be reduced. Customers will not be able to buy more products that you have in stock.' }) %>
+  </div>
+</div>
+<div>
+  <textarea name="description" id="description" cols="30" rows="10"><%= product ? product.description : '' %></textarea>
+</div>
+
+<div>
+  <h2 for="images">Images</h2>
+  <%- include('../partials/image-picker.ejs', { product: locals.product }) %>
+</div>
+
+<div class="previews"></div>
+
+<div>
+  <h2>Categories</h2>
   
-  function selectedImages(images) {
-    closeGallery()
-    console.log(images)
-    $('.selectedImages').empty()
-    images.forEach(image => {
-      $(`<div class="image-preview" data-image-id="${image.id}" style="background-image: url('${image.src}')">
-          <input type="hidden" name="images[]" value="${image.id}">
-        </div>`).appendTo('.selectedImages')
-    })
-    $( "#sortable" ).sortable();
-  }
+  <% if (allCategories && (allCategories.length > 0)) { %>
+    <a href="/admin/categories/new">New Category</a>
+    <ul>
+      <% for (let category of allCategories) { %>
+        <li>
+          <input 
+            type="checkbox"
+            name="categories"
+            value="<%= category._id %>"
+            id="<%= category._id %>"
+            <%= product && category.products.indexOf(product._id) >= 0 ? 'checked' : '' %>
+          >
+          <label for="<%= category._id %>"><%= category.title %></label>
+        </li>
+      <% } %>
+    </ul>
+  <% } else { %>
+    <p>You dont have any category yet! <a href="/admin/categories/new">Go create one!</a></p>
+  <% } %>
+</div>
+<div>
+  <input type="checkbox" id="publish" <%= product && product.publish ? 'checked' : '' %>> <label for="publish">Publish (in not is a draft)</label>
+</div>
+<button class="primary" onclick="submit()"><%= product ? 'Update' : 'Create' %></button>
 
-  function loadGallery() {
-    if (!galleryLoaded) {
-      load(initialImages.map(image => image.id))
-      galleryLoaded = true
-    }
-    $('#galleryIframe').show()
-  }
+<%# scripts %>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+<script src="/statics/jquery.richtext.min.js"></script>
+<script src="/statics/scripts/utils.js" async></script>
+
+<script async>
+  const productId = <%- locals.product? `'${product.id}'` : 'undefined' %>;
 
   $('textarea#description').richText();
 
-  function remove() {
-    alert('Clicked!')
-  }
-  function readURL(input) {
-    $('.previews').empty()
-    if (input.files) {
-      for (var fileIter of input.files)
-        (function(file) {
-          var reader = new FileReader();
-          reader.onload = function (e) {
-          var img = $('<img />', {
-          src: e.target.result, 
-          width: 180
-          }).click(remove)
-        .appendTo($('.previews'));
-          };
+  $('#title').blur(event => {
+    autocompleteHandle()
+  })
 
-          reader.readAsDataURL(fileIter);
-        })(fileIter)
-      }
+  $('.validatable-input input').keyup(event => {
+    $(event.target).parent().parent().removeClass('error')
+  })
+
+  function submit () {
+    autocompleteHandle()
+
+    const title = $('#title').val()
+    const handle = $('#handle').val()
+    let price = $('#price').val()
+    let compareAt = $('#compareAt').val() || undefined
+    let shippingCost = $('#shippingCost').val()
+    let stock = $('#stock').val() || undefined
+    const description = $('#description').val() || undefined
+    const images = $('input[name="images"]').map(function(){return $(this).val();}).get()
+    const categories = $('input:checked[name="categories"]').map(function(){return $(this).val();}).get()
+    const publish = $('input#publish').prop('checked')
+
+    const validator = new Validator()
+
+    validator.check({ title, handle }, { notEmpty: 'The _NAME cannot be empty' })
+    
+    validator.check({ price }, { isFloat: 'Should be a not negative number' })
+    validator.check({ shippingCost }, { isFloat: 'Should be a positive number or 0 if free' })
+    
+    if (compareAt) validator.check({ compareAt }, { isFloat: 'Should be a not negative number or empty' })
+    if (stock) validator.check({ stock }, { isNatural: 'Should be a natural number or empty if not tracked' })
+
+    if (validator.hasErrors()) {
+      validator.showErrors()
+      return
     }
+    
+    price = parseFloat(price)
+    if (compareAt) compareAt = parseFloat(compareAt)
+    shippingCost = parseFloat(shippingCost)
+    if (stock) stock = parseInt(stock)
+
+    fetchApi('/api/products' + (productId ? `/${productId}` : ''), {
+      method: productId ? 'PATCH' : 'POST',
+      params: { 
+        title,
+        handle,
+        price,
+        compareAt,
+        shippingCost,
+        stock,
+        description,
+        images,
+        categories,
+        publish,
+        _csrf: '<%= csrfToken %>'
+      },
+      success: function (data) {
+        window.location.replace('/admin/products')
+      }
+    })
+  }
 </script>
+
 <%- include('../partials/admin-tail.ejs') %>

@@ -119,6 +119,7 @@ exports.postCart = async (req, res, next) => {
     req.cart.modifyItems(req.body.productId, req.body.quantity)
     await req.cart.save()
     const cart = await req.cart.get()
+    // TODO: If there is any empty product then it should be removed from the cart.
     res.json({
       success: true,
       cart: cartTemplate(cart)

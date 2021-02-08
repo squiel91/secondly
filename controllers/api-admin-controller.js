@@ -4,7 +4,7 @@ const Page = require('../models/Page')
 const Category = require('../models/Category')
 const Product = require('../models/Product')
 const User = require('../models/User')
-const SessionCart = require('../models/SessionCart')
+const Image = require('../models/Image')
 
 const stdRes = require('../utils/standard-response')
 
@@ -117,17 +117,18 @@ exports.postProduct = async (req, res, next) => {
   try {
     let product = new Product({
       title: req.body.title,
+      handle: req.body.handle,
       description: req.body.description,
       price: req.body.price,
       compareAt: req.body.compareAt,
-      imagePaths: req.body.imagePaths,
-      categories: req.body.categories,
       shippingCost: req.body.shippingCost,
       stock: req.body.stock,
       publish: req.body.publish
     })
     product = await product.save()
     await product.categories(req.body.categories)
+    await Image.updateProductImages(product, req.body.images)
+
     res.json({
       success: true,
       product: productTemplate(product)
@@ -138,8 +139,38 @@ exports.postProduct = async (req, res, next) => {
 exports.patchProduct = async (req, res, next) => {
   try {
     const productId = req.params.productId
+    const product = await Product.findById(productId)
 
-    const product = await Product.findByIdAndUpdate(productId, req.body, { new: true })
+    product.title = req.body.title
+    product.handle = req.body.handle
+    product.price = req.body.price
+    product.compareAt = req.body.compareAt
+    product.shippingCost = req.body.shippingCost
+    product.stock = req.body.stock
+    product.description = req.body.description
+    product.publish = req.body.publish
+
+    // maybe I can save it after all just once
+    await product.save()
+
+    await Image.updateProductImages(product, req.body.images)
+
+    const oldCategories = await product.categories()
+    const oldCategoryIds = oldCategories.map(category => category.id)
+    const newCategoryIds = req.body.categories || []
+
+    let toAddCategoryIds = newCategoryIds.filter(x => oldCategoryIds.indexOf(x) < 0 )
+    let toRemoveCategoryIds = oldCategoryIds.filter(x => newCategoryIds.indexOf(x) < 0 )
+
+    await Category.updateMany(
+      { _id: { $in: toAddCategoryIds } },
+      { $push: { products: product._id } }
+    )
+    await Category.updateMany(
+      { _id: { $in: toRemoveCategoryIds } },
+      { $pull: { products: product._id } }
+    )
+
     res.json({
       success: true,
       product: productTemplate(product)

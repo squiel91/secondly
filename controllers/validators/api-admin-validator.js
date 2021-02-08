@@ -1,64 +1,89 @@
 const validator = require('validator')
 
+const Category = require('../../models/Category')
+const Page = require('../../models/Page')
+
 const stdRes = require('../../utils/standard-response')
 
-exports.postPage = (req, res, next) => {
-
-    if(!req.body.title) return stdRes._400(res, 'title', 'Please enter title')
+exports.postPage = async (req, res, next) => {
+  try {
+    if (!req.body.title) return stdRes._400(res, 'title', 'Please enter title')
     req.body.title = req.body.title.trim()
 
-    if(!req.body.handle) return stdRes._400(res, 'handle', 'Please enter handle')
+    if (!req.body.handle) return stdRes._400(res, 'handle', 'Please enter handle')
     req.body.handle = req.body.handle.trim().toLowerCase()
-    if(!/^[a-z0-9]+[a-z0-9-]+[a-z0-9]+$/i.test(req.body.handle)) return stdRes._400(res, 'handle', 'Please enter valid handle')
+    if (!/^[a-z0-9]+[a-z0-9-]+[a-z0-9]+$/i.test(req.body.handle)) return stdRes._400(res, 'handle', 'Please enter valid handle')
+
+    const possibleHandleDuplicate = await Page.findOne({ handle: req.body.handle })
+    if (possibleHandleDuplicate) return stdRes._400(res, 'handle', 'There is a page with the same handle. Choose another one')
 
     next()
+  } catch (error) { stdRes._500(res, error.message) }
 }
 
-exports.postCategory = (req, res, next) => {
+exports.postCategory = async (req, res, next) => {
+  try {
+    if (!req.body.title) return stdRes._400(res, 'title', 'Please enter title')
+    req.body.title = req.body.title.trim()
 
-  if(!req.body.title) return stdRes._400(res, 'title', 'Please enter title')
-  req.body.title = req.body.title.trim()
+    if (!req.body.handle) return stdRes._400(res, 'handle', 'Please enter handle')
+    req.body.handle = req.body.handle.trim().toLowerCase()
 
-  if(!req.body.handle) return stdRes._400(res, 'handle', 'Please enter handle')
-  req.body.handle = req.body.handle.trim().toLowerCase()
-  if(!/^[a-z0-9]+[a-z0-9-]+[a-z0-9]+$/i.test(req.body.handle)) return stdRes._400(res, 'handle', 'Please enter valid handle')
+    if (!/^[a-z0-9-]+$/i.test(req.body.handle)) return stdRes._400(res, 'handle', 'Please enter valid handle')
 
-  next()
+    const possibleHandleDuplicate = await Category.findOne({ handle: req.body.handle })
+    if (possibleHandleDuplicate) return stdRes._400(res, 'handle', 'It is duplicated. Choose another one')
+
+
+    next()
+  } catch (error) { stdRes._500(res, error.message) }
 }
 
-exports.postProduct = (req, res, next) => {
+exports.postProduct = async (req, res, next) => {
+  try {
+    if (!req.body.title) return stdRes._400(res, 'title', 'Please enter a title')
+    req.body.title = req.body.title.trim()
 
-  if(!req.body.title) return stdRes._400(res, 'title', 'Please enter title')
-  req.body.title = req.body.title.trim()
+    if (!req.body.handle) return stdRes._400(res, 'handle', 'Please enter handle')
+    req.body.handle = req.body.handle.trim().toLowerCase()
 
-  if(!req.body.price) return stdRes._400(res, 'price', 'Please enter price')
+    if (!/^[a-z0-9-]+$/i.test(req.body.handle)) return stdRes._400(res, 'handle', 'Please enter valid handle')
 
-  if(req.body.compareAt && req.body.compareAt < req.body.price) return stdRes._400(res, 'compareAt', 'The value must be higher than the price')
+    const possibleHandleDuplicate = await Page.findOne({ handle: req.body.handle })
+    if (possibleHandleDuplicate) return stdRes._400(res, 'handle', 'There is a page with the same handle. Choose another one')
 
-  if(!req.body.shippingCost) return stdRes._400(res, 'shippingCost', 'Please enter shippingCost')
+    if (!req.body.price) return stdRes._400(res, 'price', 'Please enter a price')
 
-  if(req.body.shippingCost < 0) return stdRes._400(res, 'shippingCost', 'The value of shippingCost must be greater than or equal to 0')
+    if (req.body.compareAt && req.body.compareAt < req.body.price) return stdRes._400(res, 'compareAt', 'It must be higher than the price')
 
-  if(req.body.stock < 0) return stdRes._400(res, 'stock', 'The value of stock must be greater than or equal to 0')
+    if (!req.body.shippingCost) return stdRes._400(res, 'shippingCost', 'Enter a shippingCost or 0 if free')
 
-  if(!req.body.description) req.body.description = req.body.description.trim().toLowerCase()
-  if(!/^[a-z0-9]+[a-z0-9-]+[a-z0-9]+$/i.test(req.body.description)) return stdRes._400(res, 'description', 'Please enter valid description')
+    if (req.body.shippingCost < 0) return stdRes._400(res, 'shippingCost', 'The cost of shipping has to be equal or greater than 0')
 
-  next()
+    if (req.body.stock) {
+      req.body.stock = parseInt(req.body.stock)
+      if (req.body.stock < 0) return stdRes._400(res, 'stock', 'If not empty, the stock must be equal greater than than 0')
+    }
+
+    if (!req.body.description) req.body.description = req.body.description.trim().toLowerCase()
+
+    next()
+  } catch (error) { stdRes._500(res, error.message) }
 }
 
 exports.postUser = (req, res, next) => {
-
-    if(!req.body.firstName) return stdRes._400(res, 'firstName', 'Please enter firstName')
+  try {
+    if (!req.body.firstName) return stdRes._400(res, 'firstName', 'Enter your first name')
     req.body.firstName = req.body.firstName.trim()
 
-    if(!req.body.email) return stdRes._400(res, 'email', 'Please enter email')
+    if (!req.body.email) return stdRes._400(res, 'email', 'Enter your email')
     req.body.email = req.body.email.trim().toLowerCase()
-    if(!validator.isEmail(req.body.email)) return stdRes._400('email', 'Enter a valid email')
+    if (!validator.isEmail(req.body.email)) return stdRes._400('email', 'Enter a valid email')
 
-    const password = req.body.password 
-    if(!password) return stdRes._400(res, 'password', 'Please enter a password')
-    if(password.length < 6) return stdRes._400(res, 'password', 'The password needs to have 6 or more characters')
+    const password = req.body.password
+    if (!password) return stdRes._400(res, 'password', 'Please enter a password')
+    if (password.length < 6) return stdRes._400(res, 'password', 'The password needs to have 6 or more characters')
 
     next()
+  } catch (error) { stdRes._500(res, error.message) }
 }

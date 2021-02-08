@@ -42,10 +42,7 @@ router.get('/users', adminController.getUsers)
 
 // Pages
 router.get('/pages', adminController.getPages)
-router.get('/pages/new', adminController.getPageCreation)
-router.get('/pages/:pageHandle/edit', adminController.getPageEdition)
-router.post('/pages', adminController.postCreatePage)
-router.post('/pages/:pageHandle', adminController.postEditPage)
-router.post('/pages/:pageHandle/delete', adminController.postDeletePage)
+router.get('/pages/create', adminController.getPageCreation)
+router.get('/pages/:pageId', adminController.getPageEdition)
 
 module.exports = router

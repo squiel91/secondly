@@ -59,8 +59,8 @@ exports.getCategory = async (req, res, next) => {
 
 // get product details
 exports.getProduct = async (req, res, next) => {
-  const product = await Product.findOne({ _id: req.params.productId, publish: true })
-  if (!product) next()
+  const product = await Product.findOne({ handle: req.params.productHandle, publish: true })
+  if (!product) return next()
 
   const recommendedProducts = await Product.find({ _id: { $ne: product._id }, publish: true }).limit(4)
   res.render('store/product.ejs', { product, recommendedProducts })

@@ -1,45 +1,57 @@
 <%- include('../partials/admin-head.ejs') %>
 
+<%# styles %>
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="/richtext.min.css">
+<link rel="stylesheet" href="/statics/richtext.min.css">
 
+<%# content %>
 <h1>Page Editor</h1>
 
-  <div class="row topPanel">
-    <div class="col-md-8">
-      <%- include('../partials/validatable-input.ejs', { label: 'Title', value: locals.page ? page.title : '', help: 'The main title of the page, showed at the very top. Very important for search engines.'}) %> 
-    </div>
-    <div class="col-md-4">
-      <%- include('../partials/validatable-input.ejs', { label: 'Handle', value: locals.page ? page.handle : '', help: 'Make the URL human readable. You will access the page  appending /pages/[handler] to the end of your store domain.'}) %> 
-    </div>
+<div class="row topPanel">
+  <div class="col-md-8">
+    <%- include('../partials/validatable-input.ejs', { label: 'Title', value: locals.page ? page.title : '', help: 'The main title of the page, showed at the very top. Very important for search engines.'}) %> 
   </div>
-  <textarea name="content" id="content" cols="30" rows="10"><%= page ? page.content : '' %></textarea>
-  
-  <button class="primary" onclick="submitPage()"><%= page ? 'Update' : 'Create' %></button>
+  <div class="col-md-4">
+    <%- include('../partials/validatable-input.ejs', { label: 'Handle', value: locals.page ? page.handle : '', help: 'You will access the page appending /pages/[handle] to the end of your store domain.'}) %> 
+  </div>
+</div>
+<textarea name="content" id="content" cols="30" rows="10"><%= locals.page ? page.content : '' %></textarea>
 
+<button class="primary" onclick="submit()"><%= locals.page ? 'Update' : 'Create' %></button>
 
-<script src="/jquery.richtext.min.js"></script>
-<script src="/scripts/utils.js" async></script>
+<%# script %>
+<script src="/statics/jquery.richtext.min.js"></script>
+<script src="/statics/scripts/utils.js" async></script>
 <script async>
+  const pageId = <%- locals.page? `'${page.id}'` : 'undefined' %>;
+
   $('textarea#content').richText();
 
   $('#title').blur(event => {
-    const title = $(event.target).val()
-    if (title) {
-      const handle = $('#handle')
-      if (!handle.val()) {
-        handle.val(title.toLowerCase().replace(' ', '-'))
-      }
-    } 
+    autocompleteHandle()
   })
 
-  function submitPage () {
+  $('.validatable-input input').keyup(event => {
+    $(event.target).parent().parent().removeClass('error')
+  })
+
+  function submit () {
+    autocompleteHandle()
     const title = $('#title').val()
     const handle = $('#handle').val()
     const content = $('#content').val()
 
-    fetchApi('/api/pages<%= page ? `/${page.id}` : '' %>', {
-      method: '<%= page ? 'PATCH' : 'POST' %>',
+    const validator = new Validator()
+
+    validator.check({ title, handle }, { notEmpty: 'The _NAME cannot be empty' })
+
+    if (validator.hasErrors()) {
+      validator.showErrors()
+      return
+    }
+
+    fetchApi('/api/pages' + (pageId ? `/${pageId}` : ''), {
+      method: pageId? 'PATCH' : 'POST',
       params: { 
         title,
         handle,

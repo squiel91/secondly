@@ -9,6 +9,10 @@ const productSchema = new Schema({
     require: true,
     index: true
   },
+  handle: {
+    type: String,
+    require: true
+  },
   description: {
     type: String,
     index: true
@@ -32,10 +36,7 @@ const productSchema = new Schema({
     type: Number,
     require: true
   },
-  stock: {
-    type: Number,
-    require: true
-  },
+  stock: Number,
   publish: {
     type: Boolean,
     default: false
