@@ -21,6 +21,7 @@ const pageTemplate = require('../models/templates/page')
 
 const mailer = require('../utils/mailer')
 const stdRes = require('../utils/standard-response')
+const env = require('../utils/env')
 
 exports.customerSetup = async (req, res, next) => {
   // is required to load the user into the request before initalizing the cart
@@ -135,11 +136,14 @@ exports.postCheckout = async (req, res, next) => {
     const total = ((subtotal + shippingCost) * 100)
 
     const name = req.body.firstName + ' ' + req.body.lastName
+    const expMonth = req.body.cardExpiration.substring(0, 2)
+    const expYear = req.body.cardExpiration.substring(3, 5)
     const customer = await stripe.customers.create({
-      // MANO: you are never sending the customer address to Stripe. Shouldnt be sent as a line1?
       address: {
         city: req.body.city,
         country: req.body.country,
+        line1: req.body.line1,
+        line2: req.body.line2,
         postal_code: req.body.zip,
         state: req.body.state
       },
@@ -152,9 +156,9 @@ exports.postCheckout = async (req, res, next) => {
     const paymentMethod = await stripe.paymentMethods.create({
       type: 'card',
       card: {
-        number: req.body.number,
-        exp_month: req.body.exp_year.exp_month,
-        exp_year: req.body.exp_year,
+        number: req.body.cardNumber,
+        exp_month: expMonth,
+        exp_year: expYear,
         cvc: req.body.cvc
       },
       billing_details: {
@@ -173,7 +177,7 @@ exports.postCheckout = async (req, res, next) => {
 
     // creating charges
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: total, // $20
+      amount: total,
       currency: 'usd',
       customer: customer.id
     })
@@ -183,8 +187,7 @@ exports.postCheckout = async (req, res, next) => {
       paymentIntent.id,
       { payment_method: paymentMethod.id }
     )
-
-    // MANO: here is 
+    let order = ''
     if (paymentIntentConfirmation) {
       const cart = await req.cart.get()
 
@@ -193,8 +196,7 @@ exports.postCheckout = async (req, res, next) => {
       const orderProducts = []
       const stockUpdatePromises = []
 
-      // use cart.forEach
-      for (const item of cart) {
+      cart.forEach((item) => {
         orderProducts.push({
           originalProduct: item.product._id,
           title: item.product.title,
@@ -204,60 +206,45 @@ exports.postCheckout = async (req, res, next) => {
         })
 
         // MANO: Update only if stock is set. If the stock is not set then there is no need to update it
-        stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
-      }
-      const order = new Order({
-        // MANO: if the user is logged in (req.user) then we should associate the order with the user
-        // user: user,
+        // stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
+      })
+      order = new Order({
+        user: (req.user) ? req.user : undefined,
         personal: {
-          firstName: req.session.shipping.firstName,
-          lastName: req.session.shipping.lastName,
-          email: req.session.shipping.email
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          email: req.body.email
         },
         shipping: {
-          state: req.session.shipping.state,
-          city: req.session.shipping.city,
-          address: req.session.shipping.address,
-          zip: req.session.shipping.zip
+          state: req.body.state,
+          city: req.body.city,
+          address: req.body.line1 + ' ' + req.body.line2,
+          zip: req.body.zip
         },
         items: orderProducts
       })
 
       // reduce the number of stock (if there is a -1 then you inform to the staff)
-      // MANO: dont use then, use async await. In the front-end is ok becouse then has more support on browsers but for the back-end it makes no sense.
-      Promise.all(stockUpdatePromises)
-        .then(result => {
-          return order.save()
-        })
-        .then(async order => {
-          await req.cart.reset()
-        })
-        .then(result => {
-        // eslint-disable-next-line eqeqeq
 
-          // MANO: use the env helper in utils
-          if (process.env.NODE_ENV === 'production') {
-            mailer(['enrique@secondly.store', 'ezequiel@secondly.store'], 'New Order Received', `Order Received from ${order.personal.firstName} ${order.personal.lastName}.\n\nYou can check it here: https://secondly.store/admin/orders/${order.id}`)
-              .then(() => {
-                return mailer(order.personal.email, 'Order Received', 'Your order has been received!\n\nIt is now being processes and we will let you know as soon as it is shipped (24 hours max.).\n\nThe Secondly Team')
-              })
-              .catch(error => {
-                console.log(error)
-              })
-          }
-        })
+      await stockUpdatePromises
+      await order.save()
+      await req.cart.reset()
+
+      if (process.env.NODE_ENV === (env.isProd)) {
+        mailer(['enrique@secondly.store', 'ezequiel@secondly.store'], 'New Order Received', `Order Received from ${order.personal.firstName} ${order.personal.lastName}.\n\nYou can check it here: https://secondly.store/admin/orders/${order.id}`)
+          .then(() => {
+            return mailer(order.personal.email, 'Order Received', 'Your order has been received!\n\nIt is now being processes and we will let you know as soon as it is shipped (24 hours max.).\n\nThe Secondly Team')
+          })
+          .catch(error => {
+            console.log(error)
+          })
+      }
     }
 
     res.json({
-      success: true
+      success: true,
+      orderData: order
     })
-
-    //   } else {
-    //     stdRes(res, message: getError(paymentIntentConfirmation))
-    //   }
-
-    // console.log('paymentIntentConfirmation', paymentIntentConfirmation)
-    // console.log('cart', cart)
   } catch (error) {
     console.log('error', error)
     stdRes._500(res, error.message)
