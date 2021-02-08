@@ -38,14 +38,10 @@ exports.getAccount = async (req, res, next) => {
 }
 
 exports.getRequestPasswordReset = (req, res, next) => {
-  if (req.user) res.redirect('/account')
-
   res.render('access/request-password-reset.ejs', { errorMessages: req.flash('error') })
 }
 
 exports.getPasswordReset = async (req, res, next) => {
-  if (req.user) res.redirect('/account')
-
   const passResetToken = req.params.resetToken
   res.render('access/password-reset.ejs', { passResetToken })
 }

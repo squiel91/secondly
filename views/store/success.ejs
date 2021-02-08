@@ -1,7 +1,6 @@
 <%- include('../partials/store-head.ejs') %>
 <h1>Thanks for your order!</h1>
 <p>
-  We appreciate your business!
   If you have any questions, please email <a href="mailto:buy@secondly.store">buy@secondly.store</a>.
 </p>
 
@@ -32,16 +31,7 @@
       <tr>
         <th>Status</th>
         <td>
-          <div class="secondlyInput">
-            <select name="status" id="status" disabled>
-              <option value="new" <%= order.status == 'new'? 'selected' : '' %>>New</option>
-              <option value="unpaid" <%= order.status === 'unpaid'? 'selected' : '' %>>Unpaid</option>
-              <option value="processing" <%= order.status === 'processing'? 'selected' : '' %>>Processing</option>
-              <option value="shipped" <%= order.status === 'shipped'? 'selected' : '' %>>Shipped</option>
-              <option value="refunded" <%= order.status === 'refunded'? 'selected' : '' %>>Refunded</option>
-              <option value="completed" <%= order.status === 'completed'? 'selected' : '' %>>Completed</option>
-            </select>
-          </div>
+          order.status
         </td>
       </tr>
     </table>
@@ -66,17 +56,11 @@
         <th>Zip Code</th>
         <td><%= order.shipping.zip %></td>
       </tr>
-      <tr>
-        <th>Tracking</th>
-        <td>
-          <% if (order.shipping.tracking) { %>
-              <%= order.shipping.tracking %>
-            <% } else { %>
-              <div class="secondlyInput">
-                <input type="text" name="tracking" id="traking" disabled></td>
-              </div>
-          <% } %>
-      </tr>
+      <% if (order.shipping.tracking) { %>
+        <tr>
+          <th>Tracking</th>
+          <td><%= order.shipping.tracking %></tr>
+      <% } %>
     </table>
   </div>
 </div>

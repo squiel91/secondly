@@ -1,4 +1,6 @@
 <%- include('../partials/store-head.ejs') %>
+
+<%# styles %>
 <style>
   .cart__error {
     color: red;
@@ -80,6 +82,7 @@
 
 </style>
 
+<%# content %>
 <% var error = false %>
 <% if (cart && cart.length > 0) { %>
   <h1>In your cart</h1>
@@ -126,7 +129,7 @@
   </a>
 <% }  else { %>
   <div class="emptyContainer">
-    <img class="empty" src="/assets/empty-cart.svg" alt="">
+    <img class="empty" src="/statics/assets/empty-cart.svg" alt="">
     <p>Your cart is <strong>Empty</strong>.<br>Add an item to get started.</p>
     <a href="/">
       <button class="primary spacing">
@@ -135,23 +138,25 @@
     </a>
   </div>
 <% } %>
-  <script src="/scripts/utils.js" async></script>
-  <script>
-    function modifyCart(productId, quantity) {
-      fetchApi('/api/cart', {
-        params: { 
-          productId: productId,
-          quantity: quantity, 
-          _csrf: '<%= csrfToken %>'
-        },
-        success: function (data) {
-          $('#subtotal').text(data.cart.subtotal)
-          $('#shippingCost').text(data.cart.shippingCost)
-          $('#total').text(data.cart.total)
-          console.log(data.cart)
-        }
-      })
-    }
-  </script>
+
+<%# scripts %>
+<script src="/statics/scripts/utils.js" async></script>
+<script>
+  function modifyCart(productId, quantity) {
+    fetchApi('/api/cart', {
+      params: { 
+        productId: productId,
+        quantity: quantity, 
+        _csrf: '<%= csrfToken %>'
+      },
+      success: function (data) {
+        $('#subtotal').text(data.cart.subtotal)
+        $('#shippingCost').text(data.cart.shippingCost)
+        $('#total').text(data.cart.total)
+        console.log(data.cart)
+      }
+    })
+  }
+</script>
   
-  <%- include('../partials/store-tail.ejs') %>
+<%- include('../partials/store-tail.ejs') %>

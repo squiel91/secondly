@@ -27,6 +27,9 @@
         })     
         </script>
     <% } %>
+    <% if (locals.type === 'card') { %>
+      <img id="card-type" src="/statics/assets/other.png" width="40" alt="card type">
+    <% } %>
     <% if (locals.type === 'password') { %>
       <svg id="show-password" onclick="toggleRevelePass()" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#a7a7a7" class="bi bi-eye" viewBox="0 0 16 16">
         <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
@@ -43,6 +46,46 @@
       offset: [0, 12],
       theme: 'error'
     })
+
+    <% if (locals.type === 'card') { %>
+      new Cleave('.validatable-input.<%= name %> input', {
+        creditCard: true,
+        onCreditCardTypeChanged: function (cardName) {
+          const cardThumbs = {
+            amex: 'amex.png',
+            diners: 'diners.png',
+            discover: 'discover.png',
+            mastercard: 'mastercard.png',
+            jcb15: 'jcb15.png',
+            jcb: 'jcb.png',
+            maestro: 'maestro.png',
+            visa: 'visa.png',
+            unionPay: 'unionPay.png',
+          }
+          const cardThumb = '/statics/assets/' + (cardName in cardThumbs? cardThumbs[cardName] : 'other.png')
+          $('#card-type').attr('src', cardThumb)
+        }
+      });
+    <% } %>
+
+    <% if (locals.type === 'zip') { %>
+      $('.validatable-input.<%= name %> input').attr('maxlength', 5)
+    <% } %>
+
+    <% if (locals.type === 'cardExp') { %>
+      new Cleave('.validatable-input.<%= name %> input', {
+        date: true,
+        datePattern: ['m', 'y']
+      });
+    <% } %>
+
+    <% if (locals.type === 'cvc') { %>
+      new Cleave('.validatable-input.<%= name %> input', {
+        numeral: true
+      });
+
+      $('.validatable-input.<%= name %> input').attr('maxlength', 3)
+    <% } %>
 
     <% if (locals.type === 'password') { %>
       function toggleRevelePass() {

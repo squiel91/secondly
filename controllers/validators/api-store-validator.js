@@ -31,14 +31,11 @@ exports.postCheckout = (req, res, next) => {
     req.body.email = req.body.email.trim().toLowerCase()
     if (!validator.isEmail(req.body.email)) return stdRes._400(res, 'email', 'Enter a valid email')
 
-    if (!req.body.phone) return stdRes._400(res, 'phone', 'Please enter your phone number')
-    req.body.phone = req.body.phone.trim()
+    // if (!req.body.phone) return stdRes._400(res, 'phone', 'Please enter your phone number')
+    // req.body.phone = req.body.phone.trim()
 
     if (!req.body.line1) return stdRes._400(res, 'line1', 'Please enter your address')
     req.body.line1 = req.body.line1.trim()
-
-    if (!req.body.line2) return stdRes._400(res, 'line2', 'Please enter your address')
-    req.body.line2 = req.body.line2.trim()
 
     if (!req.body.country) return stdRes._400(res, 'country', 'Please enter an country')
     req.body.country = req.body.country.trim()
@@ -53,12 +50,12 @@ exports.postCheckout = (req, res, next) => {
     if (req.body.zip.length !== 5) return stdRes._400(res, 'zip', 'Enter a valid zip code')
 
     req.body.remember = req.body.remember === 'true'
-    if (!req.body.cardNumber) return stdRes._400(res, 'cardNumber', 'Please enter a Card Number')
+    if (!req.body.cardNumber) return stdRes._400(res, 'cardNumber', 'Please enter a card Number')
     if (req.body.cardNumber.length < 14 || req.body.cardNumber.length > 16) return stdRes._400(res, 'cardNumber', 'Enter a valid Card Number')
 
     // eslint-disable-next-line prefer-regex-literals
-    if (!req.body.cardExpiration) return stdRes._400(res, 'cardExpiration', 'Please enter a cardExpiration code')
-    const valid = new RegExp(/^(0[1-9]|1[012])\/\d\d$/).test(req.body.cardExpiration)
+    if (!req.body.cardExpiration) return stdRes._400(res, 'cardExpiration', 'Please enter the card expiration date')
+    const valid = new RegExp(/^(0?[1-9]|1[012])\/\d\d$/).test(req.body.cardExpiration)
     // eslint-disable-next-line eqeqeq
     if (valid != true) return stdRes._400(res, 'cardExpiration', 'Enter a valid cardExpiration code')
 

@@ -23,6 +23,10 @@ const mailer = require('../utils/mailer')
 const stdRes = require('../utils/standard-response')
 const env = require('../utils/env')
 
+// email templates
+const staffNewOrderEmail = require('../email-templates/new-order-to-staff-email')
+const customerNewOrderEmail = require('../email-templates/new-order-to-customer-email')
+
 exports.customerSetup = async (req, res, next) => {
   // is required to load the user into the request before initalizing the cart
   if (req.session.userId) req.user = await User.findById(req.session.userId)
@@ -135,21 +139,24 @@ exports.postCheckout = async (req, res, next) => {
     const shippingCost = cart.reduce((accum, item) => item.product.shippingCost * item.quantity + accum, 0)
     const total = ((subtotal + shippingCost) * 100)
 
-    const name = req.body.firstName + ' ' + req.body.lastName
-    const expMonth = req.body.cardExpiration.substring(0, 2)
-    const expYear = req.body.cardExpiration.substring(3, 5)
+    const firstName = req.body.firstName
+    const lastName = req.body.lastName
+    const email = req.body.email
+    const monthYear = req.body.cardExpiration.split('/')
+    const expMonth = parseInt(monthYear[0])
+    const expYear = parseInt(monthYear[1]) + 2000
     const customer = await stripe.customers.create({
       address: {
         city: req.body.city,
         country: req.body.country,
         line1: req.body.line1,
-        line2: req.body.line2,
+        // line2: req.body.line2,
         postal_code: req.body.zip,
         state: req.body.state
       },
-      email: req.body.email,
-      name: name,
-      phone: req.body.phone
+      email,
+      name: firstName + lastName
+      // phone: req.body.phone
     })
 
     // Creating payment method
@@ -163,9 +170,9 @@ exports.postCheckout = async (req, res, next) => {
       },
       billing_details: {
         address: customer.address,
-        email: customer.email,
-        name: customer.name,
-        phone: customer.phone
+        email,
+        name: customer.name
+        // phone: customer.phone
       }
     })
 
@@ -178,7 +185,7 @@ exports.postCheckout = async (req, res, next) => {
     // creating charges
     const paymentIntent = await stripe.paymentIntents.create({
       amount: total,
-      currency: 'usd',
+      currency: 'usd', // TODO: should be custom
       customer: customer.id
     })
 
@@ -187,60 +194,61 @@ exports.postCheckout = async (req, res, next) => {
       paymentIntent.id,
       { payment_method: paymentMethod.id }
     )
-    let order = ''
-    if (paymentIntentConfirmation) {
-      const cart = await req.cart.get()
-
-      if (!cart || cart.length === 0) throw Error('The cart cannot be empty')
-
-      const orderProducts = []
-      const stockUpdatePromises = []
-
-      cart.forEach((item) => {
-        orderProducts.push({
-          originalProduct: item.product._id,
-          title: item.product.title,
-          unitPrice: item.product.price,
-          unitShippingCost: item.product.shippingCost,
-          quantity: item.quantity
-        })
-
-        // MANO: Update only if stock is set. If the stock is not set then there is no need to update it
-        // stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
-      })
-      order = new Order({
-        user: (req.user) ? req.user : undefined,
-        personal: {
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
-          email: req.body.email
-        },
-        shipping: {
-          state: req.body.state,
-          city: req.body.city,
-          address: req.body.line1 + ' ' + req.body.line2,
-          zip: req.body.zip
-        },
-        items: orderProducts
-      })
-
-      // reduce the number of stock (if there is a -1 then you inform to the staff)
-
-      await stockUpdatePromises
-      await order.save()
-      await req.cart.reset()
-
-      if (process.env.NODE_ENV === (env.isProd)) {
-        mailer(['enrique@secondly.store', 'ezequiel@secondly.store'], 'New Order Received', `Order Received from ${order.personal.firstName} ${order.personal.lastName}.\n\nYou can check it here: https://secondly.store/admin/orders/${order.id}`)
-          .then(() => {
-            return mailer(order.personal.email, 'Order Received', 'Your order has been received!\n\nIt is now being processes and we will let you know as soon as it is shipped (24 hours max.).\n\nThe Secondly Team')
-          })
-          .catch(error => {
-            console.log(error)
-          })
-      }
+    if (!paymentIntentConfirmation) {
+      return stdRes._400({ message: 'Stripe could not process the order' })
     }
 
+    if (!cart || cart.length === 0) throw Error('The cart cannot be empty')
+
+    const orderProducts = []
+    const stockUpdatePromises = []
+
+    // I should add a cover image here
+    cart.forEach((item) => {
+      orderProducts.push({
+        originalProduct: item.product._id,
+        title: item.product.title,
+        unitPrice: item.product.price,
+        unitShippingCost: item.product.shippingCost,
+        quantity: item.quantity
+      })
+
+      // EZE: see what happens here when the stock is not set
+      // reduce the number of stock (if there is a -1 then you inform to the staff)
+      stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
+    })
+    const order = new Order({
+      user: req.user ? req.user : undefined,
+      personal: {
+        firstName,
+        lastName,
+        email
+      },
+      shipping: {
+        state: req.body.state,
+        city: req.body.city,
+        address: req.body.line1, //  + ' ' + req.body.line2
+        zip: req.body.zip
+      },
+      items: orderProducts
+    })
+
+    await stockUpdatePromises
+    await order.save()
+    await req.cart.reset()
+
+    if (process.env.NODE_ENV === (env.isProd)) {
+      await mailer(
+        ['ezequiel@secondly.store'],
+        staffNewOrderEmail.subject,
+        staffNewOrderEmail.body(firstName, lastName, total, order.id)
+      )
+      await mailer(
+        email,
+        customerNewOrderEmail.subject,
+        customerNewOrderEmail.body(total, req.user, order.id)
+      )
+    }
     res.json({
       success: true,
       orderData: order

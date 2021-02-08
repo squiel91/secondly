@@ -31,6 +31,9 @@ imageSchema.statics.updateProductImages = async function (product, newImageIds) 
       alreadyIncludedIndex[productImage.id] = productImage
     } else {
       const imageToUpdate = await this.findById(productImage.id)
+
+      // the image does not exist
+      if (!imageToUpdate) continue
       imageToUpdate.products = imageToUpdate.products.filter(productId => productId.toString() !== product.id)
       await imageToUpdate.save()
     }

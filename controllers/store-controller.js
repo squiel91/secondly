@@ -79,10 +79,12 @@ exports.getCart = async (req, res, next) => {
 }
 
 // get shipping form
-exports.getCheckout = (req, res, next) => {
+exports.getCheckout = async (req, res, next) => {
   // TODO: check if the user has at least one product
   // res.render('store/shipping.ejs')
-  res.render('store/checkout.ejs', { countryCodes })
+  const cart = await req.cart.get() 
+  const totalPrice = cart.reduce((accum, item) => (item.product.price + item.product.shippingCost) * item.quantity + accum, 0)
+  res.render('store/checkout.ejs', { countryCodes, totalPrice })
 }
 
 // get shipping form
