@@ -9,7 +9,6 @@ const Order = require('../models/Order')
 const countryCodes = require('../utils/country-codes')
 // const validator = require('email-validator')
 
-
 function filterOutUnpublishedProducts (category) {
   category.products = category.products.filter(product => product.publish)
 }
@@ -70,6 +69,9 @@ exports.getProduct = async (req, res, next) => {
 // get cart details
 exports.getCart = async (req, res, next) => {
   const cart = await req.cart.get()
+  // in case the cart changed
+  res.locals.cartItemQty = req.cart.getItemsQuantity()
+
   res.render('store/cart.ejs', {
     cart,
     subtotal: cart.reduce((accum, item) => item.product.price * item.quantity + accum, 0),
@@ -82,7 +84,8 @@ exports.getCart = async (req, res, next) => {
 exports.getCheckout = async (req, res, next) => {
   // TODO: check if the user has at least one product
   // res.render('store/shipping.ejs')
-  const cart = await req.cart.get() 
+  const cart = await req.cart.get()
+
   const totalPrice = cart.reduce((accum, item) => (item.product.price + item.product.shippingCost) * item.quantity + accum, 0)
   res.render('store/checkout.ejs', { countryCodes, totalPrice })
 }

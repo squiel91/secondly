@@ -12,7 +12,11 @@ module.exports = class SessionCart {
 
   save () {
     this.session.items = this.items
-    return this.session.save()
+    return new Promise((resolve, reject) => {
+      this.session.save(() => {
+        resolve()
+      })
+    })
   }
 
   getAll () {
@@ -22,14 +26,26 @@ module.exports = class SessionCart {
       productPromises.push(Products.findById(item.product))
       quantities.push(item.quantity)
     })
+    const toPurgeItems = [] // items that doesn't exist anymore
     return new Promise((resolve, reject) => {
       Promise.all(productPromises)
-        .then(productResolved => {
+        .then(products => {
           const cartItems = []
-          for (const productIndex in productResolved) {
-            cartItems.push({ product: productResolved[productIndex], quantity: quantities[productIndex] })
+          for (const productIndex in products) {
+            const product = products[productIndex]
+            if (product) {
+              cartItems.push({ product, quantity: quantities[productIndex] })
+            } else {
+              toPurgeItems.push(this.items[productIndex])
+            }
           }
-          resolve(cartItems)
+          if (toPurgeItems.length > 0) {
+            // removing the non existing products
+            this.items = this.items.filter(item => !toPurgeItems.includes(item))
+            this.save().then(() => resolve(cartItems))
+          } else {
+            resolve(cartItems)
+          }
         })
     })
   }
