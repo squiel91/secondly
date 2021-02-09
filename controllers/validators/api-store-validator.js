@@ -34,8 +34,11 @@ exports.postCheckout = (req, res, next) => {
     // if (!req.body.phone) return stdRes._400(res, 'phone', 'Please enter your phone number')
     // req.body.phone = req.body.phone.trim()
 
-    if (!req.body.line1) return stdRes._400(res, 'line1', 'Please enter your address')
-    req.body.line1 = req.body.line1.trim()
+    if (!req.body.address) return stdRes._400(res, 'address', 'Please enter your address')
+    req.body.address = req.body.address.trim()
+
+    // if (!req.body.line1) return stdRes._400(res, 'line1', 'Please enter your address')
+    // req.body.line1 = req.body.line1.trim()
 
     if (!req.body.country) return stdRes._400(res, 'country', 'Please enter an country')
     req.body.country = req.body.country.trim()
