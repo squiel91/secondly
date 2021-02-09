@@ -8,13 +8,13 @@
     </svg>
     <label for="<%= name %>"><%= label %></label>
     <% if (locals.options) { %>
-      <select id="<%= name %>" style="margin-bottom: -3px;">>
+      <select id="<%= name %>" name="<%= name %>" style="margin-bottom: -3px;">>
         <% options.forEach(option => { %>
           <option value="<%= option.value || option.text || option %>"><%= option.text || option.value || option %></option>
         <% }) %>
       </select>
     <% } else { %>
-      <input type="<%= locals.type || 'text' %>" value="<%= locals.value? locals.value : '' %>" id="<%= name %>">
+      <input type="<%= locals.type || 'text' %>" name="<%= name %>" value="<%= locals.value? locals.value : '' %>" id="<%= name %>">
     <% } %>
     <% if (locals.help) { %>
       <svg id="<%= name %>-help" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#a7a7a7" class="bi bi-question-circle-fill" viewBox="0 0 16 16">

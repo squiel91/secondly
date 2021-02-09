@@ -1,5 +1,6 @@
 <%- include('../partials/store-head.ejs') %>
 <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+<script src="https://secure.mlstatic.com/sdk/javascript/v1/mercadopago.js"></script>
 
 <%# styles %>
 <style>
@@ -14,7 +15,7 @@
   }
 
 </style>
-
+<form action="/process_payment" method="post" id="paymentForm">
 <%# content %>
 <h1>Contact Information</h1>
 <%- include('../partials/validatable-input.ejs', { label: 'First name' }) %> 
@@ -34,54 +35,178 @@
   <input type="checkbox" id="remember" checked><label for="remember">Remember my shipping address in this device</label>
 </p>
 <h1>Card details</h1>
-<%- include('../partials/validatable-input.ejs', { label: 'Document Type', name: 'docType' }) %> 
-<%- include('../partials/validatable-input.ejs', { label: 'Document number', name: 'docNumber' }) %> 
-<%- include('../partials/validatable-input.ejs', { label: 'Card number', name: 'cardNumber', type: 'card' }) %> 
-<%- include('../partials/validatable-input.ejs', { label: 'Expiration date (MM/YY)', name: 'cardExpiration', type: 'cardExp' }) %> 
-<%- include('../partials/validatable-input.ejs', { label: 'CVC', name: 'cvc', type: 'cvc',help: 'A 3 digits code, usually displayed at the back of the card' }) %> 
+<div>
+  <div>
+    <label for="docType">Document Type</label>
+    <select id="docType" name="docType" data-checkout="docType" type="text"></select>
+  </div>
+  <div>
+    <label for="docNumber">Document Number</label>
+    <input id="docNumber" name="docNumber" data-checkout="docNumber" type="text"/>
+  </div>
+</div>
+<div>
+  <div>
+    <label for="cardholderName">Card Holder</label>
+    <input id="cardholderName" data-checkout="cardholderName" type="text">
+  </div>
+  <div>
+    <label for="">Expiration Date</label>
+    <div>
+      <input type="text" placeholder="MM" id="cardExpirationMonth" data-checkout="cardExpirationMonth"
+        onselectstart="return false" onpaste="return false"
+        oncopy="return false" oncut="return false"
+        ondrag="return false" ondrop="return false" autocomplete=off>
+      <span class="date-separator">/</span>
+      <input type="text" placeholder="YY" id="cardExpirationYear" data-checkout="cardExpirationYear"
+        onselectstart="return false" onpaste="return false"
+        oncopy="return false" oncut="return false"
+        ondrag="return false" ondrop="return false" autocomplete=off>
+    </div>
+  </div>
+  <div>
+    <label for="cardNumber">Card Number</label>
+    <input type="text" id="cardNumber" data-checkout="cardNumber"
+      onselectstart="return false" onpaste="return false"
+      oncopy="return false" oncut="return false"
+      ondrag="return false" ondrop="return false" autocomplete=off>
+  </div>
+  <div>
+    <label for="securityCode">CVV</label>
+    <input id="securityCode" data-checkout="securityCode" type="text"
+      onselectstart="return false" onpaste="return false"
+      oncopy="return false" oncut="return false"
+      ondrag="return false" ondrop="return false" autocomplete=off>
+  </div>
+  <div id="issuerInput">
+    <label for="issuer">Issuer</label>
+    <select id="issuer" name="issuer" data-checkout="issuer"></select>
+  </div>
+  <div>
+    <label for="installments">Installments</label>
+    <select type="text" id="installments" name="installments"></select>
+  </div>
+  <div>
+    <input type="hidden" name="transactionAmount" id="transactionAmount" value="<%=  totalPrice %>" />
+    <input type="hidden" name="paymentMethodId" id="paymentMethodId" />
+    <input type="hidden" name="description" id="description" />
+    <br>
+    <button id="checkout-button" type="submit" class="primary">Pay $<%=  totalPrice %></button>
+    <br>
+  </div>
+  </form>
+</div>
 
 <div class="errorMessage"></div>
 
-<button id="checkout-button" class="primary" onclick="pay()"> 
-  Pay $<%=  totalPrice %>
-</button>
-
-<img class="stripe" src="/statics/assets/stripe.svg" alt="Powered by Stripe">
+<img class="stripe" src="/statics/assets/horizontal_logo.png" alt="Powered by Mercado pago">
 
 <%# scripts %>
 <script src="/statics/scripts/utils.js" async></script>
 <script>
-  function pay () {
-    const checkoutParams = {
-      firstName: $('#firstName').val(),
-      lastName: $('#lastName').val(),
-      email: $('#email').val(),
-      phone: $('#phone').val(),
-      line1: $('#line1').val(),
-      country: $('#country').val(),
-      state: $('#state').val(),
-      city: $('#city').val(),
-      zip: $('#zip').val(),
-      cardNumber: $('#cardNumber').val(),
-      cardExpiration: $('#cardExpiration').val(),
-      cvc: $('#cvc').val(),
-      _csrf: '<%= csrfToken %>',
-      remember: $('#remember').is(":checked"),
-      docType: $('#docType').val(),
-      docNumber: $('#docNumber').val(),
-    }
+  
+window.Mercadopago.setPublishableKey('TEST-639f77b3-3262-4c14-bc79-ced1c7cead6d')
+window.Mercadopago.getIdentificationTypes()
 
-    fetchApi('/api/cart/checkout', { // POST is the default method
-      params: checkoutParams,
-      success: function (data) {
-        window.location.replace('/cart/checkout/success?orderId='+ data.orderData._id)
-      }
-    })
+document.getElementById('cardNumber').addEventListener('change', guessPaymentMethod)
+
+function guessPaymentMethod (event) {
+  const cardnumber = document.getElementById('cardNumber').value
+  console.log('cardnumber', cardnumber);
+  if (cardnumber.length >= 6) {
+    const bin = cardnumber.substring(0, 6)
+    window.Mercadopago.getPaymentMethod({
+      bin: bin
+    }, setPaymentMethod)
   }
+};
 
-  $('.validatable-input input').keydown(event => {
-    $(event.target).parent().parent().removeClass('error')
-  })
+function setPaymentMethod (status, response) {
+  if (status == 200) {
+    const paymentMethod = response[0]
+    document.getElementById('paymentMethodId').value = paymentMethod.id
+
+    getIssuers(paymentMethod.id)
+  } else {
+    alert(`payment method info error: ${response}`)
+  }
+}
+
+function getIssuers (paymentMethodId) {
+  window.Mercadopago.getIssuers(
+    paymentMethodId,
+    setIssuers
+  )
+}
+
+function setIssuers (status, response) {
+  if (status == 200) {
+    const issuerSelect = document.getElementById('issuer')
+    response.forEach(issuer => {
+      const opt = document.createElement('option')
+      opt.text = issuer.name
+      opt.value = issuer.id
+      issuerSelect.appendChild(opt)
+    })
+
+    getInstallments(
+      document.getElementById('paymentMethodId').value,
+      document.getElementById('transactionAmount').value,
+      issuerSelect.value
+    )
+  } else {
+    alert(`issuers method info error: ${response}`)
+  }
+}
+
+function getInstallments (paymentMethodId, transactionAmount, issuerId) {
+  window.Mercadopago.getInstallments({
+    payment_method_id: paymentMethodId,
+    amount: parseFloat(transactionAmount),
+    issuer_id: parseInt(issuerId)
+  }, setInstallments)
+}
+
+function setInstallments (status, response) {
+  if (status == 200) {
+    document.getElementById('installments').options.length = 0
+    response[0].payer_costs.forEach(payerCost => {
+      const opt = document.createElement('option')
+      opt.text = payerCost.recommended_message
+      opt.value = payerCost.installments
+      document.getElementById('installments').appendChild(opt)
+    })
+  } else {
+    alert(`installments method info error: ${response}`)
+  }
+}
+
+doSubmit = false
+document.getElementById('paymentForm').addEventListener('submit', getCardToken)
+function getCardToken (event) {
+  event.preventDefault()
+  if (!doSubmit) {
+    const $form = document.getElementById('paymentForm')
+    window.Mercadopago.createToken($form, setCardTokenAndPay)
+    return false
+  }
+};
+
+function setCardTokenAndPay (status, response) {
+  if (status == 200 || status == 201) {
+    const form = document.getElementById('paymentForm')
+    const card = document.createElement('input')
+    card.setAttribute('name', 'token')
+    card.setAttribute('type', 'hidden')
+    card.setAttribute('value', response.id)
+    form.appendChild(card)
+    doSubmit=true;
+    form.submit();
+  } else {
+    alert('Verify filled data!\n' + JSON.stringify(response, null, 4))
+  }
+};
+
 </script>
 
 <%- include('../partials/store-tail.ejs') %>

@@ -3,6 +3,8 @@ const express = require('express')
 const router = express.Router()
 
 const storeController = require('../controllers/store-controller')
+// EZE: Use storeApiController for customer setup
+const storeApiController = require('../controllers/api-store-controller')
 
 router.get('/', storeController.getHomepage)
 router.get('/products/:productHandle', storeController.getProduct)
@@ -23,5 +25,12 @@ router.get('/categories/:categoryHandle', storeController.getCategory)
 
 // Search
 router.get('/search', storeController.getSearch)
+
+// EZE: I didn't add the validator. we have to discuss this.
+router.post('/process_payment',
+  // storeApiValidator.postCheckout,
+  storeApiController.customerSetup,
+  storeController.postCheckoutMercado
+)
 
 module.exports = router
