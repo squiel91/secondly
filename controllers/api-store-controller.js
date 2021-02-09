@@ -124,7 +124,6 @@ exports.postCart = async (req, res, next) => {
     req.cart.modifyItems(req.body.productId, req.body.quantity)
     await req.cart.save()
     const cart = await req.cart.get()
-    // TODO: If there is any empty product then it should be removed from the cart.
     res.json({
       success: true,
       cart: cartTemplate(cart)
@@ -149,7 +148,7 @@ exports.postCheckout = async (req, res, next) => {
       address: {
         city: req.body.city,
         country: req.body.country,
-        line1: req.body.line1,
+        line1: req.body.address,
         // line2: req.body.line2,
         postal_code: req.body.zip,
         state: req.body.state
@@ -227,7 +226,7 @@ exports.postCheckout = async (req, res, next) => {
       shipping: {
         state: req.body.state,
         city: req.body.city,
-        address: req.body.line1, //  + ' ' + req.body.line2
+        address: req.body.address, //  + ' ' + req.body.line2
         zip: req.body.zip
       },
       items: orderProducts

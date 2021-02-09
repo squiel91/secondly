@@ -23,12 +23,11 @@
 <%# include('../partials/validatable-input.ejs', { label: 'Phone' }) %>
 
 <h1>Shipping Address</h1>
-<%- include('../partials/validatable-input.ejs', { label: 'Address', help: 'The address where to send the shippment.' }) %> 
 <%# include('../partials/validatable-input.ejs', { label: 'Line 2', help: 'The format you should use is the following: [Street name] [House/flat number] [Unit number]' }) %> 
 <%- include('../partials/validatable-input.ejs', { label: 'Country', options: countryCodes }) %>
-
 <%- include('../partials/validatable-input.ejs', { label: 'State' }) %> 
 <%- include('../partials/validatable-input.ejs', { label: 'City' }) %> 
+<%- include('../partials/validatable-input.ejs', { label: 'Address', help: 'The address where to send the shippment.' }) %> 
 <%- include('../partials/validatable-input.ejs', { label: 'Zip code', name: 'zip', type: 'zip', help: 'A 5 digits code that uniquely identifies a geographic area' }) %> 
 <p>
   <input type="checkbox" id="remember" checked><label for="remember">Remember my shipping address in this device</label>
@@ -55,13 +54,14 @@
       lastName: $('#lastName').val(),
       email: $('#email').val(),
       phone: $('#phone').val(),
-      line1: $('#line1').val(),
+      address: $('#address').val(),
+      // line1: $('#line1').val(),
       // line2: $('#line2').val(),
       country: $('#country').val(),
       state: $('#state').val(),
       city: $('#city').val(),
       zip: $('#zip').val(),
-      cardNumber: $('#cardNumber').val(),
+      cardNumber: $('#cardNumber').val().replaceAll(' ', ''),
       cardExpiration: $('#cardExpiration').val(),
       cvc: $('#cvc').val(),
       _csrf: '<%= csrfToken %>',

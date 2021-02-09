@@ -2,7 +2,7 @@ const SessionCart = require('./SessionCart')
 
 class Cart {
   constructor (req) {
-    if (this.user) {
+    if (req.user) {
       this.user = req.user
     } else {
       this.sessionCart = SessionCart.load(req.session)
@@ -12,9 +12,22 @@ class Cart {
   async get () {
     if (this.user) {
       return new Promise((resolve, reject) => {
-        this.user.populate('cart.product')
-          .then(populatedUserCart => {
-            resolve(populatedUserCart.cart)
+        this.user.populate('cart.product').execPopulate()
+          .then(populatedUser => {
+            let hasPurgedItems = false
+            const pupuletedCart = populatedUser.cart
+            for (let index = pupuletedCart.length - 1; index >= 0; index--) {
+              if (!pupuletedCart[index].product) {
+                this.user.cart.splice(index, 1)
+                pupuletedCart.splice(index, 1)
+                hasPurgedItems = true
+              }
+            }
+            if (hasPurgedItems) {
+              this.user.save().then(() => resolve(pupuletedCart))
+            } else {
+              resolve(pupuletedCart)
+            }
           })
           .catch(error => {
             reject(error)
@@ -27,7 +40,7 @@ class Cart {
 
   getItemsQuantity () {
     if (this.user) {
-      return this.user.getCartQty
+      return this.user.getCartQty()
     } else {
       return this.sessionCart.getCartQty()
     }

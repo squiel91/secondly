@@ -92,7 +92,7 @@
         <div class="cart__item">
           <div class="cart__thumbnail" <%- cartItem.product.images?.length > 0? `style="background-image: url('${cartItem.product.images[0].src}');"` : '' %>></div>
           <div class="cart__details">
-            <a href="/products/<%= cartItem.product.id %>"><h3><%= cartItem.product.title %></h3></a>
+            <a href="/products/<%= cartItem.product.handle %>"><h3><%= cartItem.product.title %></h3></a>
             <p>
               $ <%= cartItem.product.price %>
               <% if (cartItem.product.shippingCost > 0) { %>
