@@ -90,6 +90,13 @@ exports.getCheckout = async (req, res, next) => {
   res.render('store/checkout.ejs', { countryCodes, totalPrice })
 }
 
+// get mercado shipping form
+exports.getCheckoutMercado = async (req, res, next) => {
+  const cart = await req.cart.get()
+  const totalPrice = cart.reduce((accum, item) => (item.product.price + item.product.shippingCost) * item.quantity + accum, 0)
+  res.render('store/checkout-mp.ejs', { countryCodes, totalPrice })
+}
+
 // get shipping form
 exports.getOrders = (req, res, next) => {
   // TODO: this should be specific order
