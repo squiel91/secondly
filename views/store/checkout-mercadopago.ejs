@@ -35,63 +35,58 @@
   <input type="checkbox" id="remember" checked><label for="remember">Remember my shipping address in this device</label>
 </p>
 <h1>Card details</h1>
-<div>
-  <div>
+<div class="validatable-input">
+  <div class="secondlyInputInner">
     <label for="docType">Document Type</label>
     <select id="docType" name="docType" data-checkout="docType" type="text"></select>
   </div>
-  <div>
+  <div class="secondlyInputInner">
     <label for="docNumber">Document Number</label>
     <input id="docNumber" name="docNumber" data-checkout="docNumber" type="text"/>
   </div>
 </div>
-<div>
-  <div>
+<div class="validatable-input">
+  <div class="secondlyInputInner">
     <label for="cardholderName">Card Holder</label>
     <input id="cardholderName" data-checkout="cardholderName" type="text">
   </div>
-  <div>
-    <label for="">Expiration Date</label>
-    <div>
-      <input type="text" placeholder="MM" id="cardExpirationMonth" data-checkout="cardExpirationMonth"
-        onselectstart="return false" onpaste="return false"
-        oncopy="return false" oncut="return false"
-        ondrag="return false" ondrop="return false" autocomplete=off>
-      <span class="date-separator">/</span>
-      <input type="text" placeholder="YY" id="cardExpirationYear" data-checkout="cardExpirationYear"
-        onselectstart="return false" onpaste="return false"
-        oncopy="return false" oncut="return false"
-        ondrag="return false" ondrop="return false" autocomplete=off>
-    </div>
-  </div>
-  <div>
+<%- include('../partials/validatable-input.ejs', { label: 'Expiration date (MM/YY)', name: 'cardExpiration', type: 'cardExp' }) %> 
+<div class="secondlyInputInner">
     <label for="cardNumber">Card Number</label>
     <input type="text" id="cardNumber" data-checkout="cardNumber"
       onselectstart="return false" onpaste="return false"
       oncopy="return false" oncut="return false"
       ondrag="return false" ondrop="return false" autocomplete=off>
   </div>
-  <div>
+  <div class="secondlyInputInner">
     <label for="securityCode">CVV</label>
     <input id="securityCode" data-checkout="securityCode" type="text"
       onselectstart="return false" onpaste="return false"
       oncopy="return false" oncut="return false"
       ondrag="return false" ondrop="return false" autocomplete=off>
   </div>
-  <div id="issuerInput">
+  <div id="issuerInput" class="secondlyInputInner">
     <label for="issuer">Issuer</label>
     <select id="issuer" name="issuer" data-checkout="issuer"></select>
   </div>
-  <div>
+  <div class="secondlyInputInner">
     <label for="installments">Installments</label>
     <select type="text" id="installments" name="installments"></select>
   </div>
-  <div>
+  <div >
     <input type="hidden" name="transactionAmount" id="transactionAmount" value="<%=  totalPrice %>" />
     <input type="hidden" name="paymentMethodId" id="paymentMethodId" />
     <input type="hidden" name="description" id="description" />
+    <input type="hidden" placeholder="MM" id="cardExpirationMonth" data-checkout="cardExpirationMonth"
+        onselectstart="return false" onpaste="return false"
+        oncopy="return false" oncut="return false"
+        ondrag="return false" ondrop="return false" autocomplete=off>
+      <input type="hidden" placeholder="YY" id="cardExpirationYear" data-checkout="cardExpirationYear"
+        onselectstart="return false" onpaste="return false"
+        oncopy="return false" oncut="return false"
+        ondrag="return false" ondrop="return false" autocomplete=off>
     <br>
-    <button id="checkout-button" type="submit" class="primary">Pay $<%=  totalPrice %></button>
+    <!-- <button id="checkout-button" type="submit" class="primary">Pay $<%=  totalPrice %></button> -->
     <br>
   </div>
   </form>
@@ -99,11 +94,25 @@
 
 <div class="errorMessage"></div>
 
+<button id="checkout-button" class="primary" onclick="pay()"> 
+  Pay $<%=  totalPrice %>
+</button>
+
 <img class="stripe" src="/statics/assets/horizontal_logo.png" alt="Powered by Mercado pago">
 
 <%# scripts %>
 <script src="/statics/scripts/utils.js" async></script>
 <script>
+
+
+$("input#cardExpiration").blur(function(){
+  const cardexpiry = $('#cardExpiration').val()
+  const monthYear = cardexpiry.split('/')
+  const expMonth = parseInt(monthYear[0])
+  const expYear = parseInt(monthYear[1]) + 2000
+  $("#cardExpirationMonth").val(expMonth)
+  $("#cardExpirationYear").val(expYear)
+})
   
 window.Mercadopago.setPublishableKey('TEST-639f77b3-3262-4c14-bc79-ced1c7cead6d')
 window.Mercadopago.getIdentificationTypes()
@@ -184,7 +193,7 @@ function setInstallments (status, response) {
 doSubmit = false
 document.getElementById('paymentForm').addEventListener('submit', getCardToken)
 function getCardToken (event) {
-  event.preventDefault()
+  // event.preventDefault()
   if (!doSubmit) {
     const $form = document.getElementById('paymentForm')
     window.Mercadopago.createToken($form, setCardTokenAndPay)
@@ -201,11 +210,60 @@ function setCardTokenAndPay (status, response) {
     card.setAttribute('value', response.id)
     form.appendChild(card)
     doSubmit=true;
-    form.submit();
+    pay();
+    // form.submit();
   } else {
     alert('Verify filled data!\n' + JSON.stringify(response, null, 4))
   }
 };
+
+function pay () {
+  console.log('click');
+  let token = $("input[name=token]").val();
+    if(!token){
+      const $form = document.getElementById('paymentForm')
+      window.Mercadopago.createToken($form, setCardTokenAndPay)
+    } else{
+    console.log('tokentokentoken',  token);
+
+      const checkoutParams = {
+      token: $("input[name=token]").val(),
+      firstName: $('#firstName').val(),
+      lastName: $('#lastName').val(),
+      email: $('#email').val(),
+      phone: $('#phone').val(),
+      address: $('#address').val(),
+      country: $('#country').val(),
+      state: $('#state').val(),
+      city: $('#city').val(),
+      zip: $('#zip').val(),
+      cardNumber: $('#cardNumber').val(),
+      cardExpiration: $('#cardExpiration').val(),
+      cvc: $('#cvc').val(),
+      _csrf: '<%= csrfToken %>',
+      remember: $('#remember').is(":checked"),
+
+      docType: $('#docType').val(),
+      docNumber: $('#docNumber').val(),
+      transactionAmount: $('#transactionAmount').val(),
+      paymentMethodId: $('#paymentMethodId').val(),
+      description: $('#description').val(),
+      installments: $('#installments').val(),
+      issuer: $('#issuer').val(),
+    }
+
+    fetchApi('/api/cart/checkout-mercadopago', {
+      params: checkoutParams,
+      success: function (data) {
+        window.location.replace('/cart/checkout/success?orderId='+ data.orderData._id)
+      }
+    })
+  }
+  }
+
+  $('.validatable-input input').keydown(event => {
+    $(event.target).parent().parent().removeClass('error')
+  })
 
 </script>
 

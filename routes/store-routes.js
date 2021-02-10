@@ -3,8 +3,6 @@ const express = require('express')
 const router = express.Router()
 
 const storeController = require('../controllers/store-controller')
-// EZE: Use storeApiController for customer setup
-const storeApiController = require('../controllers/api-store-controller')
 
 router.get('/', storeController.getHomepage)
 router.get('/products/:productHandle', storeController.getProduct)

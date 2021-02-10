@@ -25,13 +25,13 @@ router.post('/cart',
 )
 
 router.post('/cart/checkout-stripe',
-  apiStoreValidator.postCheckoutStripe,
+  apiStoreValidator.postCheckout,
   apiStoreController.customerSetup,
   apiStoreController.postCheckoutStripe
 )
 
 router.post('/cart/checkout-mercadopago',
-  apiStoreValidator.postCheckoutMercadoPago,
+  apiStoreValidator.postCheckout,
   apiStoreController.customerSetup,
   apiStoreController.postCheckoutMercadoPago
 )

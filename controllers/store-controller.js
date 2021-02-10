@@ -1,20 +1,6 @@
 /* eslint-disable func-call-spacing */
 // const stripe = require('stripe')('sk_test_51HsvHmF1g3qjNQo3UKVTBTvzNgJEnECDCwjrj33NVknPH9JkhQil7XdATmhRIciU53LCfie21wig5DqgCJ5qF8m500nA4ViP5a')
 const mongoose = require('mongoose')
-// EZE: Mercado configuration
-const mercadopago = require('mercadopago')
-mercadopago.configurations.setAccessToken('TEST-2528813857390327-011214-ec73171c325ec8e222037a81f54c5253-28897842')
-
-// EZE: use other variables from api-store-cntroller
-const mailer = require('../utils/mailer')
-const stdRes = require('../utils/standard-response')
-const env = require('../utils/env')
-
-// EZE: use other variables from api-store-cntroller
-// email templates
-const staffNewOrderEmail = require('../email-templates/new-order-to-staff-email')
-const customerNewOrderEmail = require('../email-templates/new-order-to-customer-email')
-
 const Product = require('../models/Product')
 const Page = require('../models/Page')
 const Category = require('../models/Category')

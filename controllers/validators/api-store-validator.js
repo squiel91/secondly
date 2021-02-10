@@ -19,7 +19,7 @@ exports.postCart = async (req, res, next) => {
   } catch (error) { stdRes._500(res, error.message) }
 }
 
-exports.postCheckoutStripe = (req, res, next) => {
+exports.postCheckout = (req, res, next) => {
   try {
     if (!req.body.firstName) return stdRes._400(res, 'firstName', 'Please enter your first name')
     req.body.firstName = req.body.firstName.trim()
@@ -31,14 +31,8 @@ exports.postCheckoutStripe = (req, res, next) => {
     req.body.email = req.body.email.trim().toLowerCase()
     if (!validator.isEmail(req.body.email)) return stdRes._400(res, 'email', 'Enter a valid email')
 
-    // if (!req.body.phone) return stdRes._400(res, 'phone', 'Please enter your phone number')
-    // req.body.phone = req.body.phone.trim()
-
     if (!req.body.address) return stdRes._400(res, 'address', 'Please enter your address')
     req.body.address = req.body.address.trim()
-
-    // if (!req.body.line1) return stdRes._400(res, 'line1', 'Please enter your address')
-    // req.body.line1 = req.body.line1.trim()
 
     if (!req.body.country) return stdRes._400(res, 'country', 'Please enter an country')
     req.body.country = req.body.country.trim()
@@ -56,22 +50,21 @@ exports.postCheckoutStripe = (req, res, next) => {
     if (!req.body.cardNumber) return stdRes._400(res, 'cardNumber', 'Please enter a card Number')
     if (req.body.cardNumber.length < 14 || req.body.cardNumber.length > 16) return stdRes._400(res, 'cardNumber', 'Enter a valid Card Number')
 
+    if (!req.body.token) {
     // eslint-disable-next-line prefer-regex-literals
-    if (!req.body.cardExpiration) return stdRes._400(res, 'cardExpiration', 'Please enter the card expiration date')
-    const valid = new RegExp(/^(0?[1-9]|1[012])\/\d\d$/).test(req.body.cardExpiration)
-    // eslint-disable-next-line eqeqeq
-    if (valid != true) return stdRes._400(res, 'cardExpiration', 'Enter a valid cardExpiration code')
+      if (!req.body.cardExpiration) return stdRes._400(res, 'cardExpiration', 'Please enter the card expiration date')
+      const valid = new RegExp(/^(0?[1-9]|1[012])\/\d\d$/).test(req.body.cardExpiration)
+      // eslint-disable-next-line eqeqeq
+      if (valid != true) return stdRes._400(res, 'cardExpiration', 'Enter a valid cardExpiration code')
 
-    if (!req.body.cvc) return stdRes._400(res, 'cvc', 'Please enter a cvc code')
-    if (req.body.cvc.length !== 3) return stdRes._400(res, 'cvc', 'Enter a valid cvc code')
-
+      if (!req.body.cvc) return stdRes._400(res, 'cvc', 'Please enter a cvc code')
+      if (req.body.cvc.length !== 3) return stdRes._400(res, 'cvc', 'Enter a valid cvc code')
+    } else {
+      if (!req.body.docType) return stdRes._400(res, 'docType', 'Please enter a document type')
+      if (!req.body.docNumber) return stdRes._400(res, 'docNumber', 'Please enter a document number')
+    }
     next()
   } catch (error) { stdRes._500(res, error.message) }
-}
-
-exports.postCheckoutMercadoPago = (req, res, next) => {
-  // TODO MANO: add all the validations here 
-  next()
 }
 
 exports.postSubscribe = (req, res, next) => {

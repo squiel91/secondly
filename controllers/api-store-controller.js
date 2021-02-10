@@ -4,6 +4,8 @@ const Publishable_Key = 'pk_test_51Hsv6KLzpNoJw5cRqsZQiQh1hqWafCluHiYVFIt68Y4RjW
 // eslint-disable-next-line camelcase
 const Secret_Key = 'sk_test_51Hsv6KLzpNoJw5cRhFtvtSixJDOpLwLY0ZzDR6dM0nYcJUv4XV8zV4HUCpRVw0j0vjrhwotun4vAvmrESk4Chgzg00QakDHuoW'
 const stripe = require('stripe')(Secret_Key)
+const mercadopago = require('mercadopago')
+mercadopago.configurations.setAccessToken('TEST-2528813857390327-011214-ec73171c325ec8e222037a81f54c5253-28897842')
 // models
 const Cart = require('../models/Cart')
 const User = require('../models/User')
@@ -11,7 +13,6 @@ const Category = require('../models/Category')
 const Product = require('../models/Product')
 const Page = require('../models/Page')
 const Subscription = require('../models/Subscription')
-const Order = require('../models/Order')
 
 // templates
 const cartTemplate = require('../models/templates/cart')
@@ -19,13 +20,8 @@ const productTemplate = require('../models/templates/product')
 const categoryTemplate = require('../models/templates/category')
 const pageTemplate = require('../models/templates/page')
 
-const mailer = require('../utils/mailer')
 const stdRes = require('../utils/standard-response')
-const env = require('../utils/env')
-
-// email templates
-const staffNewOrderEmail = require('../email-templates/new-order-to-staff-email')
-const customerNewOrderEmail = require('../email-templates/new-order-to-customer-email')
+const checkout = require('../utils/payment-checkout')
 
 exports.customerSetup = async (req, res, next) => {
   // is required to load the user into the request before initalizing the cart
@@ -149,13 +145,11 @@ exports.postCheckoutStripe = async (req, res, next) => {
         city: req.body.city,
         country: req.body.country,
         line1: req.body.address,
-        // line2: req.body.line2,
         postal_code: req.body.zip,
         state: req.body.state
       },
       email,
       name: firstName + lastName
-      // phone: req.body.phone
     })
 
     // Creating payment method
@@ -171,7 +165,6 @@ exports.postCheckoutStripe = async (req, res, next) => {
         address: customer.address,
         email,
         name: customer.name
-        // phone: customer.phone
       }
     })
 
@@ -197,57 +190,8 @@ exports.postCheckoutStripe = async (req, res, next) => {
       return stdRes._400({ message: 'Stripe could not process the order' })
     }
 
-    if (!cart || cart.length === 0) throw Error('The cart cannot be empty')
+    const order = await checkout(req)
 
-    const orderProducts = []
-    const stockUpdatePromises = []
-
-    // I should add a cover image here
-    cart.forEach((item) => {
-      orderProducts.push({
-        originalProduct: item.product._id,
-        title: item.product.title,
-        unitPrice: item.product.price,
-        unitShippingCost: item.product.shippingCost,
-        quantity: item.quantity
-      })
-
-      // EZE: see what happens here when the stock is not set
-      // reduce the number of stock (if there is a -1 then you inform to the staff)
-      stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
-    })
-    const order = new Order({
-      user: req.user ? req.user : undefined,
-      personal: {
-        firstName,
-        lastName,
-        email
-      },
-      shipping: {
-        state: req.body.state,
-        city: req.body.city,
-        address: req.body.address, //  + ' ' + req.body.line2
-        zip: req.body.zip
-      },
-      items: orderProducts
-    })
-
-    await stockUpdatePromises
-    await order.save()
-    await req.cart.reset()
-
-    if (process.env.NODE_ENV === (env.isProd)) {
-      await mailer(
-        ['ezequiel@secondly.store'],
-        staffNewOrderEmail.subject,
-        staffNewOrderEmail.body(firstName, lastName, total, order.id)
-      )
-      await mailer(
-        email,
-        customerNewOrderEmail.subject,
-        customerNewOrderEmail.body(total, req.user, order.id)
-      )
-    }
     res.json({
       success: true,
       orderData: order
@@ -258,23 +202,8 @@ exports.postCheckoutStripe = async (req, res, next) => {
   }
 }
 
-// EZE: Here is the post mercado api
 exports.postCheckoutMercadoPago = async (req, res, next) => {
   try {
-    const cart = await req.cart.get()
-    const subtotal = cart.reduce((accum, item) => item.product.price * item.quantity + accum, 0)
-    const shippingCost = cart.reduce((accum, item) => item.product.shippingCost * item.quantity + accum, 0)
-    const total = ((subtotal + shippingCost) * 100)
-
-    const firstName = req.body.firstName
-    const lastName = req.body.lastName
-    const email = req.body.email
-
-    // EZE: below fields are validated by mercado. we need to discuss how to manage the fields which are validated by mercado.
-    // const monthYear = req.body.cardExpiration.split('/')
-    // const expMonth = parseInt(monthYear[0])
-    // const expYear = parseInt(monthYear[1]) + 2000
-
     const paymentData = {
       transaction_amount: Number(req.body.transactionAmount),
       token: req.body.token,
@@ -292,61 +221,12 @@ exports.postCheckoutMercadoPago = async (req, res, next) => {
     }
 
     const paymentStatus = await mercadopago.payment.save(paymentData)
-    // EZE: after payment status is approved other functionalities will work
     if (paymentStatus.body.status === 'approved') {
-      if (!cart || cart.length === 0) throw Error('The cart cannot be empty')
-
-      const orderProducts = []
-      const stockUpdatePromises = []
-
-      // I should add a cover image here
-      cart.forEach((item) => {
-        orderProducts.push({
-          originalProduct: item.product._id,
-          title: item.product.title,
-          unitPrice: item.product.price,
-          unitShippingCost: item.product.shippingCost,
-          quantity: item.quantity
-        })
-
-        // EZE: see what happens here when the stock is not set
-        // reduce the number of stock (if there is a -1 then you inform to the staff)
-        stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
+      const order = await checkout(req)
+      res.json({
+        success: true,
+        orderData: order
       })
-
-      const order = new Order({
-        user: req.user ? req.user : undefined,
-        personal: {
-          firstName,
-          lastName,
-          email
-        },
-        shipping: {
-          state: req.body.state,
-          city: req.body.city,
-          address: req.body.address, //  + ' ' + req.body.line2
-          zip: req.body.zip
-        },
-        items: orderProducts
-      })
-
-      await stockUpdatePromises
-      await order.save()
-      await req.cart.reset()
-
-      if (process.env.NODE_ENV === (env.isProd)) {
-        await mailer(
-          ['ezequiel@secondly.store'],
-          staffNewOrderEmail.subject,
-          staffNewOrderEmail.body(firstName, lastName, total, order.id)
-        )
-        await mailer(
-          email,
-          customerNewOrderEmail.subject,
-          customerNewOrderEmail.body(total, req.user, order.id)
-        )
-      }
-      res.render('store/success.ejs', { order })
     }
   } catch (error) {
     console.log('error', error)
