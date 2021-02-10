@@ -85,7 +85,19 @@
 
       .miniCart, .menuIcon {
         width: 26px;
-        margin-right: 6px;
+        margin-right: 2px;
+      }
+      
+      .cart-quantity {
+        background-color: deepskyblue;
+        color: white;
+        border-radius: 50%;
+        min-width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: normal;
       }
 
       .responsiveSearchBar {
@@ -253,7 +265,9 @@
                 <circle cx="36.2" cy="83.6" r="9"/>
                 <circle cx="88.3" cy="83.6" r="9"/>
               </svg>
-              <%= cartItemQty > 0? ' (' + cartItemQty + ')' : '' %>
+              <% if (cartItemQty > 0) { %>
+                <span class="cart-quantity"><%= cartItemQty %></span>
+              <% } %>
             </a>
           </div>
           <div class="menuItem d-md-block d-xl-none">

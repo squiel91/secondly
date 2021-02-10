@@ -19,7 +19,7 @@ exports.postCart = async (req, res, next) => {
   } catch (error) { stdRes._500(res, error.message) }
 }
 
-exports.postCheckout = (req, res, next) => {
+exports.postCheckoutStripe = (req, res, next) => {
   try {
     if (!req.body.firstName) return stdRes._400(res, 'firstName', 'Please enter your first name')
     req.body.firstName = req.body.firstName.trim()
@@ -67,6 +67,11 @@ exports.postCheckout = (req, res, next) => {
 
     next()
   } catch (error) { stdRes._500(res, error.message) }
+}
+
+exports.postCheckoutMercadoPago = (req, res, next) => {
+  // TODO MANO: add all the validations here 
+  next()
 }
 
 exports.postSubscribe = (req, res, next) => {

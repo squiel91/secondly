@@ -68,7 +68,7 @@
       remember: $('#remember').is(":checked")
     }
 
-    fetchApi('/api/cart/checkout', { // POST is the default method
+    fetchApi('/api/cart/checkout-stripe', { // POST is the default method
       params: checkoutParams,
       success: function (data) {
         window.location.replace('/cart/checkout/success?orderId='+ data.orderData._id)

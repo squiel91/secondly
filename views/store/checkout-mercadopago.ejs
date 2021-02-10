@@ -15,7 +15,7 @@
   }
 
 </style>
-<form action="/process_payment" method="post" id="paymentForm">
+<form action="/api/cart/checkout-mercadopago" method="post" id="paymentForm">
 <%# content %>
 <h1>Contact Information</h1>
 <%- include('../partials/validatable-input.ejs', { label: 'First name' }) %> 

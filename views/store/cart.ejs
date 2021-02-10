@@ -124,8 +124,11 @@
     Shipping: $ <span id="shippingCost"><%= shipping %></span>
   </p>
   <p class="cart__total">Total: $ <span id="total"><%= totalPrice %></span></p>
-  <a href="/cart/checkout">
-    <button class="primary" <%= error? 'disabled' : ' ' %>>Proceed to Checkout</button>
+  <a href="/cart/checkout-mercadopago">
+    <button class="primary" <%= error? 'disabled' : ' ' %>>MercadoPago Checkout</button>
+  </a>
+  <a href="/cart/checkout-stripe">
+    <button class="primary" <%= error? 'disabled' : ' ' %>>Stripe Checkout</button>
   </a>
 <% }  else { %>
   <div class="emptyContainer">

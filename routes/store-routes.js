@@ -9,8 +9,8 @@ const storeApiController = require('../controllers/api-store-controller')
 router.get('/', storeController.getHomepage)
 router.get('/products/:productHandle', storeController.getProduct)
 router.get('/cart', storeController.getCart)
-// router.get('/cart/checkout', storeController.getCheckout)
-router.get('/cart/checkout', storeController.getCheckoutMercado)
+router.get('/cart/checkout-stripe', storeController.getCheckoutStripe)
+router.get('/cart/checkout-mercadopago', storeController.getCheckoutMercadoPago)
 
 router.get('/cart/checkout/success', storeController.getCheckoutSuccess)
 router.get('/cart/checkout/fail', storeController.getCheckoutFail)
@@ -25,12 +25,5 @@ router.get('/categories/:categoryHandle', storeController.getCategory)
 
 // Search
 router.get('/search', storeController.getSearch)
-
-// EZE: I didn't add the validator. we have to discuss this.
-router.post('/process_payment',
-  // storeApiValidator.postCheckout,
-  storeApiController.customerSetup,
-  storeController.postCheckoutMercado
-)
 
 module.exports = router

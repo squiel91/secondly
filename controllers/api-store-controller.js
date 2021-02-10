@@ -131,7 +131,7 @@ exports.postCart = async (req, res, next) => {
   } catch (error) { stdRes._500(res, error.message) }
 }
 
-exports.postCheckout = async (req, res, next) => {
+exports.postCheckoutStripe = async (req, res, next) => {
   try {
     const cart = await req.cart.get()
     const subtotal = cart.reduce((accum, item) => item.product.price * item.quantity + accum, 0)
@@ -252,6 +252,102 @@ exports.postCheckout = async (req, res, next) => {
       success: true,
       orderData: order
     })
+  } catch (error) {
+    console.log('error', error)
+    stdRes._500(res, error.message)
+  }
+}
+
+// EZE: Here is the post mercado api
+exports.postCheckoutMercadoPago = async (req, res, next) => {
+  try {
+    const cart = await req.cart.get()
+    const subtotal = cart.reduce((accum, item) => item.product.price * item.quantity + accum, 0)
+    const shippingCost = cart.reduce((accum, item) => item.product.shippingCost * item.quantity + accum, 0)
+    const total = ((subtotal + shippingCost) * 100)
+
+    const firstName = req.body.firstName
+    const lastName = req.body.lastName
+    const email = req.body.email
+
+    // EZE: below fields are validated by mercado. we need to discuss how to manage the fields which are validated by mercado.
+    // const monthYear = req.body.cardExpiration.split('/')
+    // const expMonth = parseInt(monthYear[0])
+    // const expYear = parseInt(monthYear[1]) + 2000
+
+    const paymentData = {
+      transaction_amount: Number(req.body.transactionAmount),
+      token: req.body.token,
+      description: req.body.description,
+      installments: Number(req.body.installments),
+      payment_method_id: req.body.paymentMethodId,
+      issuer_id: req.body.issuer,
+      payer: {
+        email: req.body.email,
+        identification: {
+          type: req.body.docType,
+          number: req.body.docNumber
+        }
+      }
+    }
+
+    const paymentStatus = await mercadopago.payment.save(paymentData)
+    // EZE: after payment status is approved other functionalities will work
+    if (paymentStatus.body.status === 'approved') {
+      if (!cart || cart.length === 0) throw Error('The cart cannot be empty')
+
+      const orderProducts = []
+      const stockUpdatePromises = []
+
+      // I should add a cover image here
+      cart.forEach((item) => {
+        orderProducts.push({
+          originalProduct: item.product._id,
+          title: item.product.title,
+          unitPrice: item.product.price,
+          unitShippingCost: item.product.shippingCost,
+          quantity: item.quantity
+        })
+
+        // EZE: see what happens here when the stock is not set
+        // reduce the number of stock (if there is a -1 then you inform to the staff)
+        stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
+      })
+
+      const order = new Order({
+        user: req.user ? req.user : undefined,
+        personal: {
+          firstName,
+          lastName,
+          email
+        },
+        shipping: {
+          state: req.body.state,
+          city: req.body.city,
+          address: req.body.address, //  + ' ' + req.body.line2
+          zip: req.body.zip
+        },
+        items: orderProducts
+      })
+
+      await stockUpdatePromises
+      await order.save()
+      await req.cart.reset()
+
+      if (process.env.NODE_ENV === (env.isProd)) {
+        await mailer(
+          ['ezequiel@secondly.store'],
+          staffNewOrderEmail.subject,
+          staffNewOrderEmail.body(firstName, lastName, total, order.id)
+        )
+        await mailer(
+          email,
+          customerNewOrderEmail.subject,
+          customerNewOrderEmail.body(total, req.user, order.id)
+        )
+      }
+      res.render('store/success.ejs', { order })
+    }
   } catch (error) {
     console.log('error', error)
     stdRes._500(res, error.message)
