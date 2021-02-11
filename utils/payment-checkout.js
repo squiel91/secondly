@@ -1,4 +1,5 @@
 const Order = require('../models/Order')
+const Product = require('../models/Product')
 const mailer = require('./mailer')
 const env = require('./env')
 
@@ -28,7 +29,7 @@ module.exports = async (req) => {
 
     // EZE: see what happens here when the stock is not set
     // reduce the number of stock (if there is a -1 then you inform to the staff)
-    // stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
+    stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
   })
 
   const order = new Order({
@@ -49,7 +50,7 @@ module.exports = async (req) => {
 
   await stockUpdatePromises
   await order.save()
-  // await req.cart.reset()
+  await req.cart.reset()
 
   if (process.env.NODE_ENV === (env.isProd)) {
     await mailer(
