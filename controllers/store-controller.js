@@ -254,7 +254,13 @@ exports.getSearch = (req, res, next) => {
 
 exports.getCheckoutSuccess = async (req, res, next) => {
   const order = await Order.findOne({ _id: req.query.orderId })
-  res.render('store/success.ejs', { order })
+  let paymentDate = new Date(order.created)
+  paymentDate.setDate(paymentDate.getDate() + 5)
+  const day = paymentDate.getDate()
+  const month = paymentDate.getMonth() + 1
+  const year = paymentDate.getFullYear()
+  paymentDate = month + '/' + day + '/' + year
+  res.render('store/success.ejs', { order, paymentDate })
 }
 
 exports.getCheckoutFail = (req, res, next) => {

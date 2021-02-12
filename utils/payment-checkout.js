@@ -31,13 +31,20 @@ module.exports = async (req) => {
     // reduce the number of stock (if there is a -1 then you inform to the staff)
     stockUpdatePromises.push(Product.findByIdAndUpdate(item.product.id, { $inc: { stock: -item.quantity } }))
   })
-
+  let orderStatus
+  if (req.body.paymentValue != 'cc') {
+    orderStatus = 'unpaid'
+  }
   const order = new Order({
     user: req.user ? req.user : undefined,
+    status: orderStatus,
+    paymentMethod: req.body.paymentMethodId,
     personal: {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
-      email: req.body.email
+      email: req.body.email,
+      idType: req.body.docType,
+      idNumber: req.body.docNumber
     },
     shipping: {
       state: req.body.state,

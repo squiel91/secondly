@@ -204,24 +204,42 @@ exports.postCheckoutStripe = async (req, res, next) => {
 
 exports.postCheckoutMercadoPago = async (req, res, next) => {
   try {
-    const paymentData = {
-      transaction_amount: Number(req.body.transactionAmount),
-      token: req.body.token,
-      description: req.body.description,
-      installments: Number(req.body.installments),
-      payment_method_id: req.body.paymentMethodId,
-      issuer_id: req.body.issuer,
-      payer: {
-        email: req.body.email,
-        identification: {
-          type: req.body.docType,
-          number: req.body.docNumber
+    let abitabPaymentCreate
+    let paymentStatus
+    if (req.body.paymentValue != 'cc') {
+      if (req.body.paymentValue == 'abitab') {
+        req.body.paymentMethodId = 'abitab'
+      } else {
+        req.body.paymentMethodId = 'redpagos'
+      }
+      const abitabPaymentData = {
+        transaction_amount: Number(req.body.transactionAmount),
+        description: req.body.description,
+        payment_method_id: req.body.paymentMethodId,
+        payer: {
+          email: req.body.email
         }
       }
+      abitabPaymentCreate = await mercadopago.payment.create(abitabPaymentData)
+    } else {
+      const paymentData = {
+        transaction_amount: Number(req.body.transactionAmount),
+        token: req.body.token,
+        description: req.body.description,
+        installments: Number(req.body.installments),
+        payment_method_id: req.body.paymentMethodId,
+        issuer_id: req.body.issuer,
+        payer: {
+          email: req.body.email,
+          identification: {
+            type: req.body.docType,
+            number: req.body.docNumber
+          }
+        }
+      }
+      paymentStatus = await mercadopago.payment.save(paymentData)
     }
-
-    const paymentStatus = await mercadopago.payment.save(paymentData)
-    if (paymentStatus.body.status === 'approved') {
+    if ((paymentStatus && paymentStatus.body.status === 'approved') || (abitabPaymentCreate && abitabPaymentCreate.body.status === 'pending')) {
       const order = await checkout(req)
       res.json({
         success: true,

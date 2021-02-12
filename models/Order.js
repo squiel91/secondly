@@ -7,6 +7,7 @@ const orderSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
+  paymentMethod: String,
   status: {
     type: String,
     enum: [
@@ -31,6 +32,12 @@ const orderSchema = new Schema({
     email: {
       type: String,
       required: true
+    },
+    idType: {
+      type: String
+    },
+    idNumber: {
+      type: String
     }
   },
   shipping: {

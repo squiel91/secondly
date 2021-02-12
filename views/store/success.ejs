@@ -1,5 +1,12 @@
 <%- include('../partials/store-head.ejs') %>
+
+<% if (order.status == 'unpaid') { %>
+  <h2>You only have to pay $ <%= order.totalPrice() %> at your nearest <%= order.paymentMethod %>! branch</h2>
+  <p>Mention the cashier Payment to Mercado Pago IC number 3,265,943-0</p>
+  <p>You have until <%= paymentDate %> to do so.</p>
+<% } else { %>
 <h1>Thanks for your order!</h1>
+<% } %>
 <p>
   If you have any questions, please email <a href="mailto:buy@secondly.store">buy@secondly.store</a>.
 </p>
