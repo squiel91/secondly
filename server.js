@@ -9,7 +9,7 @@ const connectFlash = require('connect-flash')
 const mongoose = require('mongoose')
 // const helmet = require('helmet')
 const compression = require('compression')
-// const morgan = require('morgan')
+const morgan = require('morgan')
 
 const rootPath = require('./utils/root-path')
 const env = require('./utils/env')
@@ -62,17 +62,15 @@ server.use(connectFlash())
 // server.use(helmet())
 server.use(compression())
 
-// const accessLogStream = fs.createWriteStream(rootPath('access.log'), {flags: 'a'})
-// server.use(morgan('combined', { stream: accessLogStream }))
+const accessLogStream = fs.createWriteStream(rootPath('access.log'), {flags: 'a'})
+server.use(morgan('combined', { stream: accessLogStream }))
 
-server.post('/cardaccio', (req, res, next) => {
-  res.json({ reply: 'This is a message from the server' })
-})
+server.use('/statics', express.static(rootPath('public')))
 
 server.use('/api',
   adminApiRoutes,
   accessApiRoutes,
-  storeApiRoutes,
+  storeApiRoutes
 )
 
 server.use(accessRoutes)
@@ -80,18 +78,13 @@ server.use(storeRoutes)
 server.use('/admin', adminRoutes)
 server.use(galleryRoutes)
 
-server.use(express.static(rootPath('public')))
-
-// TODO: add a /resources path so I add it at the beginning and save power
-server.use(express.static(rootPath('public')))
-
 server.use((req, res, next) => {
   res.render('404.ejs')
 })
 
-// server.use((error, req, res, next) => {
-//   res.render('500.ejs', { error })
-// })
+server.use((error, req, res, next) => {
+  res.render('500.ejs', { error })
+})
 
 global.PREFERENCES = JSON.parse(
   fs.readFileSync(rootPath('data', 'preferences.json'))

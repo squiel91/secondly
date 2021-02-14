@@ -42,10 +42,10 @@ exports.getGallery = async (req, res, next) => {
 exports.postGallery = async (req, res, next) => {
   try {
     if (!req.file) {
-      return stdRes._400(res, 'Unsuported type')
+      return stdRes._400(res, 'Unsuported image type')
     }
 
-    let filePath = req.file.path.replace('public', '')
+    let filePath = req.file.path.replace('public', '/statics')
     filePath = filePath.replace(/\\/g, '/')
 
     let image = new Image({

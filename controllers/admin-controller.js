@@ -322,7 +322,7 @@ exports.postProduct = async (req, res, next) => {
     product.stock = stock
     product.description = description
     product.publish = publish
-    
+
     // maybe I can save it after all just once
     product = await product.save()
 
@@ -331,7 +331,7 @@ exports.postProduct = async (req, res, next) => {
     const oldCategories = await product.categories()
     const oldCategoryIds = oldCategories.map(category => category.id)
     const newCategoryIds = req.body.categories || []
-    
+
     let toAddCategoryIds = newCategoryIds.filter(x => oldCategoryIds.indexOf(x) < 0 )
     let toRemoveCategoryIds = oldCategoryIds.filter(x => newCategoryIds.indexOf(x) < 0 )
 
@@ -408,67 +408,31 @@ exports.getUsers = (req, res, next) => {
     })
 }
 
-
 // Pages
-
-exports.getPages = (req, res, next) => {
-  Page.find()
-  .then(pages => {
-    res.render('admin/pages.ejs', { pages })
-  })
-  .catch(err => console.log(err))
-  
+exports.getPages = async (req, res, next) => {
+  const pages = await Page.find()
+  res.render('admin/pages.ejs', { pages })
 }
 
 exports.getPageCreation = (req, res, next) => {
-  res.render('admin/page.ejs', { page: null })
+  res.render('admin/page.ejs')
 }
 
-exports.getPageEdition = (req, res, next) => {
-  Page.findOne({handle: req.params.pageHandle})
-    .then(page => {
-      res.render('admin/page.ejs', { page })
-    })
-    .catch(err => console.log(err))
+exports.getPageEdition = async (req, res, next) => {
+  const pageId = req.params.pageId
+  const page = await Page.findById(pageId)
+  if (page) {
+    res.render('admin/page.ejs', { page })
+  } else {
+    console.error(`Page with the id ${pageId} not found`)
+    next()
+  }
 }
 
-exports.postCreatePage = (req, res, next) => {
-  
-  console.log(req.body)
-  let page = new Page({
-    title: req.body.title,
-    handle: req.body.handle,
-    content: req.body.content
-  })
-
-  page.save()
-    .then(result => {
-      res.redirect('/admin/pages')
-    })
-    .catch(err => console.log(err))
-}
-
-
-exports.postEditPage = (req, res, next) => {
-  Page.findOne({handle: req.params.pageHandle})
-    .then(page => {
-      page.title = req.body.title
-      page.handle = req.body.handle
-      page.content = req.body.content
-      return page.save()
-    })
-    .then(result => {
-      res.redirect('/admin/pages')
-    })
-    .catch(err => {
-      console.log(err)
-    })
-}
-
-exports.postDeletePage = (req, res, next) => {
-  Page.deleteOne({handle: req.params.pageHandle})
-    .then(result => {
-      res.redirect('/admin/pages')
-    })
-    .catch(err => console.log(err))
-}
+// exports.postDeletePage = (req, res, next) => {
+//   Page.deleteOne({handle: req.params.pageHandle})
+//     .then(result => {
+//       res.redirect('/admin/pages')
+//     })
+//     .catch(err => console.log(err))
+// }

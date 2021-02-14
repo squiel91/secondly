@@ -47,8 +47,6 @@ exports.postLogout = async (req, res, next) => {
 
 exports.postRequestPasswordReset = async (req, res, next) => {
   try {
-    if (req.user) stdRes._400(res, 'You are already logged in. Log out first')
-
     if (!req.body.email) return stdRes._400(res, 'email','Please enter email')
     req.body.email = req.body.email.trim().toLowerCase()
     if (!validator.isEmail(req.body.email)) return stdRes._400(res, 'email','Enter a valid email')
@@ -59,8 +57,6 @@ exports.postRequestPasswordReset = async (req, res, next) => {
 
 exports.postPasswordReset = async (req, res, next) => {
   try {
-    if (req.user) stdRes._400(res, 'You are already logged in. Log out first')
-
     if (!req.body.passResetToken) return stdRes._400(res, 'passResetToken', 'Please enter Reset Token')
 
     const password = req.body.password

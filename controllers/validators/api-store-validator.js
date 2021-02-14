@@ -1,3 +1,4 @@
+/* eslint-disable prefer-regex-literals */
 const validator = require('validator')
 
 const Product = require('../../models/Product')
@@ -23,15 +24,18 @@ exports.postCheckout = (req, res, next) => {
     if (!req.body.firstName) return stdRes._400(res, 'firstName', 'Please enter your first name')
     req.body.firstName = req.body.firstName.trim()
 
-    if (!req.body.lastName) return stdRes._400(res, 'lastName', 'Please enter last name')
+    if (!req.body.lastName) return stdRes._400(res, 'lastName', 'Please enter your last name')
     req.body.lastName = req.body.lastName.trim()
 
     if (!req.body.email) return stdRes._400(res, 'email', 'Please enter an email')
     req.body.email = req.body.email.trim().toLowerCase()
     if (!validator.isEmail(req.body.email)) return stdRes._400(res, 'email', 'Enter a valid email')
 
-    if (!req.body.address) return stdRes._400(res, 'address', 'Please enter an address')
+    if (!req.body.address) return stdRes._400(res, 'address', 'Please enter your address')
     req.body.address = req.body.address.trim()
+
+    if (!req.body.country) return stdRes._400(res, 'country', 'Please enter an country')
+    req.body.country = req.body.country.trim()
 
     if (!req.body.state) return stdRes._400(res, 'state', 'Please enter a state')
     req.body.state = req.body.state.trim()
@@ -40,11 +44,27 @@ exports.postCheckout = (req, res, next) => {
     req.body.city = req.body.city.trim()
 
     if (!req.body.zip) return stdRes._400(res, 'zip', 'Please enter a zip code')
-    req.body.zip = req.body.zip
-    if (!validator.isLength(req.body.zip,{min:5, max: 5})) return stdRes._400(res, 'zip', 'Enter a valid zip code')
+    if (req.body.zip.length !== 5) return stdRes._400(res, 'zip', 'Enter a valid zip code')
 
     req.body.remember = req.body.remember === 'true'
+    if (req.body.paymentValue == 'cc') {
+      if (!req.body.cardNumber) return stdRes._400(res, 'cardNumber', 'Please enter a card Number')
+      if (req.body.cardNumber.length < 14 || req.body.cardNumber.length > 16) return stdRes._400(res, 'cardNumber', 'Enter a valid Card Number')
 
+      if (!req.body.token) {
+        // eslint-disable-next-line prefer-regex-literals
+        if (!req.body.cardExpiration) return stdRes._400(res, 'cardExpiration', 'Please enter the card expiration date')
+        const valid = new RegExp(/^(0?[1-9]|1[012])\/\d\d$/).test(req.body.cardExpiration)
+        // eslint-disable-next-line eqeqeq
+        if (valid != true) return stdRes._400(res, 'cardExpiration', 'Enter a valid cardExpiration code')
+
+        if (!req.body.cvc) return stdRes._400(res, 'cvc', 'Please enter a cvc code')
+        if (req.body.cvc.length !== 3) return stdRes._400(res, 'cvc', 'Enter a valid cvc code')
+      } else {
+        if (!req.body.docType) return stdRes._400(res, 'docType', 'Please enter a document type')
+        if (!req.body.docNumber) return stdRes._400(res, 'docNumber', 'Please enter a document number')
+      }
+    }
     next()
   } catch (error) { stdRes._500(res, error.message) }
 }
@@ -56,6 +76,5 @@ exports.postSubscribe = (req, res, next) => {
     if (!validator.isEmail(req.body.email)) return stdRes._400(res, 'email', 'Enter a valid email')
 
     next()
-
   } catch (error) { stdRes._500(res, error.message) }
 }

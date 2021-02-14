@@ -130,20 +130,20 @@
       <p><%= product.shippingCost == 0? 'Free Shipping' : `+ $${product.shippingCost} shipping` %></p>
       <p><%- product.description %></p>
 
-      <p>Stock: <%= product.stock == 0? 'Sold out' : product.stock %></p>
-      <% if (product.stock > 0) { %>
+      <p>Stock: <%= product.stock == 0? 'Sold out' : (product.stock? product.stock : 'available') %></p>
+      <% if (!product.stock || product.stock > 0) { %>
         <%- include('../partials/addToCart.ejs') %>
       <% } else { %>
         <button class="primary" disabled>Sold out</button>
       <% } %>
       
-      <p>Any question? Call us at <a href="tel:(773) 096 4084">(773) 096 4084</a> or write us an email at <a href="mailto:sales@secondly.store">sales@secondly.store</a>.</p>
+      <p style="margin-top: 30px;">Any question? Call us at <a href="tel:(773) 096 4084">(773) 096 4084</a> or write us an email at <a href="mailto:sales@secondly.store">sales@secondly.store</a>.</p>
       <div class="share">
         <p>You know who will like it?</p>
         <ul class="shareList">
-          <li><a href="#"class="shareLink"><img src="/assets/whatsapp.svg" alt=""></a></li>
-          <li><a href="#" class="shareLink"><img src="/assets/facebook.svg" alt=""></a></li>
-          <li><a href="#" class="shareLink"><img src="/assets/email.svg" alt=""></a></li>
+          <li><a href="#"class="shareLink"><img src="/statics/assets/whatsapp.svg" alt=""></a></li>
+          <li><a href="#" class="shareLink"><img src="/statics/assets/facebook.svg" alt=""></a></li>
+          <li><a href="#" class="shareLink"><img src="/statics/assets/email.svg" alt=""></a></li>
         </ul>
       </div>
     </div>

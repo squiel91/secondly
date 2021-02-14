@@ -1,0 +1,321 @@
+<%- include('../partials/store-head.ejs') %>
+<script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+<script src="https://secure.mlstatic.com/sdk/javascript/v1/mercadopago.js"></script>
+
+<%# styles %>
+<style>
+
+  .stripe {
+    width: 140px;
+    margin-left: 30px;
+    /* float: right; */
+  }
+  input[type="checkbox"] {
+    margin-right: 10px;
+  }
+
+  #cc {
+    display: none;
+  }
+
+  #abitab {
+    display: none;
+  }
+
+  #redpagos {
+    display: none;
+  }
+
+  #doc {
+    display: none;
+  }
+</style>
+<form action="/api/cart/checkout-mercadopago" method="post" id="paymentForm">
+<%# content %>
+<h1>Contact Information</h1>
+<%- include('../partials/validatable-input.ejs', { label: 'First name' }) %> 
+<%- include('../partials/validatable-input.ejs', { label: 'Last name' }) %> 
+<%- include('../partials/validatable-input.ejs', { label: 'Email' }) %>
+<%# include('../partials/validatable-input.ejs', { label: 'Phone' }) %>
+
+<h1>Shipping Address</h1>
+<%- include('../partials/validatable-input.ejs', { label: 'Address', help: 'The address where to send the shippment.' }) %> 
+<%# include('../partials/validatable-input.ejs', { label: 'Line 2', help: 'The format you should use is the following: [Street name] [House/flat number] [Unit number]' }) %> 
+<%- include('../partials/validatable-input.ejs', { label: 'Country', options: countryCodes }) %>
+
+<%- include('../partials/validatable-input.ejs', { label: 'State' }) %> 
+<%- include('../partials/validatable-input.ejs', { label: 'City' }) %> 
+<%- include('../partials/validatable-input.ejs', { label: 'Zip code', name: 'zip', type: 'zip', help: 'A 5 digits code that uniquely identifies a geographic area' }) %> 
+<p>
+  <input type="checkbox" id="remember" checked><label for="remember">Remember my shipping address in this device</label>
+</p>
+
+<h3>Payment method</h3>
+    <div>
+      <select class="form-control" id="paymentMethod" name="paymentMethod">
+        <option>Select a payment form</option>
+
+        <!-- Create an option for each payment method with their name and complete the ID in the attribute 'value'. -->
+        <option value="cc">credit card</option>
+        <option value="abitab">Abitab</option>
+        <option value="redpagos">Redpagos</option>
+      </select>
+    </div>
+    <div class="validatable-input" id="doc">
+      <div class="secondlyInputInner">
+        <label for="docType">Document Type</label>
+        <select id="docType" name="docType" data-checkout="docType" type="text"></select>
+      </div>
+      <div class="secondlyInputInner">
+        <label for="docNumber">Document Number</label>
+        <input id="docNumber" name="docNumber" data-checkout="docNumber" type="text"/>
+      </div>
+    </div>
+    <div id="cc" class="pay-method-options">
+      <!-- <h1>Card details</h1> -->
+      
+      <div class="validatable-input">
+        <div class="secondlyInputInner">
+          <label for="cardholderName">Card Holder</label>
+          <input id="cardholderName" data-checkout="cardholderName" type="text">
+        </div>
+      <%- include('../partials/validatable-input.ejs', { label: 'Expiration date (MM/YY)', name: 'cardExpiration', type: 'cardExp' }) %> 
+        <div class="secondlyInputInner">
+          <label for="cardNumber">Card Number</label>
+          <input type="text" id="cardNumber" data-checkout="cardNumber"
+            onselectstart="return false" onpaste="return false"
+            oncopy="return false" oncut="return false"
+            ondrag="return false" ondrop="return false" autocomplete=off>
+        </div>
+        <div class="secondlyInputInner">
+          <label for="securityCode">CVV</label>
+          <input id="securityCode" data-checkout="securityCode" type="text"
+            onselectstart="return false" onpaste="return false"
+            oncopy="return false" oncut="return false"
+            ondrag="return false" ondrop="return false" autocomplete=off>
+        </div>
+        <div id="issuerInput" class="secondlyInputInner">
+          <label for="issuer">Issuer</label>
+          <select id="issuer" name="issuer" data-checkout="issuer"></select>
+        </div>
+        <div class="secondlyInputInner">
+          <label for="installments">Installments</label>
+          <select type="text" id="installments" name="installments"></select>
+        </div>
+        <div >
+          <input type="hidden" name="transactionAmount" id="transactionAmount" value="<%=  totalPrice %>" />
+          <input type="hidden" name="paymentMethodId" id="paymentMethodId" />
+          <input type="hidden" name="description" id="description" />
+          <input type="hidden" placeholder="MM" id="cardExpirationMonth" data-checkout="cardExpirationMonth"
+              onselectstart="return false" onpaste="return false"
+              oncopy="return false" oncut="return false"
+              ondrag="return false" ondrop="return false" autocomplete=off>
+            <input type="hidden" placeholder="YY" id="cardExpirationYear" data-checkout="cardExpirationYear"
+              onselectstart="return false" onpaste="return false"
+              oncopy="return false" oncut="return false"
+              ondrag="return false" ondrop="return false" autocomplete=off>
+          <br>
+          <!-- <button id="checkout-button" type="submit" class="primary">Pay $<%=  totalPrice %></button> -->
+          <br>
+        </div>
+      </div>
+    </div>
+    <div id='redpagos' class="pay-method-options">
+      <p>Redpagos</p>
+    </div>
+</form>
+</div>
+
+<div class="errorMessage"></div>
+
+<button id="checkout-button" class="primary" onclick="pay()"> 
+  Pay $<%=  totalPrice %>
+</button>
+
+<img class="stripe" src="/statics/assets/horizontal_logo.png" alt="Powered by Mercado pago">
+
+<%# scripts %>
+<script src="/statics/scripts/utils.js" async></script>
+<script>
+ $(function() {
+    $('#paymentMethod').change(function(){
+
+      const paymentValue = $(this).val();
+      let payAttribute = '';
+        $('.pay-method-options').hide();
+        $('#' + paymentValue).show();
+        if(paymentValue == 'cc' || paymentValue == 'abitab' || paymentValue == 'redpagos'){
+          $('#doc').show();
+        }
+        $('#checkout-button').attr('onclick',"pay('"+paymentValue+"')");
+        
+    });
+  });
+
+$("input#cardExpiration").blur(function(){
+  const cardexpiry = $('#cardExpiration').val()
+  const monthYear = cardexpiry.split('/')
+  const expMonth = parseInt(monthYear[0])
+  const expYear = parseInt(monthYear[1]) + 2000
+  $("#cardExpirationMonth").val(expMonth)
+  $("#cardExpirationYear").val(expYear)
+})
+  
+window.Mercadopago.setPublishableKey('TEST-639f77b3-3262-4c14-bc79-ced1c7cead6d')
+window.Mercadopago.getIdentificationTypes()
+
+document.getElementById('cardNumber').addEventListener('change', guessPaymentMethod)
+
+function guessPaymentMethod (event) {
+  const cardnumber = document.getElementById('cardNumber').value
+  console.log('cardnumber', cardnumber);
+  if (cardnumber.length >= 6) {
+    const bin = cardnumber.substring(0, 6)
+    window.Mercadopago.getPaymentMethod({
+      bin: bin
+    }, setPaymentMethod)
+  }
+};
+
+function setPaymentMethod (status, response) {
+  if (status == 200) {
+    const paymentMethod = response[0]
+    document.getElementById('paymentMethodId').value = paymentMethod.id
+
+    getIssuers(paymentMethod.id)
+  } else {
+    alert(`payment method info error: ${response}`)
+  }
+}
+
+function getIssuers (paymentMethodId) {
+  window.Mercadopago.getIssuers(
+    paymentMethodId,
+    setIssuers
+  )
+}
+
+function setIssuers (status, response) {
+  if (status == 200) {
+    const issuerSelect = document.getElementById('issuer')
+    response.forEach(issuer => {
+      const opt = document.createElement('option')
+      opt.text = issuer.name
+      opt.value = issuer.id
+      issuerSelect.appendChild(opt)
+    })
+
+    getInstallments(
+      document.getElementById('paymentMethodId').value,
+      document.getElementById('transactionAmount').value,
+      issuerSelect.value
+    )
+  } else {
+    alert(`issuers method info error: ${response}`)
+  }
+}
+
+function getInstallments (paymentMethodId, transactionAmount, issuerId) {
+  window.Mercadopago.getInstallments({
+    payment_method_id: paymentMethodId,
+    amount: parseFloat(transactionAmount),
+    issuer_id: parseInt(issuerId)
+  }, setInstallments)
+}
+
+function setInstallments (status, response) {
+  if (status == 200) {
+    document.getElementById('installments').options.length = 0
+    response[0].payer_costs.forEach(payerCost => {
+      const opt = document.createElement('option')
+      opt.text = payerCost.recommended_message
+      opt.value = payerCost.installments
+      document.getElementById('installments').appendChild(opt)
+    })
+  } else {
+    alert(`installments method info error: ${response}`)
+  }
+}
+
+doSubmit = false
+// document.getElementById('paymentForm').addEventListener('submit', getCardToken)
+// function getCardToken (event) {
+//   // event.preventDefault()
+//   if (!doSubmit) {
+//     console.log('submit');
+//     const $form = document.getElementById('paymentForm')
+//     window.Mercadopago.createToken($form, setCardTokenAndPay)
+//     return false
+//   }
+// };
+
+function setCardTokenAndPay (status, response) {
+  if (status == 200 || status == 201) {
+    const form = document.getElementById('paymentForm')
+    const card = document.createElement('input')
+    card.setAttribute('name', 'token')
+    card.setAttribute('type', 'hidden')
+    card.setAttribute('value', response.id)
+    form.appendChild(card)
+    doSubmit=true;
+    pay('cc');
+    // form.submit();
+  } else {
+    alert('Verify filled data!\n' + JSON.stringify(response, null, 4))
+  }
+};
+
+function pay (paymentOption) {
+  console.log('click');
+  console.log('paymentOption',paymentOption);
+  let token = $("input[name=token]").val();
+    if(!token){
+      if(paymentOption == 'cc'){
+        const $form = document.getElementById('paymentForm')
+        window.Mercadopago.createToken($form, setCardTokenAndPay)
+      }
+    }
+      const checkoutParams = {
+            paymentValue: paymentOption,
+            token: $("input[name=token]").val(),
+            firstName: $('#firstName').val(),
+            lastName: $('#lastName').val(),
+            email: $('#email').val(),
+            phone: $('#phone').val(),
+            address: $('#address').val(),
+            country: $('#country').val(),
+            state: $('#state').val(),
+            city: $('#city').val(),
+            zip: $('#zip').val(),
+            cardNumber: $('#cardNumber').val(),
+            cardExpiration: $('#cardExpiration').val(),
+            cvc: $('#cvc').val(),
+            _csrf: '<%= csrfToken %>',
+            remember: $('#remember').is(":checked"),
+
+            docType: $('#docType').val(),
+            docNumber: $('#docNumber').val(),
+            transactionAmount: $('#transactionAmount').val(),
+            paymentMethodId: $('#paymentMethodId').val(),
+            description: $('#description').val(),
+            installments: $('#installments').val(),
+            issuer: $('#issuer').val(),
+      }
+
+      fetchApi('/api/cart/checkout-mercadopago', {
+        params: checkoutParams,
+        success: function (data) {
+          window.location.replace('/cart/checkout/success?orderId='+ data.orderData._id)
+        }
+      })
+  }
+  
+
+  $('.validatable-input input').keydown(event => {
+    $(event.target).parent().parent().removeClass('error')
+  })
+
+</script>
+
+<%- include('../partials/store-tail.ejs') %>
+

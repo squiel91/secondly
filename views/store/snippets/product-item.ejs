@@ -1,6 +1,6 @@
 <div>
   <div class="store__product-item">
-    <a href="/products/<%= product.id %>">
+    <a href="/products/<%= product.handle %>">
       <div class="store__product-item__image-container">
         <div class="store__product-item__image" <%- product.images?.length > 0? `style="background-image: url('${product.images[0].src}');"` : '' %>></div>
         <div class="store__product-item__price">$ <%= product.price %></div>
